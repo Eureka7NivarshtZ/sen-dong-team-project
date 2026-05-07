@@ -1,0 +1,12 @@
+GET http://localhost:3000/api/users
+###
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+  "name": "Luan",
+  "email": "luan@gmail.com",
+  "mat_khau": "con cho mysql",
+  "loai": "khach_hang"
+}
+
