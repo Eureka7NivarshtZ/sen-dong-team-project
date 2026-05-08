@@ -1,15 +1,10 @@
 const { v4: uuidv4 } = require("uuid");
 const bcrypt = require("bcrypt"); // Thư viện dùng để mã hóa mật khẩu
-const taiKhoanModel = require("../models/users"); // Import cái file code lúc nãy của bạn
+const taiKhoanModel = require("../models/tai_khoan"); // Import cái file code lúc nãy của bạn
 
-const getAll = async (req, res) => {
-  try {
-    const tatCaTaiKhoan = await taiKhoanModel.findAll();
-    res.json(tatCaTaiKhoan);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal server error" });
-  }
+const duyetTaiKhoan = async (req, res) => {
+  const tatCaTaiKhoan = await taiKhoanModel.findAll();
+  res.json(tatCaTaiKhoan);
 };
 
 // Hàm xử lý API Đăng ký / Tạo tài khoản
@@ -53,4 +48,4 @@ const taoTaiKhoan = async (req, res) => {
   }
 };
 
-module.exports = { getAll, taoTaiKhoan };
+module.exports = { duyetTaiKhoan, taoTaiKhoan };
