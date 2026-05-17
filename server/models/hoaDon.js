@@ -20,7 +20,7 @@ const create = async ({
   trang_thai,
 }) => {
   await db.query(
-    "INSERT INTO hoa_don(id, don_hang_id, so_hoa_don, ngay_xuat, tong_tien_truoc_thue, thue_suat, tien_thue, tong_tien_sau_thue, loai, hoa_don_goc_id, trang_thai) VALUES ()",
+    "INSERT INTO hoa_don(id, don_hang_id, so_hoa_don, ngay_xuat, tong_tien_truoc_thue, thue_suat, tien_thue, tong_tien_sau_thue, loai, hoa_don_goc_id, trang_thai) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
   );
 
   return {

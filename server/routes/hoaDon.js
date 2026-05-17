@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const hoaDonController = require("../controllers/hoa_don");
+const hoaDonController = require("../controllers/hoaDon");
 
 router.get("/", hoaDonController.getAll);
 

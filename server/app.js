@@ -1,6 +1,6 @@
 const express = require("express");
-const taiKhoanRouter = require("./routes/tai_khoan");
-const hoaDonRouter = require("./routes/hoa_don");
+const taiKhoanRouter = require("./routes/taiKhoan");
+const hoaDonRouter = require("./routes/hoaDon");
 
 const app = express();
 app.use(express.json());
