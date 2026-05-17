@@ -1,4 +1,5 @@
-const HoaDon = require("../models/hoa_don");
+const { v4:uuidv4 } = require('uuid')
+const HoaDon = require("../models/hoaDon");
 
 const getAll = async (req, res) => {
   const danhSachHoaDon = await HoaDon.findAll();
