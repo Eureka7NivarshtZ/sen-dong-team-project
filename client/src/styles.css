@@ -1,0 +1,13 @@
+/* Reset lại toàn bộ trang web để hiển thị thẳng hàng, text căn trái */
+body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  display: block !important; /* Xóa flex toàn màn hình của template mặc định */
+  text-align: left !important; /* Mặc định chữ lệch trái cho đẹp */
+  font-family: 'Serial', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #ffffff;
+  color: #333;
+}
+
