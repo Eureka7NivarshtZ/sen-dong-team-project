@@ -1,0 +1,18 @@
+require("dotenv").config();
+
+const app = require("./app");
+const { sequelize } = require("./models");
+
+const PORT = process.env.PORT || 5000;
+
+const main = async () => {
+  await sequelize.authenticate();
+  
+  await sequelize.sync({ alter: true });
+
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+};
+
+main();

@@ -1,11 +1,13 @@
 const express = require("express");
-const taiKhoanRouter = require("./routes/taiKhoan");
-const hoaDonRouter = require("./routes/hoaDon");
+const cors = require("cors");
+
+const tranhRoutes = require("./routes/tranh.routes");
 
 const app = express();
+
+app.use(cors());
 app.use(express.json());
 
-app.use("/users", taiKhoanRouter);
-app.use("/orders", hoaDonRouter);
+app.use("/api/tranh", tranhRoutes);
 
 module.exports = app;
