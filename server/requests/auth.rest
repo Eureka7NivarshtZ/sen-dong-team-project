@@ -2,8 +2,8 @@ POST http://localhost:5000/api/auth/dang-nhap
 Content-Type: application/json
 
 {
-  "email": "khoidz@gmail.com",
-  "mat_khau": "123"
+  "email": "nhanvien1@gmail.com",
+  "mat_khau": "123456"
 }
 
 ###

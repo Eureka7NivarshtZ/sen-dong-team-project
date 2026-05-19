@@ -1,6 +1,6 @@
 const { Tranh, HinhAnhTranh, TacGia, DanhMuc, KhoHang } = require("../models");
 
-const layTatCaTranh = async (req, res) => {
+const xemTatCaTranh = async (req, res) => {
   const danhSachTranh = await Tranh.findAll({
     include: [
       { model: HinhAnhTranh, as: "hinh_anh" },
@@ -14,7 +14,7 @@ const layTatCaTranh = async (req, res) => {
   res.json(danhSachTranh);
 };
 
-const layChiTietTranh = async (req, res) => {
+const xemChiTietTranh = async (req, res) => {
   const { id } = req.params;
 
   const tranh = await Tranh.findByPk(id, {
@@ -31,82 +31,93 @@ const layChiTietTranh = async (req, res) => {
 };
 
 const taoTranh = async (req, res) => {
-  try {
-    const tranhData = {
-      ...req.body,
-      nhan_vien_tao_id: req.user.nhan_vien_id,
-      nhan_vien_cap_nhat_id: req.user.nhan_vien_id,
-    };
+  const { danh_muc_id } = req.body;
 
-    const tranh = await Tranh.create(tranhData);
-    res.status(201).json(tranh);
-  } catch (error) {
-    res.status(400).json({
-      error: "Khong the tao tranh",
-      chi_tiet: error.message,
-    });
+  if (danh_muc_id) {
+    const danhMuc = await DanhMuc.findByPk(danh_muc_id);
+
+    if (!danhMuc) {
+      return res.status(400).json({
+        error: "Danh muc khong ton tai",
+      });
+    }
   }
+
+  const tranhData = {
+    ...req.body,
+    nhan_vien_tao_id: req.user.nhan_vien_id,
+    nhan_vien_cap_nhat_id: req.user.nhan_vien_id,
+  };
+
+  const tranh = await Tranh.create(tranhData);
+  res.status(201).json(tranh);
 };
 
 const capNhatTranh = async (req, res) => {
-  try {
-    const { id } = req.params;
+  const { id } = req.params;
 
-    const tranh = await Tranh.findByPk(id);
+  const tranh = await Tranh.findByPk(id);
 
-    if (!tranh) {
-      return res.status(404).json({
-        error: "Khong tim thay tranh",
-      });
-    }
-
-    const tranhData = {
-      ...req.body,
-      nhan_vien_cap_nhat_id: req.user.nhan_vien_id,
-      cap_nhat_luc: new Date(),
-    };
-
-    await tranh.update(tranhData);
-
-    res.json(tranh);
-  } catch (error) {
-    res.status(400).json({
-      error: "Khong the cap nhat tranh",
-      chi_tiet: error.message,
+  if (!tranh) {
+    return res.status(404).json({
+      error: "Khong tim thay tranh",
     });
   }
+
+  const tranhData = {
+    ...req.body,
+    nhan_vien_cap_nhat_id: req.user.nhan_vien_id,
+    cap_nhat_luc: new Date(),
+  };
+
+  await tranh.update(tranhData);
+
+  res.json(tranh);
+};
+
+const anTranh = async (req, res) => {
+  const { id } = req.params;
+
+  const tranh = await Tranh.findByPk(id);
+
+  if (!tranh) {
+    return res.status(404).json({
+      error: "Khong tim thay tranh",
+    });
+  }
+
+  const tranhData = {
+    ...req.body,
+    trang_thai: "an",
+    nhan_vien_cap_nhat_id: req.user.nhan_vien_id,
+    cap_nhat_luc: new Date(),
+  };
+
+  await Tranh.update(tranhData);
+  res.json(tranh);
 };
 
 const xoaTranh = async (req, res) => {
-  try {
-    const { id } = req.params;
+  const { id } = req.params;
 
-    const tranh = await Tranh.findByPk(id);
+  const tranh = await Tranh.findByPk(id);
 
-    if (!tranh) {
-      return res.status(404).json({
-        error: "Khong tim thay tranh",
-      });
-    }
-
-    await tranh.destroy();
-
-    res.status(200).json({
-      message: "Tranh da duoc xoa thanh cong",
-      id: id,
-    });
-  } catch (error) {
-    res.status(400).json({
-      error: "Khong the xoa tranh",
-      chi_tiet: error.message,
+  if (!tranh) {
+    return res.status(404).json({
+      error: "Khong tim thay tranh",
     });
   }
+
+  await tranh.destroy();
+
+  res.status(204).end();
 };
 
 module.exports = {
-  layTatCaTranh,
-  layChiTietTranh,
+  xemTatCaTranh,
+  xemChiTietTranh,
   taoTranh,
   capNhatTranh,
+  anTranh,
   xoaTranh,
 };

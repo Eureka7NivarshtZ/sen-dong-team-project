@@ -4,13 +4,13 @@ GET http://localhost:5000/api/tranh
 GET http://localhost:5000/api/tranh/9adde2b1-0f2a-48d9-a5a4-f19d675d9dd6
 
 ###
-POST http://localhost:5000/api/tranh
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjBhMGViMTQ1LThmMjUtNGYwYS1iNzQyLTQ2ZjZjNjFhY2RhYSIsImVtYWlsIjoia2hvaWR6QGdtYWlsLmNvbSIsImxvYWkiOiJraGFjaF9oYW5nIiwibmhhbl92aWVuX2lkIjpudWxsLCJ2YWlfdHJvIjpudWxsLCJraGFjaF9oYW5nX2lkIjoiZDZkNjUwM2MtNTI2NS00MzU5LWEzNWEtMmM2MWZmY2M0ZmNhIiwiaWF0IjoxNzc5MTkzMjUyLCJleHAiOjE3Nzk3OTgwNTJ9.HajouQOYG2pCGA5Lu5Wc4eZEpNOutyaFD3ZR0D4txEM
+POST http://localhost:5000/api/admin/tranh
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjRmZGM5NWFhLWZhZjMtNDVlMS04NmMxLTUzZjZlMDVhMTVmNyIsImVtYWlsIjoibmhhbnZpZW4xQGdtYWlsLmNvbSIsImxvYWkiOiJuaGFuX3ZpZW4iLCJuaGFuX3ZpZW5faWQiOiJjZGExNmJkNS1lODg5LTRkYWMtYjVkOS1mYzRiNjIyOGI3ODgiLCJ2YWlfdHJvIjoiYmFuX2hhbmciLCJraGFjaF9oYW5nX2lkIjpudWxsLCJpYXQiOjE3NzkyMDM4NjAsImV4cCI6MTc3OTgwODY2MH0.0p408c_xfbuu6na3VZSXENOBYLOqv45x1ed00x89xcs
 Content-Type: application/json
 
 {
   "tac_gia_id": "id-tac-gia-o-day",
-  "danh_muc_id": "id-danh-muc-o-day",
+  "danh_muc_id": "9e79dadb-4423-4338-bb5c-2873b54e4e27",  
   "kho_id": "id-kho-o-day",
   "ten_tranh": "Sen đầu hạ",
   "mo_ta": "Tranh sen vẽ tay",
@@ -22,7 +22,7 @@ Content-Type: application/json
 }
 
 ###
-PUT http://localhost:5000/api/tranh/
+PUT http://localhost:5000/api/admin/tranh/9adde2b1-0f2a-48d9-a5a4-f19d675d9dd6
 Content-Type: application/json
 
 {
@@ -39,4 +39,4 @@ Content-Type: application/json
 }
 
 ###
-DELETE http://localhost:5000/api/tranh/9adde2b1-0f2a-48d9-a5a4-f19d675d9dd6
+DELETE http://localhost:5000/api/admin/tranh/9adde2b1-0f2a-48d9-a5a4-f19d675d9dd6
