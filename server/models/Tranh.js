@@ -56,7 +56,20 @@ const Tranh = sequelize.define(
       allowNull: false,
       defaultValue: "ban",
     },
+    nhan_vien_tao_id: {
+      type: DataTypes.UUID,
+      allowNull: true,
+    },
+    nhan_vien_cap_nhat_id: {
+      type: DataTypes.UUID,
+      allowNull: true,
+    },
     tao_luc: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    cap_nhat_luc: {
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: DataTypes.NOW,

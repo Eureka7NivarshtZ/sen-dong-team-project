@@ -1,8 +1,11 @@
 GET http://localhost:5000/api/tranh
 
 ###
+GET http://localhost:5000/api/tranh/9adde2b1-0f2a-48d9-a5a4-f19d675d9dd6
 
+###
 POST http://localhost:5000/api/tranh
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjgzY2Y5ZjViLTcwZDMtNDE2Mi1iMjI3LTZlNzFhYjAzNTliNyIsImVtYWlsIjoia2hvaWR6QGdtYWlsLmNvbSIsImxvYWkiOiJraGFjaF9oYW5nIiwibmhhbl92aWVuX2lkIjpudWxsLCJ2YWlfdHJvIjpudWxsLCJraGFjaF9oYW5nX2lkIjoiYmQwMDBhZTMtMTE0MC00MGFjLThjODktMzQwYTJhNTJjMjEzIiwiaWF0IjoxNzc5MTc2NDI2LCJleHAiOjE3Nzk3ODEyMjZ9.I7SAY4dYuOdquNrJ8neK2RXZ4KM1R5u-Lsk_03MWFAg
 Content-Type: application/json
 
 {
@@ -17,3 +20,23 @@ Content-Type: application/json
   "so_luong_ton": 1,
   "trang_thai": "ban"
 }
+
+###
+PUT http://localhost:5000/api/tranh/
+Content-Type: application/json
+
+{
+  "tac_gia_id": "id-tac-gia-o-day",
+  "danh_muc_id": "id-danh-muc-o-day",
+  "kho_id": "id-kho-o-day",
+  "ten_tranh": null,
+  "mo_ta": "Tranh sen vẽ tay",
+  "kich_thuoc": "60x80cm",
+  "gia_ban": 2500000,
+  "gia_von": 1200000,
+  "so_luong_ton": 1,
+  "trang_thai": "ban"
+}
+
+###
+DELETE http://localhost:5000/api/tranh/9adde2b1-0f2a-48d9-a5a4-f19d675d9dd6
