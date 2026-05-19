@@ -12,6 +12,7 @@ const DanhMuc = sequelize.define(
     ten: {
       type: DataTypes.STRING(100),
       allowNull: false,
+      unique: true,
     },
   },
   {
