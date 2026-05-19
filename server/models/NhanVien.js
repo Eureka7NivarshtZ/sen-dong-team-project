@@ -1,26 +1,38 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../utils/db");
 
-const KhoHang = sequelize.define(
-  "KhoHang",
+const NhanVien = sequelize.define(
+  "NhanVien",
   {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
-    ten_kho: {
+    tai_khoan_id: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      unique: true,
+    },
+    ho_ten: {
       type: DataTypes.STRING(100),
       allowNull: false,
     },
+    ngay_sinh: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
     dia_chi: {
       type: DataTypes.TEXT,
-      allowNull: false,
-      defaultValue: 0,
+      allowNull: true,
     },
-    tien_thue: {
+    sdt: {
       type: DataTypes.STRING(20),
       allowNull: true,
+    },
+    vai_tro: {
+      type: DataTypes.ENUM("quan_ly", "nhan_vien", "thu_ngan"),
+      allowNull: false,
     },
     hoat_dong: {
       type: DataTypes.BOOLEAN,
@@ -29,9 +41,9 @@ const KhoHang = sequelize.define(
     },
   },
   {
-    tableName: "kho_hang",
+    tableName: "nhan_vien",
     timestamps: false,
   },
 );
 
-module.exports = KhoHang;
+module.exports = NhanVien;
