@@ -1,15 +1,3 @@
-POST http://localhost:5000/api/auth/dang-ky
-Content-Type: application/json
-
-{
-  "email": "khoidz@gmail.com",
-  "mat_khau": "123",
-  "ho_ten": "Đặng Hồ Đăng Khôi",
-  "sdt": "090873940",
-  "dia_chi": "TP.HCM"
-}
-
-###
 POST http://localhost:5000/api/auth/dang-nhap
 Content-Type: application/json
 
@@ -21,16 +9,3 @@ Content-Type: application/json
 ###
 GET http://localhost:5000/api/auth/thong-tin
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjdiMjg0ZTBjLTI1YzAtNDYyMy04OGViLWU4ZDJjZjNkZTEwOSIsImVtYWlsIjoibmhhbnZpZW4xQGdtYWlsLmNvbSIsImxvYWkiOiJuaGFuX3ZpZW4iLCJuaGFuX3ZpZW5faWQiOiJmYzU4OGI0OC1kNDRjLTQ3M2ItYjI0Yy02OTRlOWZhMGNkOTYiLCJ2YWlfdHJvIjoibmhhbl92aWVuIiwia2hhY2hfaGFuZ19pZCI6bnVsbCwiaWF0IjoxNzc5MTc1OTcyLCJleHAiOjE3Nzk3ODA3NzJ9.ttvWY8CZVsfyLcUsJwbjY9E-BYtpt95gBd94bKW3BcY
-###
-POST http://localhost:5000/api/auth/nhan-vien
-Content-Type: application/json
-
-{
-  "email": "nhanvien1@gmail.com",
-  "mat_khau": "123456",
-  "ho_ten": "Tran Thi B",
-  "ngay_sinh": "2000-05-20",
-  "dia_chi": "Ha Noi",
-  "sdt": "0911222333",
-  "vai_tro": "nhan_vien"
-}

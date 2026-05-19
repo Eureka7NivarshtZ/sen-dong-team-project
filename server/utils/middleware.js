@@ -4,83 +4,94 @@ const { TaiKhoan } = require("../models");
 const xuLyLoi = async (err, req, res, next) => {
   console.log(err);
 
+  if (res.headersSent) {
+    return next(err);
+  }
+
   res.status(err.statusCode || 500).json({
     error: err.message || "Loi server",
   });
-
-  next(err);
 };
 
-const layToken = (req, res, next) => {
+const yeuCauDangNhap = async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
-  if (authHeader && authHeader.startsWith("Bearer ")) {
-    req.token = authHeader.split(" ")[1];
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({
+      error: "Thieu token",
+    });
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+
+  if (!decodedToken.id) {
+    return res.status(401).json({
+      error: "Token khong hop le",
+    });
+  }
+
+  const taiKhoan = await TaiKhoan.findByPk(decodedToken.id);
+
+  if (!taiKhoan.kich_hoat) {
+    return res.status(403).json({
+      error: "Tai khoan da bi khoa",
+    });
+  }
+
+  req.user = decodedToken;
+
+  next();
+};
+
+const yeuCauKhachHang = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({
+      error: "Ban chua dang nhap",
+    });
+  }
+
+  if (req.user.loai !== "khach_hang") {
+    return res.status(403).json({
+      error: "Chi khach hang moi duoc thuc hien thao tac nay",
+    });
   }
 
   next();
 };
 
-const layNguoiDungTuToken = async (req, res, next) => {
-  if (!req.token) {
-    return res.status(401).json({ error: "Thieu token" });
-  }
-
-  try {
-    const decodedToken = jwt.verify(req.token, process.env.JWT_SECRET);
-
-    if (!decodedToken.id) {
-      return res.status(401).json({
-        error: "Token khong hop le",
-      });
-    }
-
-    req.user = decodedToken;
-    req.tai_khoan = await TaiKhoan.findByPk(decodedToken.id);
-
-    next();
-  } catch (error) {
+const yeuCauNhanVien = (req, res, next) => {
+  if (!req.user) {
     return res.status(401).json({
-      error: "Token khong hop le hoac da het han",
+      error: "Ban chua dang nhap",
     });
   }
-};
 
-const yeuCauNhanVien = (req, res, next) => {
-  if (!req.user || req.user.loai !== "nhan_vien") {
+  if (req.user.loai !== "nhan_vien") {
     return res.status(403).json({
       error: "Chi nhan vien moi duoc thuc hien thao tac nay",
     });
   }
-  next();
-};
 
-const yeuCauQuanLy = (req, res, next) => {
-  if (!req.user || req.user.loai !== "nhan_vien" || req.user.vai_tro !== "quan_ly") {
-    return res.status(403).json({
-      error: "Chi quan ly moi duoc thuc hien thao tac nay",
-    });
-  }
   next();
 };
 
 const kiemTraVaiTro = (vaiTroYeuCau) => {
-  return (req, res, next) => {
-    if (!req.user) {
-      return res.status(401).json({
-        error: "Thieu token",
-      });
-    }
+  const danhSachVaiTro = Array.isArray(vaiTroYeuCau)
+    ? vaiTroYeuCau
+    : [vaiTroYeuCau];
 
-    if (req.user.loai !== "nhan_vien") {
+  return (req, res, next) => {
+    if (!req.user || req.user.loai !== "nhan_vien") {
       return res.status(403).json({
         error: "Chi nhan vien moi duoc thuc hien thao tac nay",
       });
     }
 
-    if (!vaiTroYeuCau.includes(req.user.vai_tro)) {
+    if (!danhSachVaiTro.includes(req.user.vai_tro)) {
       return res.status(403).json({
-        error: `Chi cac vai tro sau moi duoc thuc hien: ${vaiTroYeuCau.join(", ")}`,
+        error: `Chi cac vai tro sau moi duoc thuc hien: ${danhSachVaiTro.join(", ")}`,
       });
     }
 
@@ -90,9 +101,8 @@ const kiemTraVaiTro = (vaiTroYeuCau) => {
 
 module.exports = {
   xuLyLoi,
-  layNguoiDungTuToken,
-  layToken,
+  yeuCauDangNhap,
+  yeuCauKhachHang,
   yeuCauNhanVien,
-  yeuCauQuanLy,
   kiemTraVaiTro,
 };

@@ -10,6 +10,11 @@ const TacGia = require("./TacGia.js");
 const DanhMuc = require("./DanhMuc");
 const KhoHang = require("./KhoHang");
 
+const DonViVanChuyen = require("./DonViVanChuyen.js");
+const DonHang = require("./DonHang.js");
+const DonHangChiTiet = require("./DonHangChiTiet.js");
+const VanDon = require("./VanDon.js");
+
 // Quan he tai khoan
 TaiKhoan.hasOne(NhanVien, {
   foreignKey: "tai_khoan_id",
@@ -57,6 +62,47 @@ Tranh.belongsTo(KhoHang, {
   as: "kho_hang",
 });
 
+// Quan he don hang
+KhachHang.hasMany(DonHang, {
+  foreignKey: "khach_hang_id",
+  as: "khach_hang",
+});
+
+DonHang.belongsTo(KhachHang, {
+  foreignKey: "khach_hang_id",
+  as: "khach_hang",
+});
+
+NhanVien.hasMany(DonHang, {
+  foreignKey: "nhan_vien_id",
+  as: "don_hang",
+});
+
+DonHang.belongsTo(NhanVien, {
+  foreignKey: "nhan_vien_id",
+  as: "nhan_vien",
+});
+
+DonViVanChuyen.hasMany(DonHang, {
+  foreignKey: "don_vi_van_chuyen_id",
+  as: "don_hang",
+});
+
+DonHang.belongsTo(DonViVanChuyen, {
+  foreignKey: "don_vi_van_chuyen_id",
+  as: "don_vi_van_chuyen",
+});
+
+VanDon.belongsTo(DonViVanChuyen, {
+  foreignKey: "don_vi_id",
+  as: "don_vi_van_chuyen",
+});
+
+DonViVanChuyen.hasMany(VanDon, {
+  foreignKey: "don_vi_id",
+  as: "van_don",
+});
+
 module.exports = {
   sequelize,
   TaiKhoan,
@@ -67,4 +113,8 @@ module.exports = {
   TacGia,
   DanhMuc,
   KhoHang,
+  DonHang,
+  VanDon,
+  DonHangChiTiet,
+  DonViVanChuyen,
 };

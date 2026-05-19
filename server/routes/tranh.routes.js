@@ -1,5 +1,6 @@
 const router = require("express").Router();
-const middleware = require("../utils/middleware");
+
+const { yeuCauDangNhap, yeuCauNhanVien } = require("../utils/middleware");
 
 const {
   layTatCaTranh,
@@ -9,26 +10,13 @@ const {
   xoaTranh,
 } = require("../controllers/tranh.controller");
 
+router.use(yeuCauDangNhap);
+router.use(yeuCauNhanVien);
 
 router.get("/", layTatCaTranh);
 router.get("/:id", layChiTietTranh);
-router.post(
-  "/",
-  middleware.layNguoiDungTuToken,
-  middleware.yeuCauNhanVien,
-  taoTranh
-);
-router.put(
-  "/:id",
-  middleware.layNguoiDungTuToken,
-  middleware.yeuCauQuanLy,
-  capNhatTranh
-);
-router.delete(
-  "/:id",
-  middleware.layNguoiDungTuToken,
-  middleware.yeuCauQuanLy,
-  xoaTranh
-);
+router.post("/", taoTranh);
+router.put("/:id", capNhatTranh);
+router.delete("/:id", xoaTranh);
 
 module.exports = router;

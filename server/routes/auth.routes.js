@@ -1,16 +1,12 @@
-const {
-  dangKyKhachHang,
-  dangNhap,
-  layThongTinCuaToi,
-  taoNhanVien,
-} = require("../controllers/auth.controller");
-const middleware = require("../utils/middleware");
-
 const router = require("express").Router();
 
-router.post("/dang-ky", dangKyKhachHang);
+const {
+  dangNhap,
+  xemThongTinCuaToi,
+} = require("../controllers/auth.controller");
+const { yeuCauDangNhap } = require("../utils/middleware");
+
 router.post("/dang-nhap", dangNhap);
-router.get("/thong-tin", middleware.layNguoiDungTuToken, layThongTinCuaToi);
-router.post("/nhan-vien", taoNhanVien);
+router.get("/thong-tin", yeuCauDangNhap, xemThongTinCuaToi);
 
 module.exports = router;
