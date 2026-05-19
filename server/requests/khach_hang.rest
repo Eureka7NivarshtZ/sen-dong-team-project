@@ -1,0 +1,10 @@
+POST http://localhost:5000/api/khach-hang/dang-ky
+Content-Type: application/json
+
+{
+  "email": "khoidz@gmail.com",
+  "mat_khau": "123",
+  "ho_ten": "Đặng Hồ Đăng Khôi",
+  "sdt": "090873940",
+  "dia_chi": "TP.HCM"
+}

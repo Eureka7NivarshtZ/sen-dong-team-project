@@ -1,0 +1,12 @@
+POST http://localhost:5000/api/nhan-vien/dang-ky
+Content-Type: application/json
+
+{
+  "email": "nhanvien1@gmail.com",
+  "mat_khau": "123456",
+  "ho_ten": "Tran Thi B",
+  "ngay_sinh": "2000-05-20",
+  "dia_chi": "Ha Noi",
+  "sdt": "0911222333",
+  "vai_tro": "ban_hang"
+}

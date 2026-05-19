@@ -31,7 +31,7 @@ const NhanVien = sequelize.define(
       allowNull: true,
     },
     vai_tro: {
-      type: DataTypes.ENUM("quan_ly", "nhan_vien", "thu_ngan"),
+      type: DataTypes.ENUM("quan_ly", "ban_hang", "kho"),
       allowNull: false,
     },
     hoat_dong: {
