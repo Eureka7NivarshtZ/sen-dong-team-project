@@ -24,6 +24,13 @@ const xemChiTietDanhMuc = async (req, res) => {
 
 const themDanhMuc = async (req, res) => {
   const { ten } = req.body;
+
+  if (!ten) {
+    return res.status(400).json({
+      error: "Ten danh muc la bat buoc",
+    });
+  }
+
   const danhMuc = await DanhMuc.create({ ten });
   res.status(201).json(danhMuc);
 };

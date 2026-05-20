@@ -5,12 +5,12 @@ GET http://localhost:5000/api/tranh/9adde2b1-0f2a-48d9-a5a4-f19d675d9dd6
 
 ###
 POST http://localhost:5000/api/admin/tranh
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjRmZGM5NWFhLWZhZjMtNDVlMS04NmMxLTUzZjZlMDVhMTVmNyIsImVtYWlsIjoibmhhbnZpZW4xQGdtYWlsLmNvbSIsImxvYWkiOiJuaGFuX3ZpZW4iLCJuaGFuX3ZpZW5faWQiOiJjZGExNmJkNS1lODg5LTRkYWMtYjVkOS1mYzRiNjIyOGI3ODgiLCJ2YWlfdHJvIjoiYmFuX2hhbmciLCJraGFjaF9oYW5nX2lkIjpudWxsLCJpYXQiOjE3NzkyMDM4NjAsImV4cCI6MTc3OTgwODY2MH0.0p408c_xfbuu6na3VZSXENOBYLOqv45x1ed00x89xcs
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImExNjViMTMxLThkMWItNDNiYy1iOGFkLTA5NWFjZTEyNDkxYiIsImVtYWlsIjoicXVhbl9seTFAZ21haWwuY29tIiwibG9haSI6Im5oYW5fdmllbiIsIm5oYW5fdmllbl9pZCI6ImUyYjAyYjI3LTExOWYtNGRjNy1iNjliLTc0ZTExMTQzYjhmNyIsInZhaV90cm8iOiJxdWFuX2x5Iiwia2hhY2hfaGFuZ19pZCI6bnVsbCwiaWF0IjoxNzc5MjUxMjg0LCJleHAiOjE3Nzk4NTYwODR9.miRciUbDYZykJgszaXfe63JTD8DbFCgO3OAZZdfRTW0
 Content-Type: application/json
 
 {
-  "tac_gia_id": "id-tac-gia-o-day",
-  "danh_muc_id": "9e79dadb-4423-4338-bb5c-2873b54e4e27",  
+  "tac_gia_id": "ae16e4f9-684f-4898-9f4f-b2c1d244220f",
+  "danh_muc_id": "2758d824-164d-4ec3-87a1-51ba9ef4b6a7",  
   "kho_id": "id-kho-o-day",
   "ten_tranh": "Sen đầu hạ",
   "mo_ta": "Tranh sen vẽ tay",

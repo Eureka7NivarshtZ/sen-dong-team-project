@@ -31,7 +31,7 @@ const xemChiTietTranh = async (req, res) => {
 };
 
 const taoTranh = async (req, res) => {
-  const { danh_muc_id } = req.body;
+  const { danh_muc_id, tac_gia_id } = req.body;
 
   if (danh_muc_id) {
     const danhMuc = await DanhMuc.findByPk(danh_muc_id);
@@ -39,6 +39,16 @@ const taoTranh = async (req, res) => {
     if (!danhMuc) {
       return res.status(400).json({
         error: "Danh muc khong ton tai",
+      });
+    }
+  }
+
+  if (tac_gia_id) {
+    const tacGia = await TacGia.findByPk(tac_gia_id);
+
+    if (!tacGia) {
+      return res.status(400).json({
+        error: "Tac gia khong ton tai",
       });
     }
   }
