@@ -3,7 +3,15 @@ const { Tranh, HinhAnhTranh, TacGia, DanhMuc, KhoHang } = require("../models");
 const xemTatCaTranh = async (req, res) => {
   const danhSachTranh = await Tranh.findAll({
     include: [
-      { model: HinhAnhTranh, as: "hinh_anh" },
+      {
+        model: HinhAnhTranh,
+        as: "hinh_anh",
+        separate: true,
+        order: [
+          ["la_chinh", "DESC"],
+          ["thu_tu", "ASC"],
+        ],
+      },
       { model: TacGia, as: "tac_gia" },
       { model: DanhMuc, as: "danh_muc" },
       { model: KhoHang, as: "kho_hang" },

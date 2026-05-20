@@ -10,6 +10,9 @@ const TacGia = require("./TacGia.js");
 const DanhMuc = require("./DanhMuc");
 const KhoHang = require("./KhoHang");
 
+const GioHang = require("./GioHang.js");
+const GioHangChiTiet = require("./GioHangChiTiet.js");
+
 const DonViVanChuyen = require("./DonViVanChuyen.js");
 const DonHang = require("./DonHang.js");
 const DonHangChiTiet = require("./DonHangChiTiet.js");
@@ -60,6 +63,37 @@ Tranh.belongsTo(DanhMuc, {
 Tranh.belongsTo(KhoHang, {
   foreignKey: "kho_id",
   as: "kho_hang",
+});
+
+// Quan he gio hang
+GioHang.belongsTo(KhachHang, {
+  foreignKey: "khach_hang_id",
+  as: "khach_hang",
+});
+
+KhachHang.hasMany(GioHang, {
+  foreignKey: "khach_hang_id",
+  as: "gio_hang",
+});
+
+GioHangChiTiet.belongsTo(Tranh, {
+  foreignKey: "tranh_id",
+  as: "tranh",
+});
+
+Tranh.hasMany(GioHangChiTiet, {
+  foreignKey: "tranh_id",
+  as: "gio_hang_chi_tiet",
+});
+
+GioHangChiTiet.belongsTo(GioHang, {
+  foreignKey: "gio_hang_id",
+  as: "gio_hang",
+});
+
+GioHang.hasMany(GioHangChiTiet, {
+  foreignKey: "gio_hang_id",
+  as: "gio_hang_chi_tiet",
 });
 
 // Quan he don hang
@@ -113,8 +147,10 @@ module.exports = {
   TacGia,
   DanhMuc,
   KhoHang,
+  GioHang,
+  GioHangChiTiet,
   DonHang,
-  VanDon,
   DonHangChiTiet,
+  VanDon,
   DonViVanChuyen,
 };
