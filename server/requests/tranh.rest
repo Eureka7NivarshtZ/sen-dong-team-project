@@ -23,6 +23,7 @@ Content-Type: application/json
 
 ###
 PUT http://localhost:5000/api/admin/tranh/9adde2b1-0f2a-48d9-a5a4-f19d675d9dd6
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImExNjViMTMxLThkMWItNDNiYy1iOGFkLTA5NWFjZTEyNDkxYiIsImVtYWlsIjoicXVhbl9seTFAZ21haWwuY29tIiwibG9haSI6Im5oYW5fdmllbiIsIm5oYW5fdmllbl9pZCI6ImUyYjAyYjI3LTExOWYtNGRjNy1iNjliLTc0ZTExMTQzYjhmNyIsInZhaV90cm8iOiJxdWFuX2x5Iiwia2hhY2hfaGFuZ19pZCI6bnVsbCwiaWF0IjoxNzc5MjUxMjg0LCJleHAiOjE3Nzk4NTYwODR9.miRciUbDYZykJgszaXfe63JTD8DbFCgO3OAZZdfRTW0
 Content-Type: application/json
 
 {
@@ -34,7 +35,7 @@ Content-Type: application/json
   "kich_thuoc": "60x80cm",
   "gia_ban": 2500000,
   "gia_von": 1200000,
-  "so_luong_ton": 1,
+  "so_luong_ton": 5,
   "trang_thai": "ban"
 }
 

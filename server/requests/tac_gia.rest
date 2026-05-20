@@ -22,7 +22,11 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjRmZGM5NWFhL
 Content-Type: application/json
 
 {
-  "ten": "Tranh anime"
+  "ho_ten": "John Wrick",
+  "ngay_sinh": "1995-06-20",
+  "sdt": "0902483598",
+  "dia_chi": "New York",
+  "tieu_su": ""
 }
 
 ###
