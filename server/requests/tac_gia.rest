@@ -1,19 +1,23 @@
-GET http://localhost:5000/api/danh-muc
+GET http://localhost:5000/api/tac-gia
 
 ###
-GET http://localhost:5000/api/danh-muc/9e79dadb-4423-4338-bb5c-2873b54e4e27
+GET http://localhost:5000/api/tac-gia/394fc025-2808-49bb-85ee-d95359ef3e68
 
 ###
-POST http://localhost:5000/api/admin/danh-muc
+POST http://localhost:5000/api/admin/tac-gia
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImExNjViMTMxLThkMWItNDNiYy1iOGFkLTA5NWFjZTEyNDkxYiIsImVtYWlsIjoicXVhbl9seTFAZ21haWwuY29tIiwibG9haSI6Im5oYW5fdmllbiIsIm5oYW5fdmllbl9pZCI6ImUyYjAyYjI3LTExOWYtNGRjNy1iNjliLTc0ZTExMTQzYjhmNyIsInZhaV90cm8iOiJxdWFuX2x5Iiwia2hhY2hfaGFuZ19pZCI6bnVsbCwiaWF0IjoxNzc5MjUxMjg0LCJleHAiOjE3Nzk4NTYwODR9.miRciUbDYZykJgszaXfe63JTD8DbFCgO3OAZZdfRTW0
 Content-Type: application/json
 
 {
-  "ten": "Tranh son dau"
+  "ho_ten": "John Wrick",
+  "ngay_sinh": "1995-06-20",
+  "sdt": "0902483598",
+  "dia_chi": "New York",
+  "tieu_su": ""
 }
 
 ###
-PUT http://localhost:5000/api/admin/danh-muc/394fc025-2808-49bb-85ee-d95359ef3e68
+PUT http://localhost:5000/api/admin/tac-gia/394fc025-2808-49bb-85ee-d95359ef3e68
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjRmZGM5NWFhLWZhZjMtNDVlMS04NmMxLTUzZjZlMDVhMTVmNyIsImVtYWlsIjoibmhhbnZpZW4xQGdtYWlsLmNvbSIsImxvYWkiOiJuaGFuX3ZpZW4iLCJuaGFuX3ZpZW5faWQiOiJjZGExNmJkNS1lODg5LTRkYWMtYjVkOS1mYzRiNjIyOGI3ODgiLCJ2YWlfdHJvIjoiYmFuX2hhbmciLCJraGFjaF9oYW5nX2lkIjpudWxsLCJpYXQiOjE3NzkyMDM4NjAsImV4cCI6MTc3OTgwODY2MH0.0p408c_xfbuu6na3VZSXENOBYLOqv45x1ed00x89xcs
 Content-Type: application/json
 
@@ -22,5 +26,5 @@ Content-Type: application/json
 }
 
 ###
-DELETE http://localhost:5000/api/admin/danh-muc/394fc025-2808-49bb-85ee-d95359ef3e68
+DELETE http://localhost:5000/api/admin/tac-gia/394fc025-2808-49bb-85ee-d95359ef3e68
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjRmZGM5NWFhLWZhZjMtNDVlMS04NmMxLTUzZjZlMDVhMTVmNyIsImVtYWlsIjoibmhhbnZpZW4xQGdtYWlsLmNvbSIsImxvYWkiOiJuaGFuX3ZpZW4iLCJuaGFuX3ZpZW5faWQiOiJjZGExNmJkNS1lODg5LTRkYWMtYjVkOS1mYzRiNjIyOGI3ODgiLCJ2YWlfdHJvIjoiYmFuX2hhbmciLCJraGFjaF9oYW5nX2lkIjpudWxsLCJpYXQiOjE3NzkyMDM4NjAsImV4cCI6MTc3OTgwODY2MH0.0p408c_xfbuu6na3VZSXENOBYLOqv45x1ed00x89xcs

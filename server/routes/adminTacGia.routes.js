@@ -1,19 +1,18 @@
 const router = require("express").Router();
 
 const {
-  themDanhMuc,
-  xoaDanhMuc,
-  capNhatDanhMuc,
-} = require("../controllers/danhMuc.controller");
+  themTacGia,
+  capNhatTacGia,
+  xoaTacGia,
+} = require("../controllers/tacGia.controller");
 
 const { yeuCauDangNhap, kiemTraVaiTro } = require("../utils/middleware");
 
 router.use(yeuCauDangNhap);
 router.use(kiemTraVaiTro("quan_ly"));
 
-router.post("/", themDanhMuc);
-router.put("/:id", capNhatDanhMuc);
-
-router.delete("/:id", xoaDanhMuc);
+router.post("/", themTacGia);
+router.put("/:id", capNhatTacGia);
+router.delete("/:id", xoaTacGia);
 
 module.exports = router;
