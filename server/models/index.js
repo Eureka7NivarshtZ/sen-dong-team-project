@@ -18,6 +18,9 @@ const DonHang = require("./DonHang.js");
 const DonHangChiTiet = require("./DonHangChiTiet.js");
 const VanDon = require("./VanDon.js");
 
+const HoaDon = require("./HoaDon.js");
+const ThanhToan = require("./ThanhToan.js");
+
 // Quan he tai khoan
 TaiKhoan.hasOne(NhanVien, {
   foreignKey: "tai_khoan_id",
@@ -50,14 +53,29 @@ HinhAnhTranh.belongsTo(Tranh, {
   as: "tranh",
 });
 
+TacGia.hasMany(Tranh, {
+  foreignKey: "tac_gia_id",
+  as: "tranh",
+});
+
 Tranh.belongsTo(TacGia, {
   foreignKey: "tac_gia_id",
   as: "tac_gia",
 });
 
+DanhMuc.hasMany(Tranh, {
+  foreignKey: "danh_muc_id",
+  as: "tranh",
+});
+
 Tranh.belongsTo(DanhMuc, {
   foreignKey: "danh_muc_id",
   as: "danh_muc",
+});
+
+KhoHang.hasMany(Tranh, {
+  foreignKey: "kho_id",
+  as: "tranh",
 });
 
 Tranh.belongsTo(KhoHang, {
@@ -66,14 +84,19 @@ Tranh.belongsTo(KhoHang, {
 });
 
 // Quan he gio hang
+KhachHang.hasOne(GioHang, {
+  foreignKey: "khach_hang_id",
+  as: "gio_hang",
+});
+
 GioHang.belongsTo(KhachHang, {
   foreignKey: "khach_hang_id",
   as: "khach_hang",
 });
 
-KhachHang.hasMany(GioHang, {
-  foreignKey: "khach_hang_id",
-  as: "gio_hang",
+Tranh.hasMany(GioHangChiTiet, {
+  foreignKey: "tranh_id",
+  as: "gio_hang_chi_tiet",
 });
 
 GioHangChiTiet.belongsTo(Tranh, {
@@ -81,8 +104,8 @@ GioHangChiTiet.belongsTo(Tranh, {
   as: "tranh",
 });
 
-Tranh.hasMany(GioHangChiTiet, {
-  foreignKey: "tranh_id",
+GioHang.hasMany(GioHangChiTiet, {
+  foreignKey: "gio_hang_id",
   as: "gio_hang_chi_tiet",
 });
 
@@ -91,12 +114,7 @@ GioHangChiTiet.belongsTo(GioHang, {
   as: "gio_hang",
 });
 
-GioHang.hasMany(GioHangChiTiet, {
-  foreignKey: "gio_hang_id",
-  as: "gio_hang_chi_tiet",
-});
-
-// Quan he don hang
+// Don hang
 KhachHang.hasMany(DonHang, {
   foreignKey: "khach_hang_id",
   as: "khach_hang",
@@ -117,6 +135,17 @@ DonHang.belongsTo(NhanVien, {
   as: "nhan_vien",
 });
 
+Tranh.hasMany(DonHangChiTiet, {
+  foreignKey: "tranh_id",
+  as: "don_hang_chi_tiet",
+});
+
+DonHangChiTiet.belongsTo(Tranh, {
+  foreignKey: "tranh_id",
+  as: "tranh",
+});
+
+// Van chuyen
 DonViVanChuyen.hasMany(DonHang, {
   foreignKey: "don_vi_van_chuyen_id",
   as: "don_hang",
@@ -127,14 +156,50 @@ DonHang.belongsTo(DonViVanChuyen, {
   as: "don_vi_van_chuyen",
 });
 
-VanDon.belongsTo(DonViVanChuyen, {
-  foreignKey: "don_vi_id",
-  as: "don_vi_van_chuyen",
+DonHang.hasOne(VanDon, {
+  foreignKey: "don_hang_id",
+  as: "van_don",
+});
+
+VanDon.belongsTo(DonHang, {
+  foreignKey: "don_hang_id",
+  as: "don_hang",
 });
 
 DonViVanChuyen.hasMany(VanDon, {
   foreignKey: "don_vi_id",
   as: "van_don",
+});
+
+VanDon.belongsTo(DonViVanChuyen, {
+  foreignKey: "don_vi_id",
+  as: "don_vi_van_chuyen",
+});
+
+// Hoa don - Thanh toan
+DonHang.hasMany(HoaDon, {
+  foreignKey: "don_hang_id",
+  as: "hoa_don",
+});
+
+HoaDon.belongsTo(DonHang, {
+  foreignKey: "don_hang_id",
+  as: "don_hang",
+});
+
+HoaDon.belongsTo(HoaDon, {
+  foreignKey: "hoa_don_goc_id",
+  as: "hoa_don_goc",
+});
+
+HoaDon.hasMany(ThanhToan, {
+  foreignKey: "hoa_don_id",
+  as: "thanh_toan",
+});
+
+ThanhToan.belongsTo(HoaDon, {
+  foreignKey: "hoa_don_id",
+  as: "hoa_don",
 });
 
 module.exports = {

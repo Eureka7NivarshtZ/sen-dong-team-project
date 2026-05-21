@@ -2,11 +2,11 @@ POST http://localhost:5000/api/nhan-vien/dang-ky
 Content-Type: application/json
 
 {
-  "email": "quan_ly1@gmail.com",
+  "email": "banhang1@gmail.com",
   "mat_khau": "123456",
   "ho_ten": "Nguyen Van A",
   "ngay_sinh": "2000-05-20",
   "dia_chi": "TP.HCM",
   "sdt": "0911222333",
-  "vai_tro": "quan_ly"
+  "vai_tro": "ban_hang"
 }
