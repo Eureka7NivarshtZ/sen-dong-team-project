@@ -1,6 +1,6 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { TaiKhoan, sequelize, KhachHang } = require("../models");
+const { TaiKhoan, sequelize, KhachHang, DonHang } = require("../models");
 
 const dangKyKhachHang = async (req, res) => {
   const { email, mat_khau, ho_ten, sdt, dia_chi } = req.body;
@@ -54,4 +54,102 @@ const dangKyKhachHang = async (req, res) => {
   });
 };
 
-module.exports = { dangKyKhachHang };
+// ==================== ADMIN ====================
+const xemTatCaKhachHang = async (req, res) => {
+  try {
+    const { search, page = 1, limit = 10 } = req.query;
+
+    let whereCondition = {};
+
+    if (search) {
+      whereCondition = {
+        [require("sequelize").Op.or]: [
+          { ho_ten: { [require("sequelize").Op.like]: `%${search}%` } },
+          { sdt: { [require("sequelize").Op.like]: `%${search}%` } },
+        ],
+      };
+    }
+
+    const danhSach = await KhachHang.findAndCountAll({
+      where: whereCondition,
+      include: [
+        { model: TaiKhoan, as: "tai_khoan" },
+        {
+          model: DonHang,
+          as: "khach_hang",
+          required: false,
+        },
+      ],
+      order: [["tao_luc", "DESC"]],
+      offset: (page - 1) * limit,
+      limit: parseInt(limit),
+    });
+
+    res.json({
+      data: danhSach.rows,
+      total: danhSach.count,
+      page: parseInt(page),
+      limit: parseInt(limit),
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const xemChiTietKhachHang = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const khachHang = await KhachHang.findByPk(id, {
+      include: [
+        { model: TaiKhoan, as: "tai_khoan" },
+        {
+          model: DonHang,
+          as: "khach_hang",
+        },
+      ],
+    });
+
+    if (!khachHang) {
+      return res.status(404).json({
+        error: "Không tìm thấy khách hàng",
+      });
+    }
+
+    res.json(khachHang);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const khoa_KhachHang = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const khachHang = await KhachHang.findByPk(id, {
+      include: [{ model: TaiKhoan, as: "tai_khoan" }],
+    });
+
+    if (!khachHang) {
+      return res.status(404).json({
+        error: "Không tìm thấy khách hàng",
+      });
+    }
+
+    await khachHang.tai_khoan.update({ kich_hoat: false });
+
+    res.json({
+      message: "Đã khóa tài khoản khách hàng",
+      khach_hang: khachHang,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+module.exports = {
+  dangKyKhachHang,
+  xemTatCaKhachHang,
+  xemChiTietKhachHang,
+  khoa_KhachHang,
+};

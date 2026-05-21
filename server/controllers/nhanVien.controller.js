@@ -2,9 +2,16 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { TaiKhoan, sequelize, NhanVien } = require("../models");
 
-const taoNhanVien = async (req, res) => {
-  const { email, mat_khau, ho_ten, ngay_sinh, dia_chi, sdt, vai_tro } =
-    req.body;
+const chieuTuyenNhanVien = async (req, res) => {
+  const {
+    email,
+    mat_khau,
+    ho_ten,
+    ngay_sinh,
+    dia_chi,
+    sdt,
+    vai_tro,
+  } = req.body;
 
   if (!email || !mat_khau || !ho_ten || !vai_tro) {
     return res.status(400).json({
@@ -66,4 +73,97 @@ const taoNhanVien = async (req, res) => {
   });
 };
 
-module.exports = { taoNhanVien };
+// ==================== ADMIN ====================
+const xemTatCaNhanVien = async (req, res) => {
+  try {
+    const { vai_tro, search, page = 1, limit = 10 } = req.query;
+
+    let whereCondition = {};
+
+    if (vai_tro) {
+      whereCondition.vai_tro = vai_tro;
+    }
+
+    if (search) {
+      whereCondition = {
+        ...whereCondition,
+        [require("sequelize").Op.or]: [
+          { ho_ten: { [require("sequelize").Op.like]: `%${search}%` } },
+          { sdt: { [require("sequelize").Op.like]: `%${search}%` } },
+        ],
+      };
+    }
+
+    const danhSach = await NhanVien.findAndCountAll({
+      where: whereCondition,
+      include: [{ model: TaiKhoan, as: "tai_khoan" }],
+      order: [["ho_ten", "ASC"]],
+      offset: (page - 1) * limit,
+      limit: parseInt(limit),
+    });
+
+    res.json({
+      data: danhSach.rows,
+      total: danhSach.count,
+      page: parseInt(page),
+      limit: parseInt(limit),
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const xemChiTietNhanVien = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const nhanVien = await NhanVien.findByPk(id, {
+      include: [{ model: TaiKhoan, as: "tai_khoan" }],
+    });
+
+    if (!nhanVien) {
+      return res.status(404).json({
+        error: "Không tìm thấy nhân viên",
+      });
+    }
+
+    res.json(nhanVien);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const khoaNhanVien = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const nhanVien = await NhanVien.findByPk(id, {
+      include: [{ model: TaiKhoan, as: "tai_khoan" }],
+    });
+
+    if (!nhanVien) {
+      return res.status(404).json({
+        error: "Không tìm thấy nhân viên",
+      });
+    }
+
+    // Khóa tài khoản và vô hiệu hóa nhân viên
+    await nhanVien.tai_khoan.update({ kich_hoat: false });
+    await nhanVien.update({ hoat_dong: false });
+
+    res.json({
+      message: "Đã khóa nhân viên",
+      nhan_vien: nhanVien,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+module.exports = {
+  chieuTuyenNhanVien,
+  xemTatCaNhanVien,
+  xemChiTietNhanVien,
+  khoaNhanVien,
+  taoNhanVien: chieuTuyenNhanVien, // Alias
+};

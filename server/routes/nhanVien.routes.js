@@ -1,6 +1,7 @@
 const router = require("express").Router();
-const { taoNhanVien } = require("../controllers/nhanVien.controller");
+const { chieuTuyenNhanVien } = require("../controllers/nhanVien.controller");
 
-router.post("/dang-ky", taoNhanVien);
+// Public endpoint: chiêu tuyển nhân viên mới
+router.post("/dang-ky", chieuTuyenNhanVien);
 
 module.exports = router;
