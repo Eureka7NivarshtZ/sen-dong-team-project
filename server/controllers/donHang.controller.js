@@ -20,12 +20,14 @@ const taoDonHang = async (req, res) => {
 
   if (!khachHangId) {
     return res.status(401).json({
+      success: false,
       error: "Token khong hop le hoac khong phai khach hang",
     });
   }
 
   if (!dia_chi_giao) {
     return res.status(400).json({
+      success: false,
       error: "Dia chi giao la bat buoc",
     });
   }
@@ -182,7 +184,11 @@ const taoDonHang = async (req, res) => {
     return donHangDayDu;
   });
 
-  return res.status(201).json(ketQua);
+  return res.status(201).json({
+    success: true,
+    message: "Tao don hang thanh cong",
+    data: ketQua,
+  });
 };
 
 const xemDonCuaToi = async (req, res) => {
@@ -193,7 +199,7 @@ const xemDonCuaToi = async (req, res) => {
     include: [
       {
         model: DonHangChiTiet,
-        as: "don_hang_chi_tiet",
+        as: "chi_tiet",
         include: [{ model: Tranh, as: "tranh" }],
       },
       { model: NhanVien, as: "nhan_vien" },
@@ -202,7 +208,11 @@ const xemDonCuaToi = async (req, res) => {
     order: [["ngay_dat", "DESC"]],
   });
 
-  res.json(danhSach);
+  res.json({
+    success: true,
+    message: "Lay don hang cua toi thanh cong",
+    data: danhSach,
+  });
 };
 
 const xemChiTietDonCuaToi = async (req, res) => {
@@ -214,7 +224,7 @@ const xemChiTietDonCuaToi = async (req, res) => {
     include: [
       {
         model: DonHangChiTiet,
-        as: "don_hang_chi_tiet",
+        as: "chi_tiet",
         include: [{ model: Tranh, as: "tranh" }],
       },
       { model: NhanVien, as: "nhan_vien" },
@@ -229,11 +239,16 @@ const xemChiTietDonCuaToi = async (req, res) => {
 
   if (!donHang) {
     return res.status(404).json({
+      success: false,
       error: "Không tìm thấy đơn hàng",
     });
   }
 
-  res.json(donHang);
+  res.json({
+    success: true,
+    message: "Lay chi tiet don hang thanh cong",
+    data: donHang,
+  });
 };
 
 const huyDonCuaToi = async (req, res) => {
@@ -246,19 +261,25 @@ const huyDonCuaToi = async (req, res) => {
 
   if (!donHang) {
     return res.status(404).json({
+      success: false,
       error: "Không tìm thấy đơn hàng",
     });
   }
 
   if (!["cho_xac_nhan", "dang_chuan_bi"].includes(donHang.trang_thai)) {
     return res.status(400).json({
+      success: false,
       error: "Không thể hủy đơn hàng ở trạng thái này",
     });
   }
 
   await donHang.update({ trang_thai: "huy" });
 
-  res.json(donHang);
+  res.json({
+    success: true,
+    message: "Huy don hang thanh cong",
+    data: donHang,
+  });
 };
 
 // Quản lý
@@ -284,6 +305,8 @@ const xemTatCaDonHang = async (req, res) => {
   });
 
   res.json({
+    success: true,
+    message: "Lay tat ca don hang thanh cong",
     data: danhSach.rows,
     total: danhSach.count,
     page: parseInt(page),
@@ -310,11 +333,16 @@ const xemChiTietDonBatKy = async (req, res) => {
 
   if (!donHang) {
     return res.status(404).json({
+      success: false,
       error: "Không tìm thấy đơn hàng",
     });
   }
 
-  res.json(donHang);
+  res.json({
+    success: true,
+    message: "Lay chi tiet don hang thanh cong",
+    data: donHang,
+  });
 };
 
 const capNhatTrangThaiDon = async (req, res) => {
@@ -331,6 +359,7 @@ const capNhatTrangThaiDon = async (req, res) => {
 
   if (!trangThaiHopLe.includes(trang_thai)) {
     return res.status(400).json({
+      success: false,
       error: "Trang thai khong hop le",
     });
   }
@@ -339,6 +368,7 @@ const capNhatTrangThaiDon = async (req, res) => {
 
   if (!donHang) {
     return res.status(404).json({
+      success: false,
       error: "Khong tim thay don hang",
     });
   }
@@ -348,7 +378,11 @@ const capNhatTrangThaiDon = async (req, res) => {
     nhan_vien_id: req.user.nhan_vien_id,
   });
 
-  res.json(donHang);
+  res.json({
+    success: true,
+    message: "Cap nhat trang thai don hang thanh cong",
+    data: donHang,
+  });
 };
 
 const huyDonBatKy = async (req, res) => {
@@ -358,19 +392,25 @@ const huyDonBatKy = async (req, res) => {
 
   if (!donHang) {
     return res.status(404).json({
+      success: false,
       error: "Không tìm thấy đơn hàng",
     });
   }
 
   if (!["cho_xac_nhan", "dang_chuan_bi"].includes(donHang.trang_thai)) {
     return res.status(400).json({
+      success: false,
       error: "Không thể hủy đơn hàng ở trạng thái này",
     });
   }
 
   await donHang.update({ trang_thai: "huy" });
 
-  res.json(donHang);
+  res.json({
+    success: true,
+    message: "Huy don hang thanh cong",
+    data: donHang,
+  });
 };
 
 module.exports = {

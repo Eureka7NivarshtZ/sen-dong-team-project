@@ -9,6 +9,7 @@ const taoHoaDon = async (req, res) => {
 
   if (!don_hang_id) {
     return res.status(400).json({
+      success: false,
       error: "Vui long truyen don_hang_id",
     });
   }
@@ -17,6 +18,7 @@ const taoHoaDon = async (req, res) => {
 
   if (!donHang) {
     return res.status(404).json({
+      success: false,
       error: "Khong tim thay don hang",
     });
   }
@@ -30,6 +32,7 @@ const taoHoaDon = async (req, res) => {
 
   if (hoaDonTonTai) {
     return res.status(400).json({
+      success: false,
       error: "Don hang nay da co hoa don",
     });
   }
@@ -43,7 +46,11 @@ const taoHoaDon = async (req, res) => {
     trang_thai: "da_xuat",
   });
 
-  res.status(201).json(hoaDon);
+  res.status(201).json({
+    success: true,
+    message: "Tao hoa don thanh cong",
+    data: hoaDon,
+  });
 };
 
 const layTatCaHoaDon = async (req, res) => {
@@ -61,7 +68,11 @@ const layTatCaHoaDon = async (req, res) => {
     order: [["ngay_xuat", "DESC"]],
   });
 
-  res.json(danhSachHoaDon);
+  res.json({
+    success: true,
+    message: "Lay danh sach hoa don thanh cong",
+    data: danhSachHoaDon,
+  });
 };
 
 const layChiTietHoaDon = async (req, res) => {
@@ -82,11 +93,16 @@ const layChiTietHoaDon = async (req, res) => {
 
   if (!hoaDon) {
     return res.status(404).json({
+      success: false,
       error: "Khong tim thay hoa don",
     });
   }
 
-  res.json(hoaDon);
+  res.json({
+    success: true,
+    message: "Lay chi tiet hoa don thanh cong",
+    data: hoaDon,
+  });
 };
 
 const huyHoaDon = async (req, res) => {
@@ -96,6 +112,7 @@ const huyHoaDon = async (req, res) => {
 
   if (!hoaDon) {
     return res.status(404).json({
+      success: false,
       error: "Khong tim thay hoa don",
     });
   }
@@ -104,7 +121,11 @@ const huyHoaDon = async (req, res) => {
     trang_thai: "da_huy",
   });
 
-  res.json(hoaDon);
+  res.json({
+    success: true,
+    message: "Huy hoa don thanh cong",
+    data: hoaDon,
+  });
 };
 
 module.exports = {

@@ -11,6 +11,15 @@ router.use(yeuCauNhanVien);
 router.use(kiemTraVaiTro("quan_ly"));
 
 // Dashboard
+const {
+  tongQuanDashboard,
+  donHangGanDay,
+  doanhThuTheoThang,
+} = require("../controllers/dashboard.controller");
+
+router.get("/dashboard/", tongQuanDashboard);
+router.get("/dashboard/don-hang-gan-day", donHangGanDay);
+router.get("/dashboard/doanh-thu-theo-thang", doanhThuTheoThang);
 
 // Quản lý tranh
 const {
@@ -218,5 +227,136 @@ router.put("/nhan-vien/:id", capNhatNhanVien);
 router.patch("/nhan-vien/:id/khoa-mo", khoaMoNhanVien);
 router.patch("/nhan-vien/:id/doi-mat-khau", doiMatKhauNhanVien);
 router.delete("/nhan-vien/:id", xoaNhanVien);
+
+// ==================== KHO: NHÀ CUNG CẤP ====================
+const {
+  layTatCaNhaCungCap,
+  layChiTietNhaCungCap,
+  themNhaCungCap,
+  capNhatNhaCungCap,
+  xoaNhaCungCap,
+} = require("../controllers/nhaCungCap.controller");
+
+router.get(
+  "/kho/nha-cung-cap",
+  kiemTraVaiTro(["quan_ly", "kho"]),
+  layTatCaNhaCungCap,
+);
+
+router.get(
+  "/kho/nha-cung-cap/:id",
+  kiemTraVaiTro(["quan_ly", "kho"]),
+  layChiTietNhaCungCap,
+);
+
+router.post(
+  "/kho/nha-cung-cap",
+  kiemTraVaiTro(["quan_ly", "kho"]),
+  themNhaCungCap,
+);
+
+router.put(
+  "/kho/nha-cung-cap/:id",
+  kiemTraVaiTro(["quan_ly", "kho"]),
+  capNhatNhaCungCap,
+);
+
+router.delete("/kho/nha-cung-cap/:id", kiemTraVaiTro("quan_ly"), xoaNhaCungCap);
+
+// ==================== KHO: VẬT LIỆU ====================
+const {
+  layTatCaVatLieu,
+  layVatLieuCanhBao,
+  layChiTietVatLieu,
+  themVatLieu,
+  capNhatVatLieu,
+  xoaVatLieu,
+} = require("../controllers/vatLieu.controller");
+
+router.get("/kho/vat-lieu", kiemTraVaiTro(["quan_ly", "kho"]), layTatCaVatLieu);
+
+router.get(
+  "/kho/vat-lieu/canh-bao",
+  kiemTraVaiTro(["quan_ly", "kho"]),
+  layVatLieuCanhBao,
+);
+
+router.get(
+  "/kho/vat-lieu/:id",
+  kiemTraVaiTro(["quan_ly", "kho"]),
+  layChiTietVatLieu,
+);
+
+router.post("/kho/vat-lieu", kiemTraVaiTro(["quan_ly", "kho"]), themVatLieu);
+
+router.put(
+  "/kho/vat-lieu/:id",
+  kiemTraVaiTro(["quan_ly", "kho"]),
+  capNhatVatLieu,
+);
+
+router.delete("/kho/vat-lieu/:id", kiemTraVaiTro("quan_ly"), xoaVatLieu);
+
+// ==================== KHO: PHIẾU NHẬP ====================
+const {
+  layTatCaPhieuNhap,
+  layChiTietPhieuNhap,
+  taoPhieuNhap,
+  nhapKhoPhieuNhap,
+  huyPhieuNhap,
+} = require("../controllers/phieuNhapVatLieu.controller");
+
+router.get(
+  "/kho/phieu-nhap",
+  kiemTraVaiTro(["quan_ly", "kho"]),
+  layTatCaPhieuNhap,
+);
+
+router.get(
+  "/kho/phieu-nhap/:id",
+  kiemTraVaiTro(["quan_ly", "kho"]),
+  layChiTietPhieuNhap,
+);
+
+router.post("/kho/phieu-nhap", kiemTraVaiTro(["quan_ly", "kho"]), taoPhieuNhap);
+
+router.patch(
+  "/kho/phieu-nhap/:id/nhap-kho",
+  kiemTraVaiTro(["quan_ly", "kho"]),
+  nhapKhoPhieuNhap,
+);
+
+router.patch(
+  "/kho/phieu-nhap/:id/huy",
+  kiemTraVaiTro(["quan_ly", "kho"]),
+  huyPhieuNhap,
+);
+
+// ==================== KHO: THIẾT BỊ ====================
+const {
+  layTatCaThietBi,
+  layChiTietThietBi,
+  themThietBi,
+  capNhatThietBi,
+  xoaThietBi,
+} = require("../controllers/thietBi.controller");
+
+router.get("/kho/thiet-bi", kiemTraVaiTro(["quan_ly", "kho"]), layTatCaThietBi);
+
+router.get(
+  "/kho/thiet-bi/:id",
+  kiemTraVaiTro(["quan_ly", "kho"]),
+  layChiTietThietBi,
+);
+
+router.post("/kho/thiet-bi", kiemTraVaiTro(["quan_ly", "kho"]), themThietBi);
+
+router.put(
+  "/kho/thiet-bi/:id",
+  kiemTraVaiTro(["quan_ly", "kho"]),
+  capNhatThietBi,
+);
+
+router.delete("/kho/thiet-bi/:id", kiemTraVaiTro("quan_ly"), xoaThietBi);
 
 module.exports = router;

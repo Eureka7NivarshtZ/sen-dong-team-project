@@ -19,7 +19,11 @@ const xemTatCaTranh = async (req, res) => {
     order: [["tao_luc", "DESC"]],
   });
 
-  res.json(danhSachTranh);
+  res.json({
+    success: true,
+    message: "Lay danh sach tranh thanh cong",
+    data: danhSachTranh,
+  });
 };
 
 const xemChiTietTranh = async (req, res) => {
@@ -30,12 +34,17 @@ const xemChiTietTranh = async (req, res) => {
   });
 
   if (!tranh) {
-    return res.status(400).json({
+    return res.status(404).json({
+      success: false,
       error: "Khong tim thay tranh",
     });
   }
 
-  res.json(tranh);
+  res.json({
+    success: true,
+    message: "Lay chi tiet tranh thanh cong",
+    data: tranh,
+  });
 };
 
 const taoTranh = async (req, res) => {
@@ -45,7 +54,8 @@ const taoTranh = async (req, res) => {
     const danhMuc = await DanhMuc.findByPk(danh_muc_id);
 
     if (!danhMuc) {
-      return res.status(400).json({
+      return res.status(404).json({
+        success: false,
         error: "Danh muc khong ton tai",
       });
     }
@@ -55,7 +65,8 @@ const taoTranh = async (req, res) => {
     const tacGia = await TacGia.findByPk(tac_gia_id);
 
     if (!tacGia) {
-      return res.status(400).json({
+      return res.status(404).json({
+        success: false,
         error: "Tac gia khong ton tai",
       });
     }
@@ -68,7 +79,11 @@ const taoTranh = async (req, res) => {
   };
 
   const tranh = await Tranh.create(tranhData);
-  res.status(201).json(tranh);
+  res.status(201).json({
+    success: true,
+    message: "Tao tranh thanh cong",
+    data: tranh,
+  });
 };
 
 const capNhatTranh = async (req, res) => {
@@ -78,6 +93,7 @@ const capNhatTranh = async (req, res) => {
 
   if (!tranh) {
     return res.status(404).json({
+      success: false,
       error: "Khong tim thay tranh",
     });
   }
@@ -90,7 +106,11 @@ const capNhatTranh = async (req, res) => {
 
   await tranh.update(tranhData);
 
-  res.json(tranh);
+  res.json({
+    success: true,
+    message: "Cap nhat tranh thanh cong",
+    data: tranh,
+  });
 };
 
 const anTranh = async (req, res) => {
@@ -100,6 +120,7 @@ const anTranh = async (req, res) => {
 
   if (!tranh) {
     return res.status(404).json({
+      success: false,
       error: "Khong tim thay tranh",
     });
   }
@@ -111,8 +132,12 @@ const anTranh = async (req, res) => {
     cap_nhat_luc: new Date(),
   };
 
-  await Tranh.update(tranhData);
-  res.json(tranh);
+  await tranh.update(tranhData);
+  res.json({
+    success: true,
+    message: "An tranh thanh cong",
+    data: tranh,
+  });
 };
 
 const xoaTranh = async (req, res) => {
@@ -122,13 +147,18 @@ const xoaTranh = async (req, res) => {
 
   if (!tranh) {
     return res.status(404).json({
+      success: false,
       error: "Khong tim thay tranh",
     });
   }
 
   await tranh.destroy();
 
-  res.status(204).end();
+  res.json({
+    success: true,
+    message: "Xoa tranh thanh cong",
+    data: null,
+  });
 };
 
 module.exports = {

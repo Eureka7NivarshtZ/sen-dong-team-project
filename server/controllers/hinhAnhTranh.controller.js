@@ -6,6 +6,7 @@ const themHinhAnhTranh = async (req, res) => {
 
   if (!url) {
     return res.status(400).json({
+      success: false,
       error: "URL hinh anh la bat buoc",
     });
   }
@@ -14,6 +15,7 @@ const themHinhAnhTranh = async (req, res) => {
 
   if (!tranh) {
     return res.status(404).json({
+      success: false,
       error: "Khong tim thay tranh",
     });
   }
@@ -32,7 +34,11 @@ const themHinhAnhTranh = async (req, res) => {
     thu_tu,
   });
 
-  res.status(201).json(hinhAnh);
+  res.status(201).json({
+    success: true,
+    message: "Them hinh anh tranh thanh cong",
+    data: hinhAnh,
+  });
 };
 
 const xoaHinhAnhTranh = async (req, res) => {
@@ -41,13 +47,18 @@ const xoaHinhAnhTranh = async (req, res) => {
 
   if (!hinhAnh) {
     return res.status(404).json({
+      success: false,
       error: "Khong tim thay hinh anh",
     });
   }
 
   await hinhAnh.destroy();
 
-  res.status(204).end();
+  res.json({
+    success: true,
+    message: "Xoa hinh anh tranh thanh cong",
+    data: null,
+  });
 };
 
 const datAnhChinh = async (req, res) => {
@@ -57,6 +68,7 @@ const datAnhChinh = async (req, res) => {
 
   if (!hinhAnh) {
     return res.status(404).json({
+      success: false,
       error: "Khong tim thay hinh anh",
     });
   }
@@ -72,7 +84,11 @@ const datAnhChinh = async (req, res) => {
 
   await hinhAnh.update({ la_chinh: true });
 
-  res.json(hinhAnh);
+  res.json({
+    success: true,
+    message: "Dat anh chinh thanh cong",
+    data: hinhAnh,
+  });
 };
 
 const capNhatHinhAnhTranh = async (req, res) => {
@@ -81,7 +97,17 @@ const capNhatHinhAnhTranh = async (req, res) => {
 
   if (!url) {
     return res.status(400).json({
+      success: false,
       error: "URL hinh anh la bat buoc",
+    });
+  }
+
+  const hinhAnh = await HinhAnhTranh.findByPk(id);
+
+  if (!hinhAnh) {
+    return res.status(404).json({
+      success: false,
+      error: "Khong tim thay hinh anh",
     });
   }
 
@@ -96,17 +122,13 @@ const capNhatHinhAnhTranh = async (req, res) => {
     );
   }
 
-  const hinhAnh = await HinhAnhTranh.findByPk(id);
-
-  if (!hinhAnh) {
-    return res.status(404).json({
-      error: "Khong tim thay hinh anh",
-    });
-  }
-
   await hinhAnh.update({ url, la_chinh, thu_tu });
 
-  res.json(hinhAnh);
+  res.json({
+    success: true,
+    message: "Cap nhat hinh anh tranh thanh cong",
+    data: hinhAnh,
+  });
 };
 
 module.exports = {

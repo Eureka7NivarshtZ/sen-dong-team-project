@@ -5,7 +5,11 @@ const layTatCaDonViVanChuyen = async (req, res) => {
     order: [["ten", "ASC"]],
   });
 
-  res.json(danhSach);
+  res.json({
+    success: true,
+    message: "Lay danh sach don vi van chuyen thanh cong",
+    data: danhSach,
+  });
 };
 
 const layDonViVanChuyenHoatDong = async (req, res) => {
@@ -16,7 +20,11 @@ const layDonViVanChuyenHoatDong = async (req, res) => {
     order: [["ten", "ASC"]],
   });
 
-  res.json(danhSach);
+  res.json({
+    success: true,
+    message: "Lay danh sach don vi van chuyen hoat dong thanh cong",
+    data: danhSach,
+  });
 };
 
 const layChiTietDonViVanChuyen = async (req, res) => {
@@ -26,11 +34,16 @@ const layChiTietDonViVanChuyen = async (req, res) => {
 
   if (!donVi) {
     return res.status(404).json({
+      success: false,
       error: "Không tìm thấy đơn vị vận chuyển",
     });
   }
 
-  res.json(donVi);
+  res.json({
+    success: true,
+    message: "Lay chi tiet don vi van chuyen thanh cong",
+    data: donVi,
+  });
 };
 
 const themDonViVanChuyen = async (req, res) => {
@@ -38,6 +51,7 @@ const themDonViVanChuyen = async (req, res) => {
 
   if (!ten) {
     return res.status(400).json({
+      success: false,
       error: "Vui lòng nhập tên đơn vị vận chuyển",
     });
   }
@@ -50,7 +64,11 @@ const themDonViVanChuyen = async (req, res) => {
     hoat_dong: hoat_dong === undefined ? true : hoat_dong,
   });
 
-  res.status(201).json(donVi);
+  res.status(201).json({
+    success: true,
+    message: "Them don vi van chuyen thanh cong",
+    data: donVi,
+  });
 };
 
 const capNhatDonViVanChuyen = async (req, res) => {
@@ -61,6 +79,7 @@ const capNhatDonViVanChuyen = async (req, res) => {
 
   if (!donVi) {
     return res.status(404).json({
+      success: false,
       error: "Không tìm thấy đơn vị vận chuyển",
     });
   }
@@ -73,7 +92,11 @@ const capNhatDonViVanChuyen = async (req, res) => {
     hoat_dong,
   });
 
-  res.json(donVi);
+  res.json({
+    success: true,
+    message: "Cap nhat don vi van chuyen thanh cong",
+    data: donVi,
+  });
 };
 
 const xoaDonViVanChuyen = async (req, res) => {
@@ -83,13 +106,18 @@ const xoaDonViVanChuyen = async (req, res) => {
 
   if (!donVi) {
     return res.status(404).json({
+      success: false,
       error: "Không tìm thấy đơn vị vận chuyển",
     });
   }
 
   await donVi.destroy();
 
-  res.status(204).end();
+  res.json({
+    success: true,
+    message: "Xoa don vi van chuyen thanh cong",
+    data: null,
+  });
 };
 
 const khoaMoDonViVanChuyen = async (req, res) => {
@@ -99,6 +127,7 @@ const khoaMoDonViVanChuyen = async (req, res) => {
 
   if (!donVi) {
     return res.status(404).json({
+      success: false,
       error: "Không tìm thấy đơn vị vận chuyển",
     });
   }
@@ -107,7 +136,11 @@ const khoaMoDonViVanChuyen = async (req, res) => {
     hoat_dong: !donVi.hoat_dong,
   });
 
-  res.json(donVi);
+  res.json({
+    success: true,
+    message: "Cap nhat trang thai don vi van chuyen thanh cong",
+    data: donVi,
+  });
 };
 
 module.exports = {

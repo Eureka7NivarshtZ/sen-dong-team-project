@@ -24,7 +24,8 @@ const dangNhap = async (req, res) => {
 
   if (!email || !mat_khau) {
     return res.status(400).json({
-      message: "Vui long nhap email va mat khau",
+      success: false,
+      error: "Vui long nhap email va mat khau",
     });
   }
 
@@ -44,13 +45,15 @@ const dangNhap = async (req, res) => {
 
   if (!taiKhoan) {
     return res.status(400).json({
+      success: false,
       error: "Email hoac mat khau khong dung",
     });
   }
 
   if (!taiKhoan.kich_hoat) {
     return res.status(403).json({
-      message: "Tai khoan da bi khoa",
+      success: false,
+      error: "Tai khoan da bi khoa",
     });
   }
 
@@ -58,17 +61,26 @@ const dangNhap = async (req, res) => {
 
   if (!dungMatKhau) {
     return res.status(401).json({
-      message: "Email hoac mat khau khong dung",
+      success: false,
+      error: "Email hoac mat khau khong dung",
     });
   }
 
   const token = taoToken(taiKhoan);
 
   res.json({
-    token,
-    tai_khoan: { id: taiKhoan.id, email: taiKhoan.email, loai: taiKhoan.loai },
-    khach_hang: taiKhoan.khach_hang,
-    nhan_vien: taiKhoan.nhan_vien,
+    success: true,
+    message: "Dang nhap thanh cong",
+    data: {
+      token,
+      tai_khoan: {
+        id: taiKhoan.id,
+        email: taiKhoan.email,
+        loai: taiKhoan.loai,
+      },
+      khach_hang: taiKhoan.khach_hang,
+      nhan_vien: taiKhoan.nhan_vien,
+    },
   });
 };
 
@@ -81,7 +93,69 @@ const xemThongTinCuaToi = async (req, res) => {
     ],
   });
 
-  res.json(taiKhoan);
+  res.json({
+    success: true,
+    message: "Lay thong tin thanh cong",
+    data: taiKhoan,
+  });
 };
 
-module.exports = { dangNhap, xemThongTinCuaToi };
+const dangKyKhachHang = async (req, res) => {
+  const { email, mat_khau, ho_ten, sdt, dia_chi } = req.body;
+
+  if (!email || !mat_khau || !ho_ten) {
+    return res.status(400).json({
+      success: false,
+      error: "Vui long nhap day du email, mat khau va ho ten",
+    });
+  }
+
+  const taiKhoan = await TaiKhoan.findOne({ where: { email } });
+
+  if (taiKhoan) {
+    return res.status(400).json({
+      success: false,
+      error: "email da duoc su dung",
+    });
+  }
+
+  const mat_khau_hash = await bcrypt.hash(mat_khau, 10);
+
+  const ketQua = await sequelize.transaction(async (t) => {
+    const taiKhoan = await TaiKhoan.create(
+      {
+        email,
+        mat_khau_hash,
+        loai: "khach_hang",
+      },
+      { transaction: t },
+    );
+
+    const khachHang = await KhachHang.create(
+      {
+        tai_khoan_id: taiKhoan.id,
+        ho_ten,
+        sdt,
+        dia_chi,
+      },
+      { transaction: t },
+    );
+
+    return { taiKhoan, khachHang };
+  });
+
+  res.status(201).json({
+    success: true,
+    message: "Dang ky khach hang thanh cong",
+    data: {
+      tai_khoan: {
+        id: ketQua.taiKhoan.id,
+        email: ketQua.taiKhoan.email,
+        loai: ketQua.taiKhoan.loai,
+      },
+      khach_hang: ketQua.khachHang,
+    },
+  });
+};
+
+module.exports = { dangNhap, xemThongTinCuaToi, dangKyKhachHang };
