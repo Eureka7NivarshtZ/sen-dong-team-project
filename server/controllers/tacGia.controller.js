@@ -5,7 +5,11 @@ const xemTatCaTacGia = async (req, res) => {
     order: [["ho_ten", "ASC"]],
   });
 
-  res.json(tacGia);
+  res.json({
+    success: true,
+    message: "Lay danh sach tac gia thanh cong",
+    data: tacGia,
+  });
 };
 
 const xemChiTietTacGia = async (req, res) => {
@@ -15,11 +19,16 @@ const xemChiTietTacGia = async (req, res) => {
 
   if (!tacGia) {
     return res.status(404).json({
+      success: false,
       error: "Khong tim thay tac gia",
     });
   }
 
-  res.json(tacGia);
+  res.json({
+    success: true,
+    message: "Lay chi tiet tac gia thanh cong",
+    data: tacGia,
+  });
 };
 
 const themTacGia = async (req, res) => {
@@ -27,6 +36,7 @@ const themTacGia = async (req, res) => {
 
   if (!ho_ten) {
     return res.status(400).json({
+      success: false,
       error: "Ho ten tac gia la bat buoc",
     });
   }
@@ -38,7 +48,11 @@ const themTacGia = async (req, res) => {
     dia_chi,
     tieu_su,
   });
-  res.status(201).json(tacGia);
+  res.status(201).json({
+    success: true,
+    message: "Them tac gia thanh cong",
+    data: tacGia,
+  });
 };
 
 const xoaTacGia = async (req, res) => {
@@ -48,13 +62,18 @@ const xoaTacGia = async (req, res) => {
 
   if (!tacGia) {
     return res.status(404).json({
+      success: false,
       error: "Khong tim thay tac gia",
     });
   }
 
   await tacGia.destroy();
 
-  res.status(204).end();
+  res.json({
+    success: true,
+    message: "Xoa tac gia thanh cong",
+    data: null,
+  });
 };
 
 const capNhatTacGia = async (req, res) => {
@@ -65,19 +84,25 @@ const capNhatTacGia = async (req, res) => {
 
   if (!ho_ten) {
     return res.status(400).json({
+      success: false,
       error: "Ho ten tac gia la bat buoc",
     });
   }
 
   if (!tacGia) {
     return res.status(404).json({
+      success: false,
       error: "Khong tim thay tac gia",
     });
   }
 
   await tacGia.update({ ho_ten, ngay_sinh, sdt, dia_chi, tieu_su });
 
-  res.json(tacGia);
+  res.json({
+    success: true,
+    message: "Cap nhat tac gia thanh cong",
+    data: tacGia,
+  });
 };
 
 module.exports = {

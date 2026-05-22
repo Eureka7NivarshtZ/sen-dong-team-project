@@ -9,12 +9,14 @@ const taoThanhToan = async (req, res) => {
 
   if (!hoa_don_id || !so_tien || !phuong_thuc) {
     return res.status(400).json({
+      success: false,
       error: "Vui long nhap hoa_don_id, so_tien va phuong_thuc",
     });
   }
 
   if (!["tien_mat", "chuyen_khoan", "the"].includes(phuong_thuc)) {
     return res.status(400).json({
+      success: false,
       error: "Phuong thuc thanh toan khong hop le",
     });
   }
@@ -30,12 +32,14 @@ const taoThanhToan = async (req, res) => {
 
   if (!hoaDon) {
     return res.status(404).json({
+      success: false,
       error: "Khong tim thay hoa don",
     });
   }
 
   if (hoaDon.trang_thai === "da_huy") {
     return res.status(400).json({
+      success: false,
       error: "Khong the thanh toan hoa don da huy",
     });
   }
@@ -52,6 +56,7 @@ const taoThanhToan = async (req, res) => {
 
   if (daThanhToan >= soTienCanThanhToan) {
     return res.status(400).json({
+      success: false,
       error: "Hoa don nay da duoc thanh toan du",
     });
   }
@@ -70,7 +75,11 @@ const taoThanhToan = async (req, res) => {
     });
   }
 
-  res.status(201).json(thanhToan);
+  res.status(201).json({
+    success: true,
+    message: "Tao thanh toan thanh cong",
+    data: thanhToan,
+  });
 };
 
 const layTatCaThanhToan = async (req, res) => {
@@ -84,7 +93,11 @@ const layTatCaThanhToan = async (req, res) => {
     order: [["thoi_gian", "DESC"]],
   });
 
-  res.json(danhSachThanhToan);
+  res.json({
+    success: true,
+    message: "Lay danh sach thanh toan thanh cong",
+    data: danhSachThanhToan,
+  });
 };
 
 const layChiTietThanhToan = async (req, res) => {
@@ -101,11 +114,16 @@ const layChiTietThanhToan = async (req, res) => {
 
   if (!thanhToan) {
     return res.status(404).json({
+      success: false,
       error: "Khong tim thay thanh toan",
     });
   }
 
-  res.json(thanhToan);
+  res.json({
+    success: true,
+    message: "Lay chi tiet thanh toan thanh cong",
+    data: thanhToan,
+  });
 };
 
 const capNhatTrangThaiThanhToan = async (req, res) => {
@@ -114,6 +132,7 @@ const capNhatTrangThaiThanhToan = async (req, res) => {
 
   if (!["thanh_cong", "that_bai", "hoan_tien"].includes(trang_thai)) {
     return res.status(400).json({
+      success: false,
       error: "Trang thai thanh toan khong hop le",
     });
   }
@@ -122,6 +141,7 @@ const capNhatTrangThaiThanhToan = async (req, res) => {
 
   if (!thanhToan) {
     return res.status(404).json({
+      success: false,
       error: "Khong tim thay thanh toan",
     });
   }
@@ -130,7 +150,11 @@ const capNhatTrangThaiThanhToan = async (req, res) => {
     trang_thai,
   });
 
-  res.json(thanhToan);
+  res.json({
+    success: true,
+    message: "Cap nhat trang thai thanh toan thanh cong",
+    data: thanhToan,
+  });
 };
 
 module.exports = {

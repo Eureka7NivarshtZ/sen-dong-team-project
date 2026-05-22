@@ -9,6 +9,7 @@ const xuLyLoi = async (err, req, res, next) => {
   }
 
   res.status(err.statusCode || 500).json({
+    success: false,
     error: err.message || "Loi server",
   });
 };
@@ -18,6 +19,7 @@ const yeuCauDangNhap = async (req, res, next) => {
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(401).json({
+      success: false,
       error: "Thieu token",
     });
   }
@@ -28,6 +30,7 @@ const yeuCauDangNhap = async (req, res, next) => {
 
   if (!decodedToken.id) {
     return res.status(401).json({
+      success: false,
       error: "Token khong hop le",
     });
   }
@@ -36,6 +39,7 @@ const yeuCauDangNhap = async (req, res, next) => {
 
   if (!taiKhoan.kich_hoat) {
     return res.status(403).json({
+      success: false,
       error: "Tai khoan da bi khoa",
     });
   }

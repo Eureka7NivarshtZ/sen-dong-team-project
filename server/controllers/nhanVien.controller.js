@@ -14,7 +14,11 @@ const layTatCaNhanVien = async (req, res) => {
     order: [["ho_ten", "ASC"]],
   });
 
-  res.json(danhSachNhanVien);
+  res.json({
+    success: true,
+    message: "Lay danh sach nhan vien thanh cong",
+    data: danhSachNhanVien,
+  });
 };
 
 const layChiTietNhanVien = async (req, res) => {
@@ -32,11 +36,16 @@ const layChiTietNhanVien = async (req, res) => {
 
   if (!nhanVien) {
     return res.status(404).json({
+      success: false,
       error: "Không tìm thấy nhân viên",
     });
   }
 
-  res.json(nhanVien);
+  res.json({
+    success: true,
+    message: "Lay chi tiet nhan vien thanh cong",
+    data: nhanVien,
+  });
 };
 
 const themNhanVien = async (req, res) => {
@@ -49,6 +58,7 @@ const themNhanVien = async (req, res) => {
     await transaction.rollback();
 
     return res.status(400).json({
+      success: false,
       error: "Vui lòng nhập email, mật khẩu, họ tên và vai trò",
     });
   }
@@ -59,6 +69,7 @@ const themNhanVien = async (req, res) => {
     await transaction.rollback();
 
     return res.status(400).json({
+      success: false,
       error: "Vai trò nhân viên không hợp lệ",
     });
   }
@@ -72,6 +83,7 @@ const themNhanVien = async (req, res) => {
     await transaction.rollback();
 
     return res.status(400).json({
+      success: false,
       error: "Email đã được sử dụng",
     });
   }
@@ -104,13 +116,17 @@ const themNhanVien = async (req, res) => {
   await transaction.commit();
 
   res.status(201).json({
-    tai_khoan: {
-      id: taiKhoan.id,
-      email: taiKhoan.email,
-      loai: taiKhoan.loai,
-      kich_hoat: taiKhoan.kich_hoat,
+    success: true,
+    message: "Them nhan vien thanh cong",
+    data: {
+      tai_khoan: {
+        id: taiKhoan.id,
+        email: taiKhoan.email,
+        loai: taiKhoan.loai,
+        kich_hoat: taiKhoan.kich_hoat,
+      },
+      nhan_vien: nhanVien,
     },
-    nhan_vien: nhanVien,
   });
 };
 
@@ -123,6 +139,7 @@ const capNhatNhanVien = async (req, res) => {
 
   if (!nhanVien) {
     return res.status(404).json({
+      success: false,
       error: "Không tìm thấy nhân viên",
     });
   }
@@ -132,6 +149,7 @@ const capNhatNhanVien = async (req, res) => {
 
     if (!vaiTroHopLe.includes(vai_tro)) {
       return res.status(400).json({
+        success: false,
         error: "Vai trò nhân viên không hợp lệ",
       });
     }
@@ -146,7 +164,11 @@ const capNhatNhanVien = async (req, res) => {
     hoat_dong,
   });
 
-  res.json(nhanVien);
+  res.json({
+    success: true,
+    message: "Cap nhat nhan vien thanh cong",
+    data: nhanVien,
+  });
 };
 
 const khoaMoNhanVien = async (req, res) => {
@@ -163,6 +185,7 @@ const khoaMoNhanVien = async (req, res) => {
 
   if (!nhanVien) {
     return res.status(404).json({
+      success: false,
       error: "Không tìm thấy nhân viên",
     });
   }
@@ -179,7 +202,11 @@ const khoaMoNhanVien = async (req, res) => {
     });
   }
 
-  res.json(nhanVien);
+  res.json({
+    success: true,
+    message: "Cap nhat trang thai nhan vien thanh cong",
+    data: nhanVien,
+  });
 };
 
 const doiMatKhauNhanVien = async (req, res) => {
@@ -188,6 +215,7 @@ const doiMatKhauNhanVien = async (req, res) => {
 
   if (!mat_khau_moi) {
     return res.status(400).json({
+      success: false,
       error: "Vui lòng nhập mật khẩu mới",
     });
   }
@@ -203,12 +231,14 @@ const doiMatKhauNhanVien = async (req, res) => {
 
   if (!nhanVien) {
     return res.status(404).json({
+      success: false,
       error: "Không tìm thấy nhân viên",
     });
   }
 
   if (!nhanVien.tai_khoan) {
     return res.status(404).json({
+      success: false,
       error: "Không tìm thấy tài khoản của nhân viên",
     });
   }
@@ -220,7 +250,9 @@ const doiMatKhauNhanVien = async (req, res) => {
   });
 
   res.json({
-    message: "Đổi mật khẩu nhân viên thành công",
+    success: true,
+    message: "Doi mat khau nhan vien thanh cong",
+    data: null,
   });
 };
 
@@ -238,6 +270,7 @@ const xoaNhanVien = async (req, res) => {
 
   if (!nhanVien) {
     return res.status(404).json({
+      success: false,
       error: "Không tìm thấy nhân viên",
     });
   }
@@ -253,7 +286,9 @@ const xoaNhanVien = async (req, res) => {
   }
 
   res.json({
-    message: "Đã vô hiệu hóa nhân viên thành công",
+    success: true,
+    message: "Vo hieu hoa nhan vien thanh cong",
+    data: null,
   });
 };
 

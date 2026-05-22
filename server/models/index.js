@@ -21,6 +21,12 @@ const VanDon = require("./VanDon.js");
 const HoaDon = require("./HoaDon.js");
 const ThanhToan = require("./ThanhToan.js");
 
+const NhaCungCap = require("./NhaCungCap.js");
+const VatLieu = require("./VatLieu.js");
+const PhieuNhapVatLieu = require("./PhieuNhapVatLieu.js");
+const ChiTietPhieuNhap = require("./ChiTietPhieuNhap.js");
+const ThietBi = require("./ThietBi");
+
 // Quan he tai khoan
 TaiKhoan.hasOne(NhanVien, {
   foreignKey: "tai_khoan_id",
@@ -212,6 +218,67 @@ ThanhToan.belongsTo(HoaDon, {
   as: "hoa_don",
 });
 
+// Kho & Vật tư
+NhaCungCap.hasMany(VatLieu, {
+  foreignKey: "nha_cung_cap_id",
+  as: "vat_lieu",
+});
+
+VatLieu.belongsTo(NhaCungCap, {
+  foreignKey: "nha_cung_cap_id",
+  as: "nha_cung_cap",
+});
+
+NhaCungCap.hasMany(ThietBi, {
+  foreignKey: "nha_cung_cap_id",
+  as: "thiet_bi",
+});
+
+ThietBi.belongsTo(NhaCungCap, {
+  foreignKey: "nha_cung_cap_id",
+  as: "nha_cung_cap",
+});
+
+NhaCungCap.hasMany(PhieuNhapVatLieu, {
+  foreignKey: "nha_cung_cap_id",
+  as: "phieu_nhap",
+});
+
+PhieuNhapVatLieu.belongsTo(NhaCungCap, {
+  foreignKey: "nha_cung_cap_id",
+  as: "nha_cung_cap",
+});
+
+NhanVien.hasMany(PhieuNhapVatLieu, {
+  foreignKey: "nhan_vien_id",
+  as: "phieu_nhap_vat_lieu",
+});
+
+PhieuNhapVatLieu.belongsTo(NhanVien, {
+  foreignKey: "nhan_vien_id",
+  as: "nhan_vien",
+});
+
+PhieuNhapVatLieu.hasMany(ChiTietPhieuNhap, {
+  foreignKey: "phieu_id",
+  as: "chi_tiet",
+});
+
+ChiTietPhieuNhap.belongsTo(PhieuNhapVatLieu, {
+  foreignKey: "phieu_id",
+  as: "phieu_nhap",
+});
+
+VatLieu.hasMany(ChiTietPhieuNhap, {
+  foreignKey: "vat_lieu_id",
+  as: "chi_tiet_phieu_nhap",
+});
+
+ChiTietPhieuNhap.belongsTo(VatLieu, {
+  foreignKey: "vat_lieu_id",
+  as: "vat_lieu",
+});
+
 module.exports = {
   sequelize,
   TaiKhoan,
@@ -229,5 +296,10 @@ module.exports = {
   VanDon,
   DonViVanChuyen,
   HoaDon,
-  ThanhToan
+  ThanhToan,
+  NhaCungCap,
+  VatLieu,
+  PhieuNhapVatLieu,
+  ChiTietPhieuNhap,
+  ThietBi,
 };

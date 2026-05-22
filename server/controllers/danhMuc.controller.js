@@ -5,7 +5,11 @@ const xemTatCaDanhMuc = async (req, res) => {
     order: [["ten", "ASC"]],
   });
 
-  res.json(danhMuc);
+  res.json({
+    success: true,
+    message: "Lay danh sach danh muc thanh cong",
+    data: danhMuc,
+  });
 };
 
 const xemChiTietDanhMuc = async (req, res) => {
@@ -15,11 +19,16 @@ const xemChiTietDanhMuc = async (req, res) => {
 
   if (!danhMuc) {
     return res.status(404).json({
+      success: false,
       error: "Khong tim thay danh muc",
     });
   }
 
-  res.json(danhMuc);
+  res.json({
+    success: true,
+    message: "Lay chi tiet danh muc thanh cong",
+    data: danhMuc,
+  });
 };
 
 const themDanhMuc = async (req, res) => {
@@ -27,12 +36,17 @@ const themDanhMuc = async (req, res) => {
 
   if (!ten) {
     return res.status(400).json({
+      success: false,
       error: "Ten danh muc la bat buoc",
     });
   }
 
   const danhMuc = await DanhMuc.create({ ten });
-  res.status(201).json(danhMuc);
+  res.status(201).json({
+    success: true,
+    message: "Them danh muc thanh cong",
+    data: danhMuc,
+  });
 };
 
 const xoaDanhMuc = async (req, res) => {
@@ -41,13 +55,18 @@ const xoaDanhMuc = async (req, res) => {
   const danhMuc = await DanhMuc.findByPk(id);
   if (!danhMuc) {
     return res.status(404).json({
+      success: false,
       error: "Khong tim thay danh muc",
     });
   }
 
   await danhMuc.destroy();
 
-  res.status(204).end();
+  res.json({
+    success: true,
+    message: "Xoa danh muc thanh cong",
+    data: null,
+  });
 };
 
 const capNhatDanhMuc = async (req, res) => {
@@ -58,13 +77,18 @@ const capNhatDanhMuc = async (req, res) => {
 
   if (!danhMuc) {
     return res.status(404).json({
+      success: false,
       error: "Khong tim thay danh muc",
     });
   }
 
   await danhMuc.update({ ten });
 
-  res.json(danhMuc);
+  res.json({
+    success: true,
+    message: "Cap nhat danh muc thanh cong",
+    data: danhMuc,
+  });
 };
 
 module.exports = {

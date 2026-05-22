@@ -11,9 +11,13 @@ const xemGioHangCuaToi = async (req, res) => {
 
   if (!gioHang) {
     return res.json({
-      danh_sach: [],
-      tong_so_luong: 0,
-      tong_tien: 0,
+      success: true,
+      message: "Lay gio hang thanh cong",
+      data: {
+        danh_sach: [],
+        tong_so_luong: 0,
+        tong_tien: 0,
+      },
     });
   }
 
@@ -42,9 +46,13 @@ const xemGioHangCuaToi = async (req, res) => {
   }, 0);
 
   res.json({
-    danh_sach: danhSach,
-    tong_so_luong: tongSoLuong,
-    tong_tien: tongTien,
+    success: true,
+    message: "Lay gio hang thanh cong",
+    data: {
+      danh_sach: danhSach,
+      tong_so_luong: tongSoLuong,
+      tong_tien: tongTien,
+    },
   });
 };
 
@@ -53,6 +61,7 @@ const themVaoGioHang = async (req, res) => {
 
   if (!tranh_id) {
     return res.status(400).json({
+      success: false,
       error: "tranh_id la bat buoc",
     });
   }
@@ -61,6 +70,7 @@ const themVaoGioHang = async (req, res) => {
 
   if (!Number.isInteger(soLuongThem) || soLuongThem <= 0) {
     return res.status(400).json({
+      success: false,
       error: "So luong phai lon hon 0",
     });
   }
@@ -69,12 +79,14 @@ const themVaoGioHang = async (req, res) => {
 
   if (!tranh) {
     return res.status(404).json({
+      success: false,
       error: "Khong tim thay tranh",
     });
   }
 
   if (tranh.trang_thai !== "ban") {
     return res.status(400).json({
+      success: false,
       error: "Tranh hien khong duoc ban",
     });
   }
@@ -103,6 +115,7 @@ const themVaoGioHang = async (req, res) => {
 
   if (Number(tranh.so_luong_ton) < soLuongMoi) {
     return res.status(400).json({
+      success: false,
       error: "So luong ton khong du",
     });
   }
@@ -113,7 +126,11 @@ const themVaoGioHang = async (req, res) => {
       don_gia: tranh.gia_ban,
     });
 
-    return res.json(chiTietDaCo);
+    return res.json({
+      success: true,
+      message: "Cap nhat gio hang thanh cong",
+      data: chiTietDaCo,
+    });
   }
 
   const chiTiet = await GioHangChiTiet.create({
@@ -123,7 +140,11 @@ const themVaoGioHang = async (req, res) => {
     don_gia: tranh.gia_ban,
   });
 
-  return res.json(chiTiet);
+  return res.json({
+    success: true,
+    message: "Them vao gio hang thanh cong",
+    data: chiTiet,
+  });
 };
 
 const capNhatSoLuong = async (req, res) => {
@@ -134,6 +155,7 @@ const capNhatSoLuong = async (req, res) => {
 
   if (!Number.isInteger(soLuongMoi) || soLuongMoi <= 0) {
     return res.status(400).json({
+      success: false,
       error: "So luong phai lon hon 0",
     });
   }
@@ -146,6 +168,7 @@ const capNhatSoLuong = async (req, res) => {
 
   if (!gioHang) {
     return res.status(404).json({
+      success: false,
       error: "Khong tim thay gio hang",
     });
   }
@@ -160,12 +183,14 @@ const capNhatSoLuong = async (req, res) => {
 
   if (!chiTiet) {
     return res.status(404).json({
+      success: false,
       error: "Khong tim thay san pham trong gio hang",
     });
   }
 
   if (Number(chiTiet.tranh.so_luong_ton) < soLuongMoi) {
     return res.status(400).json({
+      success: false,
       error: "So luong ton khong du",
     });
   }
@@ -175,7 +200,11 @@ const capNhatSoLuong = async (req, res) => {
     don_gia: chiTiet.tranh.gia_ban,
   });
 
-  res.json(chiTiet);
+  res.json({
+    success: true,
+    message: "Cap nhat so luong thanh cong",
+    data: chiTiet,
+  });
 };
 
 const xoaKhoiGioHang = async (req, res) => {
@@ -190,6 +219,7 @@ const xoaKhoiGioHang = async (req, res) => {
 
   if (!gioHang) {
     return res.status(404).json({
+      success: false,
       error: "Khong tim thay gio hang",
     });
   }
@@ -203,13 +233,18 @@ const xoaKhoiGioHang = async (req, res) => {
 
   if (!chiTiet) {
     return res.status(404).json({
+      success: false,
       error: "Khong tim thay san pham trong gio hang",
     });
   }
 
   await chiTiet.destroy();
 
-  res.status(204).end();
+  res.json({
+    success: true,
+    message: "Xoa san pham khoi gio hang thanh cong",
+    data: null,
+  });
 };
 
 const xoaTatCaGioHang = async (req, res) => {
@@ -223,6 +258,7 @@ const xoaTatCaGioHang = async (req, res) => {
 
   if (!gioHang) {
     return res.status(404).json({
+      success: false,
       error: "Gio hang dang trong",
     });
   }
@@ -233,7 +269,11 @@ const xoaTatCaGioHang = async (req, res) => {
     },
   });
 
-  res.status(204).end();
+  res.json({
+    success: true,
+    message: "Xoa tat ca san pham khoi gio hang thanh cong",
+    data: null,
+  });
 };
 
 module.exports = {
