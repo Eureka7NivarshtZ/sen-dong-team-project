@@ -12,7 +12,7 @@ const { yeuCauDangNhap, yeuCauKhachHang } = require("../utils/middleware");
 router.use(yeuCauDangNhap);
 router.use(yeuCauKhachHang);
 
-router.post("/", taoDonHang);
+router.post("/them", taoDonHang);
 router.get("/cua-toi", xemDonCuaToi);
 router.get("/:id", xemChiTietDonCuaToi);
 router.put("/:id/huy", huyDonCuaToi);

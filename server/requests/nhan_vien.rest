@@ -1,8 +1,9 @@
-POST http://localhost:5000/api/nhan-vien/dang-ky
+POST http://localhost:5000/api/admin/nhan-vien/dang-ky
+Authorization: Bearer 
 Content-Type: application/json
 
 {
-  "email": "banhang1@gmail.com",
+  "email": "quanly2@gmail.com",
   "mat_khau": "123456",
   "ho_ten": "Nguyen Van A",
   "ngay_sinh": "2000-05-20",

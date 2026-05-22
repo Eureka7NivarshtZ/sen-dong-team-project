@@ -106,7 +106,7 @@ GioHangChiTiet.belongsTo(Tranh, {
 
 GioHang.hasMany(GioHangChiTiet, {
   foreignKey: "gio_hang_id",
-  as: "gio_hang_chi_tiet",
+  as: "chi_tiet",
 });
 
 GioHangChiTiet.belongsTo(GioHang, {
@@ -117,7 +117,7 @@ GioHangChiTiet.belongsTo(GioHang, {
 // Don hang
 KhachHang.hasMany(DonHang, {
   foreignKey: "khach_hang_id",
-  as: "khach_hang",
+  as: "don_hang",
 });
 
 DonHang.belongsTo(KhachHang, {
@@ -143,6 +143,16 @@ Tranh.hasMany(DonHangChiTiet, {
 DonHangChiTiet.belongsTo(Tranh, {
   foreignKey: "tranh_id",
   as: "tranh",
+});
+
+DonHang.hasMany(DonHangChiTiet, {
+  foreignKey: "don_hang_id",
+  as: "chi_tiet",
+});
+
+DonHangChiTiet.belongsTo(DonHang, {
+  foreignKey: "don_hang_id",
+  as: "don_hang",
 });
 
 // Van chuyen
@@ -218,4 +228,6 @@ module.exports = {
   DonHangChiTiet,
   VanDon,
   DonViVanChuyen,
+  HoaDon,
+  ThanhToan
 };

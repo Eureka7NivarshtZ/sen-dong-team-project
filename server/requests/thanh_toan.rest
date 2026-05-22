@@ -1,0 +1,9 @@
+POST http://localhost:5000/api/admin/thanh-toan
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZiMjgyYjY3LTY0MWItNDk3YS04MDgwLWI4ZjBiNzExYWU4OCIsImVtYWlsIjoicXVhbmx5MUBnbWFpbC5jb20iLCJsb2FpIjoibmhhbl92aWVuIiwibmhhbl92aWVuX2lkIjoiZmFkM2ZlYWEtYTczNC00NTIzLWI0MzgtZGIxNGMxM2NiZGJiIiwidmFpX3RybyI6InF1YW5fbHkiLCJraGFjaF9oYW5nX2lkIjpudWxsLCJpYXQiOjE3Nzk0NDMxMzYsImV4cCI6MTc4MDA0NzkzNn0.MasIg3m50_fciiZ7_p9i2G7dMQyO7DD1n7rtAO2IuG4
+Content-Type: application/json
+
+{
+  "hoa_don_id": "983ba31f-f9ce-4b34-a602-fa9ea896b8b9",
+  "so_tien": 3960000,
+  "phuong_thuc": "chuyen_khoan"
+}
