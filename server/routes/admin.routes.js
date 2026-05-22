@@ -1,7 +1,13 @@
 const router = require("express").Router();
-const { yeuCauDangNhap, kiemTraVaiTro } = require("../utils/middleware");
+
+const {
+  yeuCauDangNhap,
+  kiemTraVaiTro,
+  yeuCauNhanVien,
+} = require("../utils/middleware");
 
 router.use(yeuCauDangNhap);
+router.use(yeuCauNhanVien);
 router.use(kiemTraVaiTro("quan_ly"));
 
 // Dashboard
@@ -72,6 +78,117 @@ router.get("/don-hang/:id", xemChiTietDonBatKy);
 router.put("/don-hang/:id/trang-thai", capNhatTrangThaiDon);
 router.put("/don-hang/:id/huy", huyDonBatKy);
 
+// Quản lý đơn vị vận chuyển
+const {
+  layTatCaDonViVanChuyen,
+  layChiTietDonViVanChuyen,
+  themDonViVanChuyen,
+  capNhatDonViVanChuyen,
+  xoaDonViVanChuyen,
+  khoaMoDonViVanChuyen,
+} = require("../controllers/donViVanChuyen.controller");
+
+router.get("/don-vi-van-chuyen/", layTatCaDonViVanChuyen);
+router.get("/don-vi-van-chuyen/:id", layChiTietDonViVanChuyen);
+router.post("/don-vi-van-chuyen/", themDonViVanChuyen);
+router.put("/don-vi-van-chuyen/:id", capNhatDonViVanChuyen);
+router.patch("/don-vi-van-chuyen/:id/khoa-mo", khoaMoDonViVanChuyen);
+router.delete("/don-vi-van-chuyen/:id", xoaDonViVanChuyen);
+
+// Quản lý vận đơn
+const {
+  taoVanDon,
+  layTatCaVanDon,
+  layChiTietVanDon,
+  capNhatTrangThaiVanDon,
+  capNhatVanDon,
+  xoaVanDon,
+} = require("../controllers/vanDon.controller");
+
+router.post(
+  "/van-don/don-hang/:don_hang_id",
+  kiemTraVaiTro(["quan_ly", "ban_hang", "kho"]),
+  taoVanDon,
+);
+
+router.get(
+  "/van-don/",
+  kiemTraVaiTro(["quan_ly", "ban_hang", "kho"]),
+  layTatCaVanDon,
+);
+
+router.get(
+  "/van-don/:id",
+  kiemTraVaiTro(["quan_ly", "ban_hang", "kho"]),
+  layChiTietVanDon,
+);
+
+router.put(
+  "/van-don/:id",
+  kiemTraVaiTro(["quan_ly", "ban_hang", "kho"]),
+  capNhatVanDon,
+);
+
+router.patch(
+  "/van-don/:id/trang-thai",
+  kiemTraVaiTro(["quan_ly", "ban_hang", "kho"]),
+  capNhatTrangThaiVanDon,
+);
+
+router.delete("/van-don/:id", kiemTraVaiTro("quan_ly"), xoaVanDon);
+
+// Quản lý hóa đơn
+const {
+  taoHoaDon,
+  layTatCaHoaDon,
+  layChiTietHoaDon,
+  huyHoaDon,
+} = require("../controllers/hoaDon.controller");
+
+router.get("/hoa-don/", kiemTraVaiTro(["quan_ly", "ban_hang"]), layTatCaHoaDon);
+
+router.get(
+  "/hoa-don/:id",
+  kiemTraVaiTro(["quan_ly", "ban_hang"]),
+  layChiTietHoaDon,
+);
+
+router.post("/hoa-don/", kiemTraVaiTro(["quan_ly", "ban_hang"]), taoHoaDon);
+
+router.patch("/hoa-don/:id/huy", kiemTraVaiTro("quan_ly"), huyHoaDon);
+
+// Quản lý thanh toán
+const {
+  taoThanhToan,
+  layTatCaThanhToan,
+  layChiTietThanhToan,
+  capNhatTrangThaiThanhToan,
+} = require("../controllers/thanhToan.controller");
+
+router.get(
+  "/thanh-toan/",
+  kiemTraVaiTro(["quan_ly", "ban_hang"]),
+  layTatCaThanhToan,
+);
+
+router.get(
+  "/thanh-toan/:id",
+  kiemTraVaiTro(["quan_ly", "ban_hang"]),
+  layChiTietThanhToan,
+);
+
+router.post(
+  "/thanh-toan/",
+  kiemTraVaiTro(["quan_ly", "ban_hang"]),
+  taoThanhToan,
+);
+
+router.patch(
+  "/thanh-toan/:id/trang-thai",
+  kiemTraVaiTro(["quan_ly", "ban_hang"]),
+  capNhatTrangThaiThanhToan,
+);
+
 // Quản lý khách hàng
 const {
   xemTatCaKhachHang,
@@ -85,15 +202,21 @@ router.put("/khach-hang/:id/khoa", khoa_KhachHang);
 
 // Quản lý nhân viên
 const {
-  xemTatCaNhanVien,
-  xemChiTietNhanVien,
-  khoaNhanVien,
-  chieuTuyenNhanVien,
+  layTatCaNhanVien,
+  layChiTietNhanVien,
+  themNhanVien,
+  capNhatNhanVien,
+  khoaMoNhanVien,
+  doiMatKhauNhanVien,
+  xoaNhanVien,
 } = require("../controllers/nhanVien.controller");
 
-router.get("/nhan-vien", xemTatCaNhanVien);
-router.get("/nhan-vien/:id", xemChiTietNhanVien);
-router.put("/nhan-vien/:id/khoa", khoaNhanVien);
-router.post("/nhan-vien", chieuTuyenNhanVien);
+router.get("/nhan-vien", layTatCaNhanVien);
+router.get("/nhan-vien/:id", layChiTietNhanVien);
+router.post("/", themNhanVien);
+router.put("/nhan-vien/:id", capNhatNhanVien);
+router.patch("/nhan-vien/:id/khoa-mo", khoaMoNhanVien);
+router.patch("/nhan-vien/:id/doi-mat-khau", doiMatKhauNhanVien);
+router.delete("/nhan-vien/:id", xoaNhanVien);
 
 module.exports = router;

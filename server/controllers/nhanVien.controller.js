@@ -1,169 +1,268 @@
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const { TaiKhoan, sequelize, NhanVien } = require("../models");
 
-const chieuTuyenNhanVien = async (req, res) => {
-  const {
-    email,
-    mat_khau,
-    ho_ten,
-    ngay_sinh,
-    dia_chi,
-    sdt,
-    vai_tro,
-  } = req.body;
+const { sequelize, TaiKhoan, NhanVien } = require("../models");
+
+const layTatCaNhanVien = async (req, res) => {
+  const danhSachNhanVien = await NhanVien.findAll({
+    include: [
+      {
+        model: TaiKhoan,
+        as: "tai_khoan",
+        attributes: ["id", "email", "loai", "kich_hoat", "tao_luc"],
+      },
+    ],
+    order: [["ho_ten", "ASC"]],
+  });
+
+  res.json(danhSachNhanVien);
+};
+
+const layChiTietNhanVien = async (req, res) => {
+  const { id } = req.params;
+
+  const nhanVien = await NhanVien.findByPk(id, {
+    include: [
+      {
+        model: TaiKhoan,
+        as: "tai_khoan",
+        attributes: ["id", "email", "loai", "kich_hoat", "tao_luc"],
+      },
+    ],
+  });
+
+  if (!nhanVien) {
+    return res.status(404).json({
+      error: "Không tìm thấy nhân viên",
+    });
+  }
+
+  res.json(nhanVien);
+};
+
+const themNhanVien = async (req, res) => {
+  const transaction = await sequelize.transaction();
+
+  const { email, mat_khau, ho_ten, ngay_sinh, dia_chi, sdt, vai_tro } =
+    req.body;
 
   if (!email || !mat_khau || !ho_ten || !vai_tro) {
+    await transaction.rollback();
+
     return res.status(400).json({
-      error: "Vui long nhap day du email, mat khau, ho ten va vai tro",
+      error: "Vui lòng nhập email, mật khẩu, họ tên và vai trò",
     });
   }
 
   const vaiTroHopLe = ["quan_ly", "ban_hang", "kho"];
 
   if (!vaiTroHopLe.includes(vai_tro)) {
+    await transaction.rollback();
+
     return res.status(400).json({
-      error: "Vai tro khong hop le",
+      error: "Vai trò nhân viên không hợp lệ",
     });
   }
 
-  const taiKhoanTonTai = await TaiKhoan.findOne({ where: { email } });
+  const taiKhoanTonTai = await TaiKhoan.findOne({
+    where: { email },
+    transaction,
+  });
 
   if (taiKhoanTonTai) {
+    await transaction.rollback();
+
     return res.status(400).json({
-      error: "Email da duoc su dung",
+      error: "Email đã được sử dụng",
     });
   }
 
   const mat_khau_hash = await bcrypt.hash(mat_khau, 10);
 
-  const ketQua = await sequelize.transaction(async (t) => {
-    const taiKhoan = await TaiKhoan.create(
-      {
-        email,
-        mat_khau_hash,
-        loai: "nhan_vien",
-      },
-      { transaction: t },
-    );
+  const taiKhoan = await TaiKhoan.create(
+    {
+      email,
+      mat_khau_hash,
+      loai: "nhan_vien",
+      kich_hoat: true,
+    },
+    { transaction },
+  );
 
-    const nhanVien = await NhanVien.create(
-      {
-        tai_khoan_id: taiKhoan.id,
-        ho_ten,
-        ngay_sinh,
-        dia_chi,
-        sdt,
-        vai_tro,
-        hoat_dong: true,
-      },
-      { transaction: t },
-    );
+  const nhanVien = await NhanVien.create(
+    {
+      tai_khoan_id: taiKhoan.id,
+      ho_ten,
+      ngay_sinh: ngay_sinh || null,
+      dia_chi,
+      sdt,
+      vai_tro,
+      hoat_dong: true,
+    },
+    { transaction },
+  );
 
-    return { taiKhoan, nhanVien };
-  });
+  await transaction.commit();
 
   res.status(201).json({
     tai_khoan: {
-      id: ketQua.taiKhoan.id,
-      email: ketQua.taiKhoan.email,
-      loai: ketQua.taiKhoan.loai,
+      id: taiKhoan.id,
+      email: taiKhoan.email,
+      loai: taiKhoan.loai,
+      kich_hoat: taiKhoan.kich_hoat,
     },
-    nhan_vien: ketQua.nhanVien,
+    nhan_vien: nhanVien,
   });
 };
 
-// ==================== ADMIN ====================
-const xemTatCaNhanVien = async (req, res) => {
-  try {
-    const { vai_tro, search, page = 1, limit = 10 } = req.query;
+const capNhatNhanVien = async (req, res) => {
+  const { id } = req.params;
 
-    let whereCondition = {};
+  const { ho_ten, ngay_sinh, dia_chi, sdt, vai_tro, hoat_dong } = req.body;
 
-    if (vai_tro) {
-      whereCondition.vai_tro = vai_tro;
-    }
+  const nhanVien = await NhanVien.findByPk(id);
 
-    if (search) {
-      whereCondition = {
-        ...whereCondition,
-        [require("sequelize").Op.or]: [
-          { ho_ten: { [require("sequelize").Op.like]: `%${search}%` } },
-          { sdt: { [require("sequelize").Op.like]: `%${search}%` } },
-        ],
-      };
-    }
-
-    const danhSach = await NhanVien.findAndCountAll({
-      where: whereCondition,
-      include: [{ model: TaiKhoan, as: "tai_khoan" }],
-      order: [["ho_ten", "ASC"]],
-      offset: (page - 1) * limit,
-      limit: parseInt(limit),
+  if (!nhanVien) {
+    return res.status(404).json({
+      error: "Không tìm thấy nhân viên",
     });
-
-    res.json({
-      data: danhSach.rows,
-      total: danhSach.count,
-      page: parseInt(page),
-      limit: parseInt(limit),
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
   }
-};
 
-const xemChiTietNhanVien = async (req, res) => {
-  try {
-    const { id } = req.params;
+  if (vai_tro) {
+    const vaiTroHopLe = ["quan_ly", "ban_hang", "kho"];
 
-    const nhanVien = await NhanVien.findByPk(id, {
-      include: [{ model: TaiKhoan, as: "tai_khoan" }],
-    });
-
-    if (!nhanVien) {
-      return res.status(404).json({
-        error: "Không tìm thấy nhân viên",
+    if (!vaiTroHopLe.includes(vai_tro)) {
+      return res.status(400).json({
+        error: "Vai trò nhân viên không hợp lệ",
       });
     }
-
-    res.json(nhanVien);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
   }
+
+  await nhanVien.update({
+    ho_ten,
+    ngay_sinh,
+    dia_chi,
+    sdt,
+    vai_tro,
+    hoat_dong,
+  });
+
+  res.json(nhanVien);
 };
 
-const khoaNhanVien = async (req, res) => {
-  try {
-    const { id } = req.params;
+const khoaMoNhanVien = async (req, res) => {
+  const { id } = req.params;
 
-    const nhanVien = await NhanVien.findByPk(id, {
-      include: [{ model: TaiKhoan, as: "tai_khoan" }],
+  const nhanVien = await NhanVien.findByPk(id, {
+    include: [
+      {
+        model: TaiKhoan,
+        as: "tai_khoan",
+      },
+    ],
+  });
+
+  if (!nhanVien) {
+    return res.status(404).json({
+      error: "Không tìm thấy nhân viên",
     });
-
-    if (!nhanVien) {
-      return res.status(404).json({
-        error: "Không tìm thấy nhân viên",
-      });
-    }
-
-    // Khóa tài khoản và vô hiệu hóa nhân viên
-    await nhanVien.tai_khoan.update({ kich_hoat: false });
-    await nhanVien.update({ hoat_dong: false });
-
-    res.json({
-      message: "Đã khóa nhân viên",
-      nhan_vien: nhanVien,
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
   }
+
+  const trangThaiMoi = !nhanVien.hoat_dong;
+
+  await nhanVien.update({
+    hoat_dong: trangThaiMoi,
+  });
+
+  if (nhanVien.tai_khoan) {
+    await nhanVien.tai_khoan.update({
+      kich_hoat: trangThaiMoi,
+    });
+  }
+
+  res.json(nhanVien);
+};
+
+const doiMatKhauNhanVien = async (req, res) => {
+  const { id } = req.params;
+  const { mat_khau_moi } = req.body;
+
+  if (!mat_khau_moi) {
+    return res.status(400).json({
+      error: "Vui lòng nhập mật khẩu mới",
+    });
+  }
+
+  const nhanVien = await NhanVien.findByPk(id, {
+    include: [
+      {
+        model: TaiKhoan,
+        as: "tai_khoan",
+      },
+    ],
+  });
+
+  if (!nhanVien) {
+    return res.status(404).json({
+      error: "Không tìm thấy nhân viên",
+    });
+  }
+
+  if (!nhanVien.tai_khoan) {
+    return res.status(404).json({
+      error: "Không tìm thấy tài khoản của nhân viên",
+    });
+  }
+
+  const mat_khau_hash = await bcrypt.hash(mat_khau_moi, 10);
+
+  await nhanVien.tai_khoan.update({
+    mat_khau_hash,
+  });
+
+  res.json({
+    message: "Đổi mật khẩu nhân viên thành công",
+  });
+};
+
+const xoaNhanVien = async (req, res) => {
+  const { id } = req.params;
+
+  const nhanVien = await NhanVien.findByPk(id, {
+    include: [
+      {
+        model: TaiKhoan,
+        as: "tai_khoan",
+      },
+    ],
+  });
+
+  if (!nhanVien) {
+    return res.status(404).json({
+      error: "Không tìm thấy nhân viên",
+    });
+  }
+
+  await nhanVien.update({
+    hoat_dong: false,
+  });
+
+  if (nhanVien.tai_khoan) {
+    await nhanVien.tai_khoan.update({
+      kich_hoat: false,
+    });
+  }
+
+  res.json({
+    message: "Đã vô hiệu hóa nhân viên thành công",
+  });
 };
 
 module.exports = {
-  chieuTuyenNhanVien,
-  xemTatCaNhanVien,
-  xemChiTietNhanVien,
-  khoaNhanVien,
-  taoNhanVien: chieuTuyenNhanVien, // Alias
+  layTatCaNhanVien,
+  layChiTietNhanVien,
+  themNhanVien,
+  capNhatNhanVien,
+  khoaMoNhanVien,
+  doiMatKhauNhanVien,
+  xoaNhanVien,
 };

@@ -1,0 +1,34 @@
+POST http://localhost:5000/api/admin/don-vi-van-chuyen
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZiMjgyYjY3LTY0MWItNDk3YS04MDgwLWI4ZjBiNzExYWU4OCIsImVtYWlsIjoicXVhbmx5MUBnbWFpbC5jb20iLCJsb2FpIjoibmhhbl92aWVuIiwibmhhbl92aWVuX2lkIjoiZmFkM2ZlYWEtYTczNC00NTIzLWI0MzgtZGIxNGMxM2NiZGJiIiwidmFpX3RybyI6InF1YW5fbHkiLCJraGFjaF9oYW5nX2lkIjpudWxsLCJpYXQiOjE3Nzk0NDMxMzYsImV4cCI6MTc4MDA0NzkzNn0.MasIg3m50_fciiZ7_p9i2G7dMQyO7DD1n7rtAO2IuG4
+Content-Type: application/json
+
+{
+  "ten": "Giao hàng nhanh",
+  "sdt": "19001234",
+  "email": "support@ghn.vn",
+  "phi_co_ban": 30000
+}
+
+###
+GET http://localhost:5000/api/admin/don-vi-van-chuyen/hoat-dong
+
+###
+PUT http://localhost:5000/api/admin/don-vi-van-chuyen/:id
+Authorization: Bearer
+Content-Type: application/json
+
+{
+  "ten": "Giao hàng nhanh",
+  "sdt": "19001234",
+  "email": "support@ghn.vn",
+  "phi_co_ban": 35000,
+  "hoat_dong": true
+}
+
+###
+PATCH http://localhost:5000/api/admin/don-vi-van-chuyen/:id/khoa-mo
+Authorization: Bearer
+
+###
+DELETE http://localhost:5000/api/admin/don-vi-van-chuyen/:id
+Authorization: Bearer

@@ -1,0 +1,7 @@
+POST http://localhost:5000/api/admin/hoa-don
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZiMjgyYjY3LTY0MWItNDk3YS04MDgwLWI4ZjBiNzExYWU4OCIsImVtYWlsIjoicXVhbmx5MUBnbWFpbC5jb20iLCJsb2FpIjoibmhhbl92aWVuIiwibmhhbl92aWVuX2lkIjoiZmFkM2ZlYWEtYTczNC00NTIzLWI0MzgtZGIxNGMxM2NiZGJiIiwidmFpX3RybyI6InF1YW5fbHkiLCJraGFjaF9oYW5nX2lkIjpudWxsLCJpYXQiOjE3Nzk0NDMxMzYsImV4cCI6MTc4MDA0NzkzNn0.MasIg3m50_fciiZ7_p9i2G7dMQyO7DD1n7rtAO2IuG4
+Content-Type: application/json
+
+{
+  "don_hang_id": "47d6b11e-7a3b-4d9e-82ad-d30555ab5ec4"
+}
