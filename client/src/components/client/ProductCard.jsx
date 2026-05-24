@@ -70,9 +70,17 @@ function ProductCard_TrangChu({ image, title, category, price, onOpenDetail }) {
             {price}
           </span>
 
-          <span style={{ fontSize: '13px', color: '#1c3f3a', fontWeight: '500' }}>
-            Xem chi tiết →
-          </span>
+          <button style={{
+            padding: '6px 14px',
+            backgroundColor: '#111',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontSize: '13px'
+          }}>
+            + Thêm sản phẩm
+          </button>
         </div>
       </div>
     </div>
