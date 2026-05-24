@@ -1,8 +1,9 @@
 import React from 'react';
 
-function ProductCard_TrangChu({ image, title, category, price }) {
+function ProductCard_TrangChu({ image, title, category, price, onOpenDetail }) {
   return (
     <div
+      onClick={onOpenDetail} // Bấm vào bất kỳ đâu trên card để xem chi tiết thông tin tranh
       style={{
         border: '1px solid #eaeaea',
         borderRadius: '8px',
@@ -22,12 +23,18 @@ function ProductCard_TrangChu({ image, title, category, price }) {
         e.currentTarget.style.boxShadow = '0 4px 10px rgba(0,0,0,0.03)';
       }}
     >
-      {/* FIX: dùng image, không dùng product.image */}
-      <img
-        src={image}
-        alt={title}
-        style={{ width: '100%', height: '230px', objectFit: 'cover' }}
-      />
+      {/* KHUNG TRANH RỘNG RÃI - KHÔNG BỊ CẮT XÉN HÌNH */}
+      <div style={{ width: '100%', height: '200px', backgroundColor: '#f9f9f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <img
+          src={image || "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=500"}
+          alt={title}
+          style={{ 
+            maxWidth: '100%', 
+            maxHeight: '100%', 
+            objectFit: 'contain' // Đảm bảo tranh hiển thị trọn vẹn bề ngang và bề dọc
+          }}
+        />
+      </div>
 
       <div style={{ padding: '15px' }}>
         <span style={{
@@ -57,23 +64,15 @@ function ProductCard_TrangChu({ image, title, category, price }) {
         }}>
           <span style={{
             fontWeight: 'bold',
-            color: '#e74c3c',
+            color: '#faa22f', // Đồng bộ màu xanh lục chủ đạo của xưởng
             fontSize: '16px'
           }}>
             {price}
           </span>
 
-          <button style={{
-            padding: '6px 14px',
-            backgroundColor: '#111',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontSize: '13px'
-          }}>
-            Xem chi tiết
-          </button>
+          <span style={{ fontSize: '13px', color: '#1c3f3a', fontWeight: '500' }}>
+            Xem chi tiết →
+          </span>
         </div>
       </div>
     </div>
