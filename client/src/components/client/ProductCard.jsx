@@ -72,7 +72,7 @@ function ProductCard_TrangChu({ image, title, category, price }) {
             cursor: 'pointer',
             fontSize: '13px'
           }}>
-            Xem chi tiết
+            + Thêm sản phẩm
           </button>
         </div>
       </div>

@@ -40,234 +40,156 @@ const mockFeaturedProducts = [
 const mockReviews = [
   {
     id: 1,
-    name: "Nguyễn Văn A",
-    role: "Khách mua tranh phòng khách",
+    name: "Messi",
+    role: "Cầu thủ bóng đá",
+    avatar: images["../../assets/messi.png"]?.default,
     stars: "⭐⭐⭐⭐⭐",
-    comment:
-      "Tranh in rất sắc nét, màu sắc tươi tắn đúng như hình thiết kế. Đóng gói cực kỳ cẩn thận, khung viền composite chắc chắn, rất đáng tiền!",
-    avatar:
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150",
+    comment: "World Cup, Sen Đông, GOAT",
   },
   {
     id: 2,
-    name: "Trần Thị B",
-    role: "Chủ quán cà phê",
+    name: "Anh Độ Mixi",
+    role: "Streamer nổi tiếng",
+    avatar: images["../../assets/do-mixi.jpg"]?.default,
     stars: "⭐⭐⭐⭐⭐",
-    comment:
-      "Mình đặt trọn bộ tranh Canvas tối giản cho quán decor lại. Khách đến ai cũng khen góc check-in mới. Thợ đóng khung rất tỉ mỉ, giao hàng nhanh.",
-    avatar:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150",
+    comment: "Anh em bộ tộc hãy ủng hộ Sen Đông nhá",
   },
   {
     id: 3,
-    name: "Lê Minh C",
-    role: "Văn phòng công ty",
+    name: "Khang Truong",
+    role: "Sinh viên CNTT",
+    avatar: images["../../assets/khang.png"]?.default,
     stars: "⭐⭐⭐⭐⭐",
-    comment:
-      "Dịch vụ in tranh động lực theo yêu cầu của xưởng siêu chất lượng. Tư vấn nhiệt tình, hỗ trợ chọn kích thước chuẩn. Sẽ tiếp tục ủng hộ xưởng.",
-    avatar:
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=150",
+    comment: "Nhìn những bức tranh, tôi đã nghĩ ngay đến Hạnh phúc",
   },
 ];
 
 function Home() {
   return (
-    <div style={{ width: "100%", boxSizing: "border-box" }}>
-      {/* 1. KHỐI BANNER CHỮ TRÁI - HÌNH PHẢI CỦA BẠN */}
+    <div style={{ width: "100%", boxSizing: "border-box", fontFamily: "Arial, sans-serif" }}>
+      
+      {/* ================= KHỐI 1: BANNER HERO (CHỮ TRÁI - HÌNH PHẢI) ================= */}
       <div
         style={{
           display: "flex",
           flexDirection: "row",
-          justifyContent: "space-between",
           alignItems: "center",
-          background: "#f4f5f7",
-          height: "600px",
-          marginBottom: "40px",
-          overflow: "hidden",
-          width: "100%",
+          justifyContent: "space-between",
+          backgroundColor: "#fff",
+          padding: "60px 80px",
+          gap: "40px",
+          maxWidth: "1200px",
+          margin: "0 auto",
         }}
       >
-        <div style={{ flex: 1, padding: "0 50px", textAlign: "left" }}>
+        <div style={{ flex: 1, textAlign: "left" }}>
           <h1
             style={{
-              fontSize: "38px",
+              fontSize: "46px",
               fontWeight: "bold",
-              color: "#111",
-              margin: "0 0 15px 0",
+              color: "#1c3f3a",
+              lineHeight: "1.2",
+              margin: "0 0 20px 0",
             }}
           >
-            Nghệ thuật đẹp từng nét vẽ
+            Nghệ thuật đẹp <br /> từng nét vẽ
           </h1>
           <p
             style={{
-              fontSize: "16px",
-              margin: "0 0 25px 0",
-              color: "#555",
-              lineHeight: "1.5",
+              fontSize: "15px",
+              color: "#666",
+              lineHeight: "1.6",
+              margin: "0 0 30px 0",
+              maxWidth: "450px",
             }}
           >
-            Mỗi bức tranh tại Sen Đông là một tác phẩm độc bản, khám phá bộ sưu
-            tập phong phú từ sơn dầu đến màu nước.
+            Mỗi bức tranh tại Sen Đông là một tác phẩm độc bản, khám phá bộ sưu tập phong phú từ sơn dầu đến màu nước.
           </p>
-          <div style={{ display: "flex", gap: "12px" }}>
-            <div
+          <div style={{ display: "flex", gap: "15px" }}>
+            <button
               style={{
-                display: "flex",
-                gap: "12px",
-                marginTop: "20px",
-                justifyContent: "flex-start", // 👈 vị trí
+                padding: "12px 24px",
+                backgroundColor: "#39b441",
+                color: "#fff",
+                border: "none",
+                borderRadius: "4px",
+                fontSize: "15px",
+                fontWeight: "bold",
+                cursor: "pointer",
               }}
             >
-              <button
-                style={{
-                  padding: "12px 24px",
-                  backgroundColor: "#39b441",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "6px",
-                  fontSize: "15px",
-                  fontWeight: "bold",
-                  cursor: "pointer",
-                }}
-              >
-                Khám phá bộ sưu tập ➔
-              </button>
-
-              <button
-                style={{
-                  padding: "12px 24px",
-                  backgroundColor: "#111",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "6px",
-                  fontSize: "15px",
-                  fontWeight: "bold",
-                  cursor: "pointer",
-                }}
-              >
-                Về chúng tôi
-              </button>
-            </div>
+              Khám phá bộ sưu tập &rarr;
+            </button>
+            <button
+              style={{
+                padding: "12px 24px",
+                backgroundColor: "#a1a1a1",
+                color: "#111",
+                border: "none",
+                borderRadius: "4px",
+                fontSize: "15px",
+                fontWeight: "bold",
+                cursor: "pointer",
+              }}
+            >
+              Xem về chúng tôi
+            </button>
           </div>
         </div>
-        <div style={{ flex: 1, height: "100%" }}>
+
+        <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
           <img
-            src="/src/assets/banner.png"
-            alt="Banner"
-            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            src={images["../../assets/banner.png"]?.default || "https://via.placeholder.com/550x450"}
+            alt="Banner Sen Đông"
+            style={{
+              width: "100%",
+              maxWidth: "520px",
+              height: "auto",
+              objectFit: "cover",
+            }}
           />
         </div>
       </div>
 
-      {/* 2. KHỐI CAM KẾT DỊCH VỤ DÀN NGANG */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr 1fr",
-          gap: "20px",
-          marginBottom: "50px",
-          width: "100%",
-        }}
-      >
-        <br />
-        <div style={{ textAlign: "center" }}>
-          <h2>Vì sao nên chọn Sen Đông</h2>
-          <p>Chất lượng nghệ thuật được đặt lên hàng đầu</p>
-        </div>
-        <br />
-        <div
-          style={{
-            padding: "20px",
-            background: "#fcfcfc",
-            borderRadius: "8px",
-            border: "1px solid #eee",
-            textAlign: "left",
-          }}
-        >
-          <h3 style={{ margin: "0 0 8px 0", fontSize: "16px", color: "#111" }}>
-            🎨 Tranh thủ công
-          </h3>
-          <p
-            style={{
-              margin: 0,
-              color: "#666",
-              fontSize: "13px",
-              lineHeight: "1.5",
-            }}
-          >
-            100% vẽ tay bởi họa sĩ có bằng cấp, không in ấn công nghiệp
-          </p>
-        </div>
-        <div
-          style={{
-            padding: "20px",
-            background: "#fcfcfc",
-            borderRadius: "8px",
-            border: "1px solid #eee",
-            textAlign: "left",
-          }}
-        >
-          <h3 style={{ margin: "0 0 8px 0", fontSize: "16px", color: "#111" }}>
-            🚚 Giao Hàng An Toàn
-          </h3>
-          <p
-            style={{
-              margin: 0,
-              color: "#666",
-              fontSize: "13px",
-              lineHeight: "1.5",
-            }}
-          >
-            Đóng gói chống sốc nhiều lớp, bảo hiểm gãy vỡ toàn quốc.
-          </p>
-        </div>
-        <div
-          style={{
-            padding: "20px",
-            background: "#fcfcfc",
-            borderRadius: "8px",
-            border: "1px solid #eee",
-            textAlign: "left",
-          }}
-        >
-          <h3 style={{ margin: "0 0 8px 0", fontSize: "16px", color: "#111" }}>
-            🛠️ Hoàn trả dễ dàng
-          </h3>
-          <p
-            style={{
-              margin: 0,
-              color: "#666",
-              fontSize: "13px",
-              lineHeight: "1.5",
-            }}
-          >
-            Khung viền composite siêu bền, chống mối mọt, gia công tỉ mỉ.
-          </p>
+      {/* ================= KHỐI 2: VÌ SAO NÊN CHỌN SEN ĐÔNG (NỀN XANH NHẠT) ================= */}
+      <div style={{ backgroundColor: "#edf5f1", padding: "60px 20px", textAlign: "center" }}>
+        <h2 style={{ color: "#1c3f3a", fontSize: "28px", fontWeight: "bold", margin: "0 0 8px 0" }}>
+          Vì sao nên chọn Sen Đông
+        </h2>
+        <p style={{ color: "#666", fontSize: "14px", margin: "0 0 40px 0" }}>
+          Chất lượng nghệ thuật được đặt lên hàng đầu
+        </p>
+        
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "30px", maxWidth: "1200px", margin: "0 auto" }}>
+          {/* Thẻ 1 */}
+          <div style={{ background: "#fff", padding: "40px 20px", borderRadius: "8px", boxShadow: "0 4px 12px rgba(0,0,0,0.01)" }}>
+            <div style={{ fontSize: "32px", marginBottom: "15px" }}>🎨</div>
+            <h3 style={{ fontSize: "16px", fontWeight: "bold", color: "#111", margin: "0 0 10px 0" }}>Tranh thủ công</h3>
+            <p style={{ fontSize: "13px", color: "#888", margin: 0, lineHeight: "1.6" }}>100% vẽ tay bởi họa sĩ có bằng cấp, không in ấn công nghiệp</p>
+          </div>
+          {/* Thẻ 2 */}
+          <div style={{ background: "#fff", padding: "40px 20px", borderRadius: "8px", boxShadow: "0 4px 12px rgba(0,0,0,0.01)" }}>
+            <div style={{ fontSize: "32px", marginBottom: "15px" }}>🚚</div>
+            <h3 style={{ fontSize: "16px", fontWeight: "bold", color: "#111", margin: "0 0 10px 0" }}>Giao hàng an toàn</h3>
+            <p style={{ fontSize: "13px", color: "#888", margin: 0, lineHeight: "1.6" }}>Đóng gói chuyên dụng, bảo hiểm 100% giá trị</p>
+          </div>
+          {/* Thẻ 3 */}
+          <div style={{ background: "#fff", padding: "40px 20px", borderRadius: "8px", boxShadow: "0 4px 12px rgba(0,0,0,0.01)" }}>
+            <div style={{ fontSize: "32px", marginBottom: "15px" }}>🔄</div>
+            <h3 style={{ fontSize: "16px", fontWeight: "bold", color: "#111", margin: "0 0 10px 0" }}>Hoàn trả dễ dàng</h3>
+            <p style={{ fontSize: "13px", color: "#888", margin: 0, lineHeight: "1.6" }}>Đổi trả trong 7 ngày nếu không hài lòng</p>
+          </div>
         </div>
       </div>
 
-      {/* 3. LƯỚI SẢN PHẨM NỔI BẬT */}
-      <div style={{ width: "100%", textAlign: "left", marginBottom: "60px" }}>
-        <h2
-          style={{
-            color: "#111",
-            fontSize: "24px",
-            fontWeight: "bold",
-            marginBottom: "20px",
-            borderBottom: "1px solid #eee",
-            paddingBottom: "10px",
-          }}
-        >
-          Sản Phẩm Nổi Bật
-        </h2>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-            gap: "20px",
-            width: "100%",
-          }}
-        >
+      {/* ================= KHỐI 3: PHỔ BIẾN (DANH SÁCH SẢN PHẨM) ================= */}
+      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "60px 20px" }}>
+        <div style={{ textAlign: "center", marginBottom: "40px" }}>
+          <h2 style={{ fontSize: "28px", fontWeight: "bold", color: "#1c3f3a", margin: "0 0 8px 0" }}>Phổ biến</h2>
+          <p style={{ color: "#666", fontSize: "14px", margin: 0 }}>Sản phẩm bán chạy nhất của chúng tôi có thể bạn sẽ thích</p>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "25px" }}>
           {mockFeaturedProducts.map((product) => (
             <ProductCard_TrangChu
               key={product.id}
@@ -280,101 +202,51 @@ function Home() {
         </div>
       </div>
 
-      {/* 4. KHỐI ĐÁNH GIÁ KHÁCH HÀNG (SỬA LẠI THEO ĐÚNG HÌNH FIGMA) */}
-      <div style={{ width: "100%", textAlign: "left", marginTop: "20px" }}>
-        <h2
-          style={{
-            color: "#111",
-            fontSize: "24px",
-            fontWeight: "bold",
-            marginBottom: "20px",
-            borderBottom: "1px solid #eee",
-            paddingBottom: "10px",
-          }}
-        >
-          Khách Hàng Nói Gì Về Chúng Tôi
+      {/* ================= KHỐI 4: ĐÁNH GIÁ (NỀN XANH NHẠT) ================= */}
+      <div style={{ backgroundColor: "#edf5f1", padding: "60px 20px", textAlign: "center" }}>
+        <h2 style={{ color: "#1c3f3a", fontSize: "28px", fontWeight: "bold", margin: "0 0 8px 0" }}>
+          Đánh giá
         </h2>
+        <p style={{ color: "#666", fontSize: "14px", margin: "0 0 40px 0" }}>
+          Một số đánh giá tích cực từ những khách hàng hài lòng của chúng tôi
+        </p>
 
-        {/* Ép layout chia 3 cột nằm ngang đều nhau bằng Grid */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr 1fr",
-            gap: "25px",
-            width: "100%",
-            boxSizing: "border-box",
-          }}
-        >
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "30px", maxWidth: "1200px", margin: "0 auto" }}>
           {mockReviews.map((review) => (
             <div
               key={review.id}
               style={{
-                background: "#fff",
-                borderRadius: "10px",
-                padding: "25px",
-                border: "1px solid #eaeaea",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.02)",
+                backgroundColor: "#fff",
+                borderRadius: "8px",
+                padding: "35px 25px",
                 display: "flex",
                 flexDirection: "column",
-                gap: "12px",
+                alignItems: "center",
+                boxShadow: "0 4px 15px rgba(0,0,0,0.01)",
               }}
             >
-              {/* Sao đánh giá */}
-              <div style={{ fontSize: "16px" }}>{review.stars}</div>
+              <img
+                src={review.avatar}
+                alt={review.name}
+                style={{ width: "60px", height: "60px", borderRadius: "50%", objectFit: "cover", marginBottom: "12px" }}
+              />
+              
+              <div style={{ fontSize: "14px", color: "#ffb400", marginBottom: "15px" }}>
+                {review.stars}
+              </div>
 
-              {/* Nội dung đánh giá */}
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: "14px",
-                  color: "#444",
-                  lineHeight: "1.6",
-                  fontStyle: "italic",
-                  flex: 1 /* Đẩy phần thông tin khách xuống đáy card nếu text ngắn */,
-                }}
-              >
-                "{review.comment}"
+              <p style={{ fontSize: "14px", color: "#444", lineHeight: "1.6", margin: "0 0 15px 0", textAlign: "center", flex: 1 }}>
+                {review.comment}
               </p>
 
-              {/* Thông tin Khách hàng (Avatar tròn, tên) */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "12px",
-                  marginTop: "10px",
-                }}
-              >
-                <img
-                  src={review.avatar}
-                  alt={review.name}
-                  style={{
-                    width: "45px",
-                    height: "45px",
-                    borderRadius: "50%",
-                    objectFit: "cover",
-                  }}
-                />
-                <div>
-                  <h4
-                    style={{
-                      margin: 0,
-                      fontSize: "15px",
-                      color: "#111",
-                      fontWeight: "600",
-                    }}
-                  >
-                    {review.name}
-                  </h4>
-                  <span style={{ fontSize: "12px", color: "#888" }}>
-                    {review.role}
-                  </span>
-                </div>
-              </div>
+              <h4 style={{ fontSize: "14px", fontWeight: "bold", color: "#555", margin: 0 }}>
+                {review.name}
+              </h4>
             </div>
           ))}
         </div>
       </div>
+
     </div>
   );
 }
