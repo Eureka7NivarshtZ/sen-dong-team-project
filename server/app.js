@@ -9,6 +9,11 @@ const tacGiaRoutes = require("./routes/tacGia.routes");
 const gioHangRoutes = require("./routes/gioHang.routes");
 const donHangRoutes = require("./routes/donHang.routes");
 const donViVanChuyenRoutes = require("./routes/donViVanChuyen.routes");
+const danhGiaRoutes = require("./routes/danhGia.routes");
+const khuyenMaiRoutes = require("./routes/khuyenMai.routes");
+const hoTroRoutes = require("./routes/hoTro.routes");
+const thongBaoRoutes = require("./routes/hoTro.routes");
+const lichSuDonHangRoutes = require("./routes/lichSuDonHang.routes");
 
 const adminRoutes = require("./routes/admin.routes");
 
@@ -24,6 +29,11 @@ app.use("/api/danh-muc", danhMucRoutes);
 app.use("/api/tac-gia", tacGiaRoutes);
 app.use("/api/gio-hang", gioHangRoutes);
 app.use("/api/don-hang", donHangRoutes);
+app.use("/api/danh-gia", danhGiaRoutes);
+app.use("/api/khuyen-mai", khuyenMaiRoutes);
+app.use("/api/ho-tro", hoTroRoutes);
+app.use("/api/lich-su-don-hang", lichSuDonHangRoutes);
+app.use("/api/thong-bao", thongBaoRoutes);
 app.use("/api/don-vi-van-chuyen", donViVanChuyenRoutes);
 
 app.use("/api/admin", adminRoutes);

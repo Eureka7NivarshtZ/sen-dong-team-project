@@ -362,4 +362,41 @@ router.put(
 
 router.delete("/kho/thiet-bi/:id", kiemTraVaiTro("quan_ly"), xoaThietBi);
 
+// ==================== KHUYẾN MÃI ====================
+const {
+  adminTaoKhuyenMai,
+  adminXemTatCaKhuyenMai,
+  adminXemChiTietKhuyenMai,
+  adminCapNhatKhuyenMai,
+  adminXoaKhuyenMai,
+} = require("../controllers/khuyenMai.controller");
+
+router.get("/khuyen-mai", adminXemTatCaKhuyenMai);
+router.get("/khuyen-mai/:id", adminXemChiTietKhuyenMai);
+router.post("/khuyen-mai", adminTaoKhuyenMai);
+router.put("/khuyen-mai/:id", adminCapNhatKhuyenMai);
+router.delete("/khuyen-mai/:id", adminXoaKhuyenMai);
+
+// ==================== ĐÁNH GIÁ ====================
+const {
+  adminXemTatCaDanhGia,
+  adminCapNhatTrangThaiDanhGia,
+  adminPhanHoiDanhGia,
+} = require("../controllers/danhGia.controller");
+
+router.get("/admin/danh-gia", adminXemTatCaDanhGia);
+router.patch("/admin/danh-gia/:id/trang-thai", adminCapNhatTrangThaiDanhGia);
+router.patch("/admin/danh-gia/:id/phan-hoi", adminPhanHoiDanhGia);
+
+// ==================== HỖ TRỢ ====================
+const {
+  adminXemTatCaYeuCauHoTro,
+  adminCapNhatYeuCauHoTro,
+  adminPhanHoiHoTro,
+} = require("../controllers/hoTro.controller");
+
+router.get("/ho-tro", adminXemTatCaYeuCauHoTro);
+router.patch("/ho-tro/:id", adminCapNhatYeuCauHoTro);
+router.post("/ho-tro/:id/phan-hoi", adminPhanHoiHoTro);
+
 module.exports = router;
