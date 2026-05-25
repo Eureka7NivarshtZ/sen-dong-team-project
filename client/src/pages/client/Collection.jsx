@@ -33,7 +33,7 @@ function Collection() {
 
   const getCategories = () => {
     const cats = new Set(
-      allProducts.map((p) => p.danhMuc?.ten).filter(Boolean)
+      allProducts.map((p) => p.danh_muc?.ten).filter(Boolean),
     );
 
     return ["Tất cả", ...Array.from(cats)];
@@ -45,8 +45,8 @@ function Collection() {
 
     const filtered = allProducts.filter(
       (product) =>
-        product.ten?.toLowerCase().includes(query) ||
-        product.moTa?.toLowerCase().includes(query)
+        product.ten_tranh?.toLowerCase().includes(query) ||
+        product.mo_ta?.toLowerCase().includes(query),
     );
 
     setFilteredProducts(filtered);
@@ -59,9 +59,7 @@ function Collection() {
     if (category === "Tất cả") {
       setFilteredProducts(allProducts);
     } else {
-      const filtered = allProducts.filter(
-        (p) => p.danhMuc?.ten === category
-      );
+      const filtered = allProducts.filter((p) => p.danh_muc?.ten === category);
 
       setFilteredProducts(filtered);
     }
@@ -177,25 +175,30 @@ function Collection() {
               }}
             >
               {filteredProducts.length > 0 ? (
-                filteredProducts.map((product) => (
-                  <ProductCard_TrangChu
-                    key={product.id}
-                    image={
-                      product.hinhAnhChinh?.duongDan ||
-                      "https://via.placeholder.com/300x300"
-                    }
-                    title={product.ten}
-                    category={product.danhMuc?.ten || "Danh mục"}
-                    price={
-                      product.giaBan
-                        ? `${product.giaBan.toLocaleString()}đ`
-                        : "0đ"
-                    }
-                    onOpenDetail={() =>
-                      navigate(`/chi-tiet-san-pham/${product.id}`)
-                    }
-                  />
-                ))
+                filteredProducts.map((product) => {
+                  const hinhAnhChinh =
+                    product.hinh_anh?.find((h) => h.la_chinh) ||
+                    product.hinh_anh?.[0];
+                  return (
+                    <ProductCard_TrangChu
+                      key={product.id}
+                      image={
+                        hinhAnhChinh?.url ||
+                        "https://via.placeholder.com/300x300"
+                      }
+                      title={product.ten_tranh}
+                      category={product.danh_muc?.ten || "Danh mục"}
+                      price={
+                        product.gia_ban
+                          ? `${Number(product.gia_ban).toLocaleString()}đ`
+                          : "0đ"
+                      }
+                      onOpenDetail={() =>
+                        navigate(`/chi-tiet-san-pham/${product.id}`)
+                      }
+                    />
+                  );
+                })
               ) : (
                 <div
                   style={{

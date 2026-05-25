@@ -44,7 +44,7 @@ function Login() {
       if (result.success) {
         // Kiểm tra xem người dùng có phải admin không
         const user = authService.getUser();
-        if (user?.vai_tro === "quan_ly" || user?.vai_tro === "admin") {
+        if (user?.vai_tro === "quan_ly") {
           alert("Đăng nhập thành công với quyền Admin!");
           navigate("/admin/dashboard");
         } else {
@@ -269,7 +269,7 @@ function Login() {
             href="#"
             onClick={(e) => {
               e.preventDefault();
-              navigate("/dang-ky");
+              navigate("/auth/dang-ky-khach-hang");
             }}
             style={{
               color: "#2f80ed",

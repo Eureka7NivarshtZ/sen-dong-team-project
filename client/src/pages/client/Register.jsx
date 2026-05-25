@@ -28,7 +28,7 @@ function Register() {
 
       if (result.success) {
         alert("Đăng ký tài khoản thành công! Vui lòng đăng nhập.");
-        navigate("/login");
+        navigate("/auth/dang-nhap");
       } else {
         setError(result.error || "Đăng ký thất bại");
       }
@@ -301,7 +301,7 @@ function Register() {
             href="#"
             onClick={(e) => {
               e.preventDefault();
-              navigate("/login");
+              navigate("/auth/dang-nhap");
             }}
             style={{
               color: "#2f80ed",

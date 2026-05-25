@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Tạo instance axios với config chung
 const apiClient = axios.create({
-  baseURL: "http://localhost:3000/api", // Thay đổi port theo cấu hình backend của bạn
+  baseURL: "http://localhost:5000/api", // Thay đổi port theo cấu hình backend của bạn
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
@@ -34,7 +34,7 @@ apiClient.interceptors.response.use(
       localStorage.removeItem("authToken");
       localStorage.removeItem("user");
       // Có thể redirect tới login page
-      window.location.href = "/login";
+      window.location.href = "/auth/dang-nhap";
     }
 
     // Xử lý lỗi 403 (Forbidden)
