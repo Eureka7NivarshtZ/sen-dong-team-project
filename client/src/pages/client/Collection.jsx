@@ -1,114 +1,75 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useCart } from "../../contexts/CartContext";
+import { tranhService } from "../../services";
 import ProductCard_TrangChu from "../../components/client/ProductCard";
 
 const images = import.meta.glob("../../assets/*.{png,jpg,jpeg,webp}", {
   eager: true,
 });
 
-const initialProducts = [
-  {
-    id: 1,
-    title: "Tranh Đêm đầy sao",
-    category: "Tranh sơn dầu",
-    price: "3.600.000 đ",
-    image: images["../../assets/dem-day-sao.jpg"]?.default,
-    description:
-      "Tác phẩm khắc họa khung cảnh ban đêm huyền ảo với những vòng xoáy năng lượng cuồn cuộn, thể hiện cá tính nghệ thuật độc bản và sâu lắng.",
-  },
-  {
-    id: 2,
-    title: "Tranh Hoa diên vĩ",
-    category: "Tranh sơn dầu",
-    price: "3.600.000 đ",
-    image: images["../../assets/hoa-diên-vĩ.jpeg"]?.default,
-    description:
-      "Bức tranh hoa diên vĩ mang sắc xanh dịu mát tràn đầy sức sống tươi mới, đem lại nét sang trọng, tao nhã cho không gian nội thất của bạn.",
-  },
-  {
-    id: 3,
-    title: "Tranh Hoa hướng dương",
-    category: "Tranh sơn dầu canvas",
-    price: "3.600.000 đ",
-    image: images["../../assets/hoa-hướng-dương.jpeg"]?.default,
-    description:
-      "Sử dụng chất liệu canvas cao cấp phối cùng sắc vàng rực rỡ của nắng, tác phẩm tượng trưng cho năng lượng tích cực, may mắn và thịnh vượng.",
-  },
-  {
-    id: 4,
-    title: "Vườn xuân Trung Nam Bắc",
-    category: "Tranh sơn mài",
-    price: "3.600.000 đ",
-    image: images["../../assets/vuon-xuan-trung-nam-bac.jpg"]?.default,
-    description:
-      "Kiệt tác sơn mài tinh xảo tái hiện không khí lễ hội mùa xuân rộn ràng khắp ba miền đất nước, đậm đà bản sắc văn hóa và nghệ thuật dân tộc.",
-  },
-  {
-    id: 5,
-    title: "Chùa tháp Phổ Minh",
-    category: "Tranh sơn mài",
-    price: "3.600.000 đ",
-    image: images["../../assets/chua-thap-pho-minh.jpg"]?.default,
-    description:
-      "Tác phẩm mang phong vị cổ kính trầm mặc, thực hiện tỉ mỉ qua nhiều lớp sơn mài truyền thống nhằm tôn vinh vẻ đẹp kiến trúc tâm linh Việt Nam.",
-  },
-  {
-    id: 6,
-    title: "Bác Hồ ở chiến khu Việt Bắc",
-    category: "Tranh sơn mài",
-    price: "3.600.000 đ",
-    image: images["../../assets/uncle-ho-at-viet-bac.jpg"]?.default,
-    description:
-      "Bức tranh sơn mài lịch sử giàu cảm xúc, khắc họa hình ảnh vị lãnh tụ vĩ đại giản dị giữa núi rừng chiến khu Việt Bắc hùng vĩ.",
-  },
-  {
-    id: 7,
-    title: "Đám cưới chuột Hàng Trống",
-    category: "Tranh khắc gỗ dân gian Đông Hồ",
-    price: "3.600.000 đ",
-    image: images["../../assets/dam-cuoi-chuot-hang-trong.jpg"]?.default,
-    description:
-      "Bức tranh mang đậm tính châm biếm sâu cay và hóm hỉnh của dân gian xưa, được chế tác thủ công bằng phương pháp khắc gỗ mộc mạc.",
-  },
-  {
-    id: 8,
-    title: "Lợn đàn",
-    category: "Tranh khắc gỗ dân gian Đông Hồ",
-    price: "3.600.000 đ",
-    image: images["../../assets/lon-dan.jpg"]?.default,
-    description:
+function Collection() {
+  const navigate = useNavigate();
+  const [allProducts, setAllProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Lấy danh sách tranh từ API
+  useEffect(() => {
+    const layDanhSachTranh = async () => {
+      try {
+        const result = await tranhService.layTatCaTranh();
+        if (result.success) {
+          setAllProducts(result.data || []);
+          setFilteredProducts(result.data || []);
+        }
+      } catch (err) {
+        console.error("Lỗi lấy danh sách tranh:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    layDanhSachTranh();
+  }, []);
+
+  // Xử lý tìm kiếm
+  const handleSearch = (e) => {
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query);
+
+    const filtered = allProducts.filter((product) =>
+      product.ten?.toLowerCase().includes(query) ||
+      product.moTa?.toLowerCase().includes(query)
+    );
+
+    setFilteredProducts(filtered);
+  };
       "Hình ảnh đàn lợn béo tròn ngộ nghĩnh thể hiện ước vọng về một cuộc sống sung túc, no đủ, ấm no cho mọi gia đình Việt.",
   },
-  {
-    id: 9,
-    title: "Mona Lisa 2",
-    category: "Tranh sơn dầu",
-    price: "3.600.000 đ",
-    image: images["../../assets/mona-lihạnh.jpg"]?.default,
-    description:
-      "Kích thước: 60x80cm. \nChất liệu: Sơn dầu trên vải canvas. \nĐẹp",
-  },
-];
-
-const categories = [
-  "Tất cả",
-  "Tranh sơn dầu",
-  "Tranh sơn mài",
-  "Tranh sơn dầu canvas",
-  "Tranh khắc gỗ dân gian Đông Hồ",
 ];
 
 function Collection() {
   const navigate = useNavigate();
-  const { addToCart } = useCart();
 
   const [selectedCategory, setSelectedCategory] = useState("Tất cả");
 
-  const filteredProducts =
-    selectedCategory === "Tất cả"
-      ? initialProducts
-      : initialProducts.filter((p) => p.category === selectedCategory);
+  const getCategories = () => {
+    const cats = new Set(allProducts.map((p) => p.danhMuc?.ten).filter(Boolean));
+    return ["Tất cả", ...Array.from(cats)];
+  };
+
+  const handleCategoryFilter = (category) => {
+    setSelectedCategory(category);
+    if (category === "Tất cả") {
+      setFilteredProducts(allProducts);
+    } else {
+      const filtered = allProducts.filter(
+        (p) => p.danhMuc?.ten === category
+      );
+      setFilteredProducts(filtered);
+    }
+  };
 
   return (
     <div
@@ -172,13 +133,13 @@ function Collection() {
                 margin: 0,
               }}
             >
-              {categories.map((cat) => {
+              {getCategories().map((cat) => {
                 const isActive = selectedCategory === cat;
 
                 return (
                   <li
                     key={cat}
-                    onClick={() => setSelectedCategory(cat)}
+                    onClick={() => handleCategoryFilter(cat)}
                     style={{
                       fontSize: "15px",
                       color: isActive ? "#1c3f3a" : "#333333",
@@ -209,24 +170,36 @@ function Collection() {
             minWidth: 0,
           }}
         >
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-              gap: "30px",
-            }}
-          >
-            {filteredProducts.map((product) => (
-              <ProductCard_TrangChu
-                key={product.id}
-                image={product.image}
-                title={product.title}
-                category={product.category}
-                price={product.price}
-                onOpenDetail={() => navigate(`/product/${product.id}`)}
-              />
-            ))}
-          </div>
+          {loading ? (
+            <div style={{ textAlign: "center", padding: "40px" }}>
+              <p>Đang tải sản phẩm...</p>
+            </div>
+          ) : (
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+                gap: "30px",
+              }}
+            >
+              {filteredProducts.length > 0 ? (
+                filteredProducts.map((product) => (
+                  <ProductCard_TrangChu
+                    key={product.id}
+                    image={product.hinhAnhChinh?.duongDan || "https://via.placeholder.com/300x300"}
+                    title={product.ten}
+                    category={product.danhMuc?.ten || "Danh mục"}
+                    price={product.giaBan ? `${product.giaBan.toLocaleString()}đ` : "0đ"}
+                    onOpenDetail={() => navigate(`/chi-tiet-san-pham/${product.id}`)}
+                  />
+                ))
+              ) : (
+                <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: "40px" }}>
+                  <p>Không tìm thấy sản phẩm nào</p>
+                </div>
+              )}
+            </div>
+          )}
         </main>
       </div>
     </div>
