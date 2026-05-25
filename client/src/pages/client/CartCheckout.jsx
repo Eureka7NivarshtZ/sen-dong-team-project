@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useCart } from '../../contexts/CartContext';
 
-function CartCheckout({ cartItems, setCartItems, onNavigate }) {
+function CartCheckout() {
+  const navigate = useNavigate();
+  const { cartItems, setCartItems } = useCart();
   // Quản lý các bước: 1: Giỏ hàng, 2: Thông tin đặt hàng, 3: Vận chuyển, 4: Thanh toán, 5: Thành công
   const [step, setStep] = useState(1);
   const [shippingInfo, setShippingInfo] = useState({ name: '', phone: '', address: '', note: '', method: 'standard', payment: 'cod' });
@@ -69,7 +73,7 @@ function CartCheckout({ cartItems, setCartItems, onNavigate }) {
             <div style={{ textAlign: "center", padding: "80px 0", color: "#888888" }}>
               <div style={{ fontSize: "50px", marginBottom: "15px" }}>🛒</div>
               <p style={{ fontSize: "16px", margin: "0 0 20px 0" }}>Giỏ hàng trống</p>
-              <button onClick={() => onNavigate('collection')} style={{ padding: "10px 20px", backgroundColor: "#1c3f3a", color: "white", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold" }}>Khám phá bộ sưu tập ngay</button>
+              <button onClick={() => navigate('/bo-suu-tap')} style={{ padding: "10px 20px", backgroundColor: "#1c3f3a", color: "white", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold" }}>Khám phá bộ sưu tập ngay</button>
             </div>
           ) : (
             /* HIỂN THỊ DANH SÁCH KHI ĐÃ CÓ TRANH TRONG GIỎ */
@@ -204,7 +208,7 @@ function CartCheckout({ cartItems, setCartItems, onNavigate }) {
             <div style={{ width: '60px', height: '60px', borderRadius: '50%', backgroundColor: '#e8f5e9', color: '#2e7d32', fontSize: '32px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px' }}>✓</div>
             <h2 style={{ color: '#2e7d32', margin: '0 0 10px 0' }}>Đặt hàng thành công!</h2>
             <p style={{ color: '#555', maxWidth: '500px', margin: '0 auto 30px auto', lineHeight: '1.6' }}>Cảm ơn bạn đã ủng hộ xưởng tranh Sen Đông. Nhân viên xưởng sẽ sớm liên hệ qua điện thoại để xác nhận đơn hàng.</p>
-            <button onClick={() => { setStep(1); setCartItems([]); onNavigate('home'); }} style={{ padding: '12px 24px', backgroundColor: '#1c3f3a', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Quay lại trang chủ</button>
+            <button onClick={() => { setStep(1); setCartItems([]); navigate('/'); }} style={{ padding: '12px 24px', backgroundColor: '#1c3f3a', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Quay lại trang chủ</button>
           </div>
         )}
 

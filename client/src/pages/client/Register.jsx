@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-function Register({ onNavigate }) {
+function Register() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -8,7 +10,7 @@ function Register({ onNavigate }) {
   const handleRegister = (e) => {
     e.preventDefault();
     alert('Đăng ký tài khoản thành công!');
-    onNavigate('login'); // Đăng ký xong chuyển sang trang Đăng nhập
+    navigate('/dang-nhap');
   };
 
   return (
@@ -53,7 +55,7 @@ function Register({ onNavigate }) {
         </form>
 
         <p style={{ fontSize: '14px', color: '#555', marginTop: '25px', marginBottom: 0 }}>
-          Đã có tài khoản ? <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('login'); }} style={{ color: '#2f80ed', textDecoration: 'none', fontWeight: 'bold' }}>Đăng nhập</a>
+          Đã có tài khoản ? <a href="#" onClick={(e) => { e.preventDefault(); navigate('/dang-nhap'); }} style={{ color: '#2f80ed', textDecoration: 'none', fontWeight: 'bold' }}>Đăng nhập</a>
         </p>
       </div>
     </div>

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-function Login({ onNavigate }) {
+function Login() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -8,18 +10,18 @@ function Login({ onNavigate }) {
   const handleUserLogin = (e) => {
     e.preventDefault();
     localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('userRole', 'user'); // Ghi nhận quyền USER thông thường
+    localStorage.setItem('userRole', 'user');
     alert('Đăng nhập thành công với quyền Khách hàng!');
-    onNavigate('home'); // Chuyển về trang chủ Khách hàng
+    navigate('/');
   };
 
   // 2. XỬ LÝ ĐĂNG NHẬP VỚI QUYỀN ADMIN (CHỈ KHI BẤM NÚT ADMIN)
   const handleAdminLogin = (e) => {
     e.preventDefault();
     localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('userRole', 'admin'); // Ghi nhận quyền ADMIN tối cao
+    localStorage.setItem('userRole', 'admin');
     alert('Đăng nhập thành công với quyền Quản trị viên Admin!');
-    onNavigate('home'); // Chuyển về trang chủ, lúc này nút Admin trên Navbar sẽ xuất hiện
+    navigate('/');
   };
 
   return (
@@ -73,7 +75,7 @@ function Login({ onNavigate }) {
         </form>
 
         <p style={{ fontSize: '14px', color: '#555', marginTop: '25px', marginBottom: 0 }}>
-          Chưa có tài khoản? <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('register'); }} style={{ color: '#2f80ed', textDecoration: 'none', fontWeight: 'bold' }}>Tạo tài khoản</a>
+          Chưa có tài khoản? <a href="#" onClick={(e) => { e.preventDefault(); navigate('/dang-ky'); }} style={{ color: '#2f80ed', textDecoration: 'none', fontWeight: 'bold' }}>Tạo tài khoản</a>
         </p>
       </div>
     </div>

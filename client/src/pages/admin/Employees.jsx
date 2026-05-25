@@ -1,8 +1,7 @@
 import { useState } from "react";
-import Sidebar from "../../components/admin/Sidebar";
 import Topbar from "../../components/admin/Topbar";
 
-function Employees({ onNavigate }) {
+function Employees() {
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -62,9 +61,7 @@ function Employees({ onNavigate }) {
   };
 
   return (
-    <div className="dashboard-container" style={{ display: "flex", width: "100%" }}>
-      <Sidebar onNavigate={onNavigate} currentTab="admin-employees" />
-      <div className="dashboard-content" style={{ flex: 1, backgroundColor: "#f4f6f9", minHeight: "100vh" }}>
+    <div className="dashboard-content" style={{ flex: 1, backgroundColor: "#f9f9f9", minHeight: "100vh" }}>
         <Topbar />
         
         <div style={{ padding: "30px", textAlign: "left" }}>
@@ -102,8 +99,7 @@ function Employees({ onNavigate }) {
               </tbody>
             </table>
           </div>
-        </div>
-      </div>
+    </div>
 
       {showModal && (
         <div className="modal-overlay" style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", backgroundColor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000 }}>

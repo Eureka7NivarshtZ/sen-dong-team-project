@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import ProductCard_TrangChu from "../../components/client/ProductCard";
 
 // Dữ liệu mẫu hiển thị trên Trang Chủ của bạn
@@ -65,6 +66,8 @@ const mockReviews = [
 ];
 
 function Home() {
+  const navigate = useNavigate();
+
   return (
     <div style={{ width: "100%", boxSizing: "border-box", fontFamily: "Arial, sans-serif" }}>
       
@@ -107,6 +110,7 @@ function Home() {
           </p>
           <div style={{ display: "flex", gap: "15px" }}>
             <button
+              onClick={() => navigate("/collection")}
               style={{
                 padding: "12px 24px",
                 backgroundColor: "#39b441",
@@ -121,6 +125,7 @@ function Home() {
               Khám phá bộ sưu tập &rarr;
             </button>
             <button
+              onClick={() => navigate("/about")}
               style={{
                 padding: "12px 24px",
                 backgroundColor: "#a1a1a1",
