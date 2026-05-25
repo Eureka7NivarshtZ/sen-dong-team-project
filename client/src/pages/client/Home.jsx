@@ -43,7 +43,7 @@ function Home() {
 
   // Lấy danh sách tranh từ API khi component mount
   useEffect(() => {
-    const layTrahiAnh = async () => {
+    const layDanhSachTranh = async () => {
       try {
         const result = await tranhService.layTatCaTranh();
         if (result.success) {
@@ -57,7 +57,7 @@ function Home() {
       }
     };
 
-    layTrahiAnh();
+    layDanhSachTranh();
   }, []);
 
   return (
@@ -326,13 +326,15 @@ function Home() {
               <ProductCard_TrangChu
                 key={product.id}
                 image={
-                  product.hinhAnhChinh?.duongDan ||
+                  product.hinhAnhChinh?.url ||
                   "https://via.placeholder.com/300x300"
                 }
-                title={product.ten}
-                category={product.danhMuc?.ten || "Danh mục"}
+                title={product.ten_tranh}
+                category={product.danh_muc?.ten || "Danh mục"}
                 price={
-                  product.giaBan ? `${product.giaBan.toLocaleString()}đ` : "0đ"
+                  product.gia_ban
+                    ? `${Number(product.gia_ban).toLocaleString()}đ`
+                    : "0đ"
                 }
                 onOpenDetail={() =>
                   navigate(`/chi-tiet-san-pham/${product.id}`)

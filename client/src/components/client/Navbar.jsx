@@ -21,7 +21,7 @@ const Navbar = () => {
   const handleUserIconClick = (e) => {
     e.preventDefault();
     if (!authService.isAuthenticated()) {
-      navigate("/login");
+      navigate("/auth/dang-nhap");
     } else {
       setShowDropdown(!showDropdown);
     }

@@ -34,7 +34,7 @@ apiClient.interceptors.response.use(
       localStorage.removeItem("authToken");
       localStorage.removeItem("user");
       // Có thể redirect tới login page
-      window.location.href = "/login";
+      window.location.href = "/auth/dang-nhap";
     }
 
     // Xử lý lỗi 403 (Forbidden)

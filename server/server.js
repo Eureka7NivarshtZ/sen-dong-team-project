@@ -3,7 +3,7 @@ require("dotenv").config();
 const app = require("./app");
 const { sequelize } = require("./models");
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT;
 
 const main = async () => {
   await sequelize.authenticate();
