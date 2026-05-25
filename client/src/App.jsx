@@ -10,6 +10,7 @@ import CartCheckout from './pages/client/CartCheckout';
 import Login from './pages/client/Login';        
 import Register from './pages/client/Register'; 
 import ProductDetail from './pages/client/ProductDetail';
+import SupportTickets from './pages/client/SupportTickets'; // Đảm bảo dòng import này đã có
 
 // ADMIN PAGES
 import Dashboard from './pages/admin/Dashboard';
@@ -17,7 +18,7 @@ import Orders from './pages/admin/Orders';
 import Paintings from './pages/admin/Paintings';
 import Warehouse from './pages/admin/Warehouse';
 import Employees from './pages/admin/Employees';
-
+import Promotions from './pages/admin/Promotions';
 function App() {
   return (
     <Routes>
@@ -30,6 +31,9 @@ function App() {
         <Route path='/cart' element={<CartCheckout />} />
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
+        
+        {/* 🛠️ DÁN DÒNG ĐỊNH TUYẾN MỚI CỦA BẠN VÀO ĐÂY */}
+        <Route path='/support' element={<SupportTickets />} />
       </Route>
 
       {/* ADMIN ROUTES - với Sidebar */}
@@ -40,6 +44,7 @@ function App() {
         <Route path='/admin/paintings' element={<Paintings />} />
         <Route path='/admin/warehouse' element={<Warehouse />} />
         <Route path='/admin/employees' element={<Employees />} />
+        <Route path='/admin/promotions' element={<Promotions />} />
       </Route>
     </Routes>
   );

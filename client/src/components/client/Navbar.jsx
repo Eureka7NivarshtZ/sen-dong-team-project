@@ -21,7 +21,7 @@ const Navbar = () => {
   const handleUserIconClick = (e) => {
     e.preventDefault();
     if (!authService.isAuthenticated()) {
-      navigate("/dang-nhap");
+      navigate("/login");
     } else {
       setShowDropdown(!showDropdown);
     }
@@ -205,6 +205,45 @@ const Navbar = () => {
               ></span>
             )}
           </li>
+          
+
+          <li
+            style={{
+              position: "relative",
+              height: "70px",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate("/support"); // Gọi Router chuyển sang đường dẫn /support ngay lập tức
+              }}
+              style={{
+                textDecoration: "none",
+                fontSize: "15px",
+                color: location.pathname === "/support" ? "#2e7d32" : "#333333",
+                fontWeight: location.pathname === "/support" ? "700" : "500",
+              }}
+            >
+              Hỗ trợ
+            </a>
+            {location.pathname === "/support" && (
+              <span
+                style={{
+                  position: "absolute",
+                  bottom: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "3px",
+                  backgroundColor: "#2e7d32",
+                  borderRadius: "2px",
+                }}
+              ></span>
+            )}
+          </li>
         </ul>
       </nav>
 
@@ -223,7 +262,7 @@ const Navbar = () => {
           style={{
             display: "flex",
             alignItems: "center",
-            color: isLoggedIn ? "#2e7d32" : "#333333",
+
             transition: "color 0.2s",
           }}
         >
@@ -257,30 +296,6 @@ const Navbar = () => {
               textAlign: "left",
             }}
           >
-            {userRole === "admin" && (
-              <div
-                onClick={() => {
-                  setShowDropdown(false);
-                  navigate("/admin");
-                }}
-                style={{
-                  padding: "10px 15px",
-                  fontSize: "14px",
-                  color: "#1c3f3a",
-                  fontWeight: "bold",
-                  cursor: "pointer",
-                  backgroundColor: "#f9f9f9",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#edf5f1")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#f9f9f9")
-                }
-              >
-                ⚙️ Quản trị Admin
-              </div>
-            )}
             <div
               onClick={handleLogout}
               style={{

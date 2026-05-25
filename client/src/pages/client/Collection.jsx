@@ -3,22 +3,20 @@ import { useNavigate } from "react-router-dom";
 import { tranhService } from "../../services";
 import ProductCard_TrangChu from "../../components/client/ProductCard";
 
-const images = import.meta.glob("../../assets/*.{png,jpg,jpeg,webp}", {
-  eager: true,
-});
-
 function Collection() {
   const navigate = useNavigate();
+
   const [allProducts, setAllProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("Tất cả");
 
-  // Lấy danh sách tranh từ API
   useEffect(() => {
     const layDanhSachTranh = async () => {
       try {
         const result = await tranhService.layTatCaTranh();
+
         if (result.success) {
           setAllProducts(result.data || []);
           setFilteredProducts(result.data || []);
@@ -33,40 +31,38 @@ function Collection() {
     layDanhSachTranh();
   }, []);
 
-  // Xử lý tìm kiếm
+  const getCategories = () => {
+    const cats = new Set(
+      allProducts.map((p) => p.danhMuc?.ten).filter(Boolean)
+    );
+
+    return ["Tất cả", ...Array.from(cats)];
+  };
+
   const handleSearch = (e) => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
 
-    const filtered = allProducts.filter((product) =>
-      product.ten?.toLowerCase().includes(query) ||
-      product.moTa?.toLowerCase().includes(query)
+    const filtered = allProducts.filter(
+      (product) =>
+        product.ten?.toLowerCase().includes(query) ||
+        product.moTa?.toLowerCase().includes(query)
     );
 
     setFilteredProducts(filtered);
-  };
-      "Hình ảnh đàn lợn béo tròn ngộ nghĩnh thể hiện ước vọng về một cuộc sống sung túc, no đủ, ấm no cho mọi gia đình Việt.",
-  },
-];
-
-function Collection() {
-  const navigate = useNavigate();
-
-  const [selectedCategory, setSelectedCategory] = useState("Tất cả");
-
-  const getCategories = () => {
-    const cats = new Set(allProducts.map((p) => p.danhMuc?.ten).filter(Boolean));
-    return ["Tất cả", ...Array.from(cats)];
+    setSelectedCategory("Tất cả");
   };
 
   const handleCategoryFilter = (category) => {
     setSelectedCategory(category);
+
     if (category === "Tất cả") {
       setFilteredProducts(allProducts);
     } else {
       const filtered = allProducts.filter(
         (p) => p.danhMuc?.ten === category
       );
+
       setFilteredProducts(filtered);
     }
   };
@@ -89,12 +85,7 @@ function Collection() {
           alignItems: "start",
         }}
       >
-        {/* CỘT TRÁI */}
-        <aside
-          style={{
-            width: "280px",
-          }}
-        >
+        <aside style={{ width: "280px" }}>
           <div
             style={{
               position: "sticky",
@@ -114,6 +105,20 @@ function Collection() {
             >
               Bộ sưu tập
             </h1>
+
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={handleSearch}
+              placeholder="Tìm kiếm tranh..."
+              style={{
+                width: "100%",
+                padding: "10px",
+                marginBottom: "30px",
+                border: "1px solid #ddd",
+                borderRadius: "4px",
+              }}
+            />
 
             <h3
               style={{
@@ -149,12 +154,6 @@ function Collection() {
                       transition: "color 0.2s ease",
                       lineHeight: "1.5",
                     }}
-                    onMouseEnter={(e) => {
-                      if (!isActive) e.currentTarget.style.color = "#1c3f3a";
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isActive) e.currentTarget.style.color = "#333333";
-                    }}
                   >
                     {cat}
                   </li>
@@ -164,12 +163,7 @@ function Collection() {
           </div>
         </aside>
 
-        {/* CỘT PHẢI */}
-        <main
-          style={{
-            minWidth: 0,
-          }}
-        >
+        <main style={{ minWidth: 0 }}>
           {loading ? (
             <div style={{ textAlign: "center", padding: "40px" }}>
               <p>Đang tải sản phẩm...</p>
@@ -186,15 +180,30 @@ function Collection() {
                 filteredProducts.map((product) => (
                   <ProductCard_TrangChu
                     key={product.id}
-                    image={product.hinhAnhChinh?.duongDan || "https://via.placeholder.com/300x300"}
+                    image={
+                      product.hinhAnhChinh?.duongDan ||
+                      "https://via.placeholder.com/300x300"
+                    }
                     title={product.ten}
                     category={product.danhMuc?.ten || "Danh mục"}
-                    price={product.giaBan ? `${product.giaBan.toLocaleString()}đ` : "0đ"}
-                    onOpenDetail={() => navigate(`/chi-tiet-san-pham/${product.id}`)}
+                    price={
+                      product.giaBan
+                        ? `${product.giaBan.toLocaleString()}đ`
+                        : "0đ"
+                    }
+                    onOpenDetail={() =>
+                      navigate(`/chi-tiet-san-pham/${product.id}`)
+                    }
                   />
                 ))
               ) : (
-                <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: "40px" }}>
+                <div
+                  style={{
+                    gridColumn: "1 / -1",
+                    textAlign: "center",
+                    padding: "40px",
+                  }}
+                >
                   <p>Không tìm thấy sản phẩm nào</p>
                 </div>
               )}
