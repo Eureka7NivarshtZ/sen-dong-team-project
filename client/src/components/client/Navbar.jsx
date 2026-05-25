@@ -66,12 +66,7 @@ const Navbar = () => {
           <li style={{ position: 'relative', height: '70px', display: 'flex', alignItems: 'center' }}>
             <a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/collection'); }} style={{ textDecoration: 'none', fontSize: '15px', color: isActive('/collection') ? '#2e7d32' : '#333333', fontWeight: isActive('/collection') ? '700' : '500' }}>Bộ sưu tập</a>
             {isActive('/collection') && <span style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '3px', backgroundColor: '#2e7d32', borderRadius: '2px' }}></span>}
-          </li>
-          {/* GIỎ HÀNG */}
-          <li style={{ position: 'relative', height: '70px', display: 'flex', alignItems: 'center' }}>
-            <a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/cart'); }} style={{ textDecoration: 'none', fontSize: '15px', color: isActive('/cart') ? '#2e7d32' : '#333333', fontWeight: isActive('/cart') ? '700' : '500' }}>Giỏ hàng</a>
-            {isActive('/cart') && <span style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '3px', backgroundColor: '#2e7d32', borderRadius: '2px' }}></span>}
-          </li>
+          </li>         
         </ul>
       </nav>
 
@@ -82,10 +77,10 @@ const Navbar = () => {
           onClick={handleUserIconClick}
           style={{ display: 'flex', alignItems: 'center', color: isLoggedIn ? '#2e7d32' : '#333333', transition: 'color 0.2s' }}
         >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-            <circle cx="12" cy="7" r="4"></circle>
-          </svg>
+          <i className="fa-regular fa-user"></i>
+        </a>
+        <a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/cart'); }} style={{ textDecoration: 'none', fontSize: '15px', color: '#333333'}}>
+          <i className="fa-solid fa-cart-shopping"></i>
         </a>
 
         {/* MENU POPUP THẢ XUỐNG KHI BẤM VÀO ICON USER ĐÃ ĐĂNG NHẬP */}
