@@ -1,14 +1,14 @@
 @baseUrl = http://localhost:5000/api
 
-@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImE4YWM1NjBmLTI0ZjEtNGQwMi05ODY0LWNlM2YzNzE4MTRkYyIsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJsb2FpIjoibmhhbl92aWVuIiwibmhhbl92aWVuX2lkIjoiN2Q5ZjFkOWUtYzFkNC00Yzc1LTliYmYtZDYwMTZhMWNkYjNmIiwidmFpX3RybyI6InF1YW5fbHkiLCJraGFjaF9oYW5nX2lkIjpudWxsLCJpYXQiOjE3Nzk3MTYxNzUsImV4cCI6MTc4MDMyMDk3NX0.qZVFuNd84ZPR5L-NeMOw-Hm1W4pwCn641TZ9t378zIk
-@customerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImRlNTljYjM0LTFmN2UtNDdjYi05Mzg3LTg1NzFhYTBlYWVkMyIsImVtYWlsIjoia2hhY2hoYW5nMUBleGFtcGxlLmNvbSIsImxvYWkiOiJraGFjaF9oYW5nIiwibmhhbl92aWVuX2lkIjpudWxsLCJ2YWlfdHJvIjpudWxsLCJraGFjaF9oYW5nX2lkIjoiNGNiYzVkNDYtNWVkNC00Y2RmLTkzOTUtMDhiOGQxMWNmZmY3IiwiaWF0IjoxNzc5NzA0MjcwLCJleHAiOjE3ODAzMDkwNzB9.7LpQvfP-FlLDd4V8rJcbTLCURfZzJL61bGuzqj-5uPE
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImY1NDllNDgyLTlmYTItNDgyNi04ZDAzLTI1YWU4OWI5ODU0OSIsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJsb2FpIjoibmhhbl92aWVuIiwibmhhbl92aWVuX2lkIjoiNTRjOTMyZDktYWE0OC00OGExLWIyMDUtMWEwMGFjZWJhZTQzIiwidmFpX3RybyI6InF1YW5fbHkiLCJraGFjaF9oYW5nX2lkIjpudWxsLCJpYXQiOjE3Nzk3MTc2MTgsImV4cCI6MTc4MDMyMjQxOH0.bqIkCFqC3UHXXPyQ0jC60hIGtp8lfkkk_4k8Vt1vZfI
+@customerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImMyZDNhMGI0LTg0OTAtNGEyNS1hNmU0LWI5NDU1YjM0YmE2YiIsImVtYWlsIjoia2hhY2hoYW5nMUBleGFtcGxlLmNvbSIsImxvYWkiOiJraGFjaF9oYW5nIiwibmhhbl92aWVuX2lkIjpudWxsLCJ2YWlfdHJvIjpudWxsLCJraGFjaF9oYW5nX2lkIjoiNjk4NTMwY2EtZTM1YS00OGY0LWFmZmItY2QyNmYwYzA2ZjViIiwiaWF0IjoxNzc5NzE3NjQ2LCJleHAiOjE3ODAzMjI0NDZ9.XhN9H2v8EeYkcFfY7Lis55Zo87yio8BdpIpWooNvtsw
 
-@danhMucId = a9cfb38d-3b88-4f11-8177-d97e9af1b649
-@tacGiaId = 94ffecc4-063e-4c91-902b-97dc4e515a08
-@tranhId = d7fded57-cb64-468a-910c-523d4e799aed
+@danhMucId = fb1b22d2-badb-4efb-bb53-a1ae7e8f30a5
+@tacGiaId = 2a12253b-45d8-4215-b163-c8cdfa57d120
+@tranhId = d6cccb3d-fecb-4a1d-9fab-5069bfd615cd
 @hinhAnhTranhId = 
-@khachHangId = 4cbc5d46-5ed4-4cdf-9395-08b8d11cfff7
-@nhanVienId = 7d9f1d9e-c1d4-4c75-9bbf-d6016a1cdb3f
+@khachHangId = 698530ca-e35a-48f4-affb-cd26f0c06f5b
+@nhanVienId = 54c932d9-aa48-48a1-b205-1a00acebae43
 @donHangId = 
 @donViVanChuyenId = 
 @vanDonId = 
@@ -175,7 +175,7 @@ Content-Type: application/json
   "danh_muc_id": "{{danhMucId}}",
   "tac_gia_id": "{{tacGiaId}}",
   "kho_id": null,
-  "gia_ban": 50000000,
+  "gia_ban": 5000000,
   "gia_von": 3000000,
   "so_luong_ton": 10,
   "trang_thai": "ban"
