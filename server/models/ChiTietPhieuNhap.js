@@ -1,5 +1,5 @@
 const { DataTypes } = require("sequelize");
-const sequelize = require("../utils/db");
+const sequelize = require("../config/db");
 
 const ChiTietPhieuNhap = sequelize.define(
   "ChiTietPhieuNhap",
@@ -39,7 +39,7 @@ const ChiTietPhieuNhap = sequelize.define(
   {
     tableName: "chi_tiet_phieu_nhap",
     timestamps: false,
-  }
+  },
 );
 
 module.exports = ChiTietPhieuNhap;

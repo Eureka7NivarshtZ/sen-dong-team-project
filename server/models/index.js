@@ -1,4 +1,4 @@
-const sequelize = require("../utils/db");
+const sequelize = require("../config/db.js");
 
 const TaiKhoan = require("./TaiKhoan.js");
 const KhachHang = require("./KhachHang.js");

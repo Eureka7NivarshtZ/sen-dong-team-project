@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const middleware = require("./utils/middleware");
+const middleware = require("./config/middleware");
 
 const authRoutes = require("./routes/auth.routes");
 const tranhRoutes = require("./routes/tranh.routes");

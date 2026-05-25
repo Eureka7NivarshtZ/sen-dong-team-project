@@ -3,8 +3,6 @@ require("dotenv").config();
 const app = require("./app");
 const { sequelize } = require("./models");
 
-const sequelize = require("./config/db");
-
 async function main() {
   try {
     await sequelize.authenticate();

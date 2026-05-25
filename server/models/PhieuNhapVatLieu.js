@@ -1,5 +1,5 @@
 const { DataTypes } = require("sequelize");
-const sequelize = require("../utils/db");
+const sequelize = require("../config/db");
 
 const PhieuNhapVatLieu = sequelize.define(
   "PhieuNhapVatLieu",
@@ -41,7 +41,7 @@ const PhieuNhapVatLieu = sequelize.define(
   {
     tableName: "phieu_nhap_vat_lieu",
     timestamps: false,
-  }
+  },
 );
 
 module.exports = PhieuNhapVatLieu;

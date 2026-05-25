@@ -4,7 +4,7 @@ const {
   yeuCauDangNhap,
   kiemTraVaiTro,
   yeuCauNhanVien,
-} = require("../utils/middleware");
+} = require("../config/middleware");
 
 router.use(yeuCauDangNhap);
 router.use(yeuCauNhanVien);
