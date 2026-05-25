@@ -1,14 +1,14 @@
 @baseUrl = http://localhost:5000/api
 
-@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImU2NWY0OTViLWVmNzctNDJiNC1hOWMxLTE1ZDgzYTQ3OGE2NSIsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJsb2FpIjoibmhhbl92aWVuIiwibmhhbl92aWVuX2lkIjoiZDRjNDA3NjgtYjFkOS00YmE2LTllYzYtYWQwMmJlYjNlMjYzIiwidmFpX3RybyI6InF1YW5fbHkiLCJraGFjaF9oYW5nX2lkIjpudWxsLCJpYXQiOjE3Nzk3MDE3ODIsImV4cCI6MTc4MDMwNjU4Mn0.m9mITX0KM-NptN2bBtv-n27sGmM6AFpjavhC5FAVbP0
-@customerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjdiODBlMzYyLWI4MjQtNGFhOC04ODMzLTczZTA3MTRiMWJkYiIsImVtYWlsIjoia2hhY2hoYW5nMUBleGFtcGxlLmNvbSIsImxvYWkiOiJraGFjaF9oYW5nIiwibmhhbl92aWVuX2lkIjpudWxsLCJ2YWlfdHJvIjpudWxsLCJraGFjaF9oYW5nX2lkIjoiZTJhNzVjZDMtYmUyZi00NzZjLWFmYzAtNGUyN2RkMzc2ZTcyIiwiaWF0IjoxNzc5NzAxODUyLCJleHAiOjE3ODAzMDY2NTJ9.v0H4TkXNQa9rxmI0FXWXKudCFJZwq9ToCIE8OPPJ9Xk
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImE4YWM1NjBmLTI0ZjEtNGQwMi05ODY0LWNlM2YzNzE4MTRkYyIsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJsb2FpIjoibmhhbl92aWVuIiwibmhhbl92aWVuX2lkIjoiN2Q5ZjFkOWUtYzFkNC00Yzc1LTliYmYtZDYwMTZhMWNkYjNmIiwidmFpX3RybyI6InF1YW5fbHkiLCJraGFjaF9oYW5nX2lkIjpudWxsLCJpYXQiOjE3Nzk3MDQyMTIsImV4cCI6MTc4MDMwOTAxMn0.MPkrPs5FudkAW9z9fYMzAXoKF0sMBON9lj31f83heUw
+@customerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImRlNTljYjM0LTFmN2UtNDdjYi05Mzg3LTg1NzFhYTBlYWVkMyIsImVtYWlsIjoia2hhY2hoYW5nMUBleGFtcGxlLmNvbSIsImxvYWkiOiJraGFjaF9oYW5nIiwibmhhbl92aWVuX2lkIjpudWxsLCJ2YWlfdHJvIjpudWxsLCJraGFjaF9oYW5nX2lkIjoiNGNiYzVkNDYtNWVkNC00Y2RmLTkzOTUtMDhiOGQxMWNmZmY3IiwiaWF0IjoxNzc5NzA0MjcwLCJleHAiOjE3ODAzMDkwNzB9.7LpQvfP-FlLDd4V8rJcbTLCURfZzJL61bGuzqj-5uPE
 
-@danhMucId = 1c51dcef-882d-4d3e-b1bc-a2452d6d055b
-@tacGiaId = 15ca060f-9104-41b5-86da-429e549c1c30
-@tranhId = 
+@danhMucId = a9cfb38d-3b88-4f11-8177-d97e9af1b649
+@tacGiaId = 94ffecc4-063e-4c91-902b-97dc4e515a08
+@tranhId = d7fded57-cb64-468a-910c-523d4e799aed
 @hinhAnhTranhId = 
-@khachHangId = 
-@nhanVienId = 
+@khachHangId = 4cbc5d46-5ed4-4cdf-9395-08b8d11cfff7
+@nhanVienId = 7d9f1d9e-c1d4-4c75-9bbf-d6016a1cdb3f
 @donHangId = 
 @donViVanChuyenId = 
 @vanDonId = 
@@ -18,6 +18,7 @@
 @vatLieuId = 
 @phieuNhapVatLieuId = 
 @thietBiId = 
+@danhGiaId = 
 
 
 ### ============================================
@@ -33,7 +34,16 @@ Content-Type: application/json
   "mat_khau": "123456"
 }
 
-### 1.2 Đăng ký khách hàng
+### 1.2 Đăng nhập khách hàng
+POST {{baseUrl}}/auth/dang-nhap
+Content-Type: application/json
+
+{
+  "email": "khachhang1@example.com",
+  "mat_khau": "123456"
+}
+
+### 1.3 Đăng ký khách hàng
 POST {{baseUrl}}/auth/dang-ky-khach-hang
 Content-Type: application/json
 
@@ -43,15 +53,6 @@ Content-Type: application/json
   "ho_ten": "Nguyễn Văn A",
   "sdt": "0901234567",
   "dia_chi": "123 Đường ABC, Quận 1, TP HCM"
-}
-
-### 1.3 Đăng nhập khách hàng
-POST {{baseUrl}}/auth/dang-nhap
-Content-Type: application/json
-
-{
-  "email": "khachhang1@example.com",
-  "mat_khau": "123456"
 }
 
 ### 1.4 Xem thông tin của tôi
@@ -241,6 +242,76 @@ Authorization: Bearer {{adminToken}}
 DELETE {{baseUrl}}/admin/tranh/hinh-anh/{{hinhAnhTranhId}}
 Authorization: Bearer {{adminToken}}
 
+### Khách hàng xem đánh giá của một tranh
+GET {{baseUrl}}/tranh/{{tranhId}}/danh-gia
+
+### Khách hàng tạo đánh giá
+POST {{baseUrl}}/danh-gia
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{
+  "tranh_id": "{{tranhId}}",
+  "don_hang_id": "{{donHangId}}",
+  "so_sao": 5,
+  "noi_dung": "Tranh rất đẹp, đóng gói cẩn thận.",
+  "hinh_anh_url": "https://example.com/review-image.jpg"
+}
+
+### ============================================
+### ĐÁNH GIÁ
+### ============================================
+
+### Khách hàng xem đánh giá của một tranh
+GET {{baseUrl}}/danh-gia/tranh/{{tranhId}}
+
+### Khách hàng tạo đánh giá
+POST {{baseUrl}}/danh-gia
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{
+  "tranh_id": "{{tranhId}}",
+  "don_hang_id": "{{donHangId}}",
+  "so_sao": 5,
+  "noi_dung": "Tranh rất đẹp, đóng gói cẩn thận.",
+  "hinh_anh_url": "https://example.com/review-image.jpg"
+}
+
+### Khách hàng xem đánh giá của tôi
+GET {{baseUrl}}/danh-gia/cua-toi
+Authorization: Bearer {{customerToken}}
+
+### Admin xem tất cả đánh giá
+GET {{baseUrl}}/admin/danh-gia
+Authorization: Bearer {{adminToken}}
+
+### Admin duyệt đánh giá
+PATCH {{baseUrl}}/admin/danh-gia/{{danhGiaId}}/trang-thai
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "trang_thai": "hien"
+}
+
+### Admin ẩn đánh giá
+PATCH {{baseUrl}}/admin/danh-gia/{{danhGiaId}}/trang-thai
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "trang_thai": "an"
+}
+
+### Admin phản hồi đánh giá
+PATCH {{baseUrl}}/admin/danh-gia/{{danhGiaId}}/phan-hoi
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "phan_hoi": "Cảm ơn bạn đã tin tưởng và ủng hộ xưởng tranh."
+}
 
 ### ============================================
 ### 5. NHÂN VIÊN
@@ -594,6 +665,152 @@ Content-Type: application/json
   "trang_thai": "thanh_cong"
 }
 
+### ============================================
+### KHUYẾN MÃI
+### ============================================
+
+@khuyenMaiId = 
+
+### Khách hàng kiểm tra mã khuyến mãi
+POST {{baseUrl}}/khuyen-mai/kiem-tra
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{
+  "ma": "GIAM10",
+  "tong_tien": 5000000
+}
+
+### Admin xem tất cả khuyến mãi
+GET {{baseUrl}}/admin/khuyen-mai
+Authorization: Bearer {{adminToken}}
+
+### Admin xem chi tiết khuyến mãi
+GET {{baseUrl}}/admin/khuyen-mai/{{khuyenMaiId}}
+Authorization: Bearer {{adminToken}}
+
+### Admin tạo khuyến mãi
+POST {{baseUrl}}/admin/khuyen-mai
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "ma": "GIAM10",
+  "ten": "Giảm 10%",
+  "mo_ta": "Khuyến mãi khai trương",
+  "loai_giam": "phan_tram",
+  "gia_tri_giam": 10,
+  "giam_toi_da": 500000,
+  "don_toi_thieu": 1000000,
+  "so_luong": 100,
+  "ngay_bat_dau": "2026-05-01 00:00:00",
+  "ngay_ket_thuc": "2026-06-01 23:59:59",
+  "ap_dung_cho": "toan_bo"
+}
+
+### Admin cập nhật khuyến mãi
+PUT {{baseUrl}}/admin/khuyen-mai/{{khuyenMaiId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "ten": "Giảm 10% Updated",
+  "trang_thai": "hoat_dong"
+}
+
+### Admin xóa khuyến mãi
+DELETE {{baseUrl}}/admin/khuyen-mai/{{khuyenMaiId}}
+Authorization: Bearer {{adminToken}}
+
+
+### ============================================
+### HỖ TRỢ KHÁCH HÀNG
+### ============================================
+
+@hoTroId = 
+
+### Khách hàng tạo yêu cầu hỗ trợ
+POST {{baseUrl}}/ho-tro
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{
+  "don_hang_id": "{{donHangId}}",
+  "tieu_de": "Cần hỗ trợ đơn hàng",
+  "noi_dung": "Tôi muốn hỏi tình trạng giao hàng.",
+  "loai": "don_hang",
+  "muc_do": "binh_thuong"
+}
+
+### Khách hàng xem yêu cầu hỗ trợ của tôi
+GET {{baseUrl}}/ho-tro/cua-toi
+Authorization: Bearer {{customerToken}}
+
+### Khách hàng xem chi tiết yêu cầu hỗ trợ
+GET {{baseUrl}}/ho-tro/{{hoTroId}}
+Authorization: Bearer {{customerToken}}
+
+### Khách hàng phản hồi yêu cầu hỗ trợ
+POST {{baseUrl}}/ho-tro/{{hoTroId}}/phan-hoi
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{
+  "noi_dung": "Tôi bổ sung thêm thông tin đơn hàng."
+}
+
+### Admin xem tất cả yêu cầu hỗ trợ
+GET {{baseUrl}}/admin/ho-tro
+Authorization: Bearer {{adminToken}}
+
+### Admin cập nhật yêu cầu hỗ trợ
+PATCH {{baseUrl}}/admin/ho-tro/{{hoTroId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "trang_thai": "dang_xu_ly",
+  "muc_do": "cao"
+}
+
+### Admin phản hồi yêu cầu hỗ trợ
+POST {{baseUrl}}/admin/ho-tro/{{hoTroId}}/phan-hoi
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "noi_dung": "Shop đã tiếp nhận và đang xử lý yêu cầu của bạn."
+}
+
+### ============================================
+### THÔNG BÁO
+### ============================================
+
+@thongBaoId = 
+
+### Xem thông báo của tôi
+GET {{baseUrl}}/thong-bao
+Authorization: Bearer {{customerToken}}
+
+### Đếm thông báo chưa đọc
+GET {{baseUrl}}/thong-bao/chua-doc/dem
+Authorization: Bearer {{customerToken}}
+
+### Đánh dấu tất cả thông báo đã đọc
+PATCH {{baseUrl}}/thong-bao/da-doc/tat-ca
+Authorization: Bearer {{customerToken}}
+
+### Đánh dấu một thông báo đã đọc
+PATCH {{baseUrl}}/thong-bao/{{thongBaoId}}/da-doc
+Authorization: Bearer {{customerToken}}
+
+### ============================================
+### LỊCH SỬ TRẠNG THÁI ĐƠN HÀNG
+### ============================================
+
+### Xem lịch sử trạng thái đơn hàng
+GET {{baseUrl}}/lich-su-don-hang/{{donHangId}}/trang-thai
+Authorization: Bearer {{customerToken}}
 
 ### ============================================
 ### 14. KHO - NHÀ CUNG CẤP
