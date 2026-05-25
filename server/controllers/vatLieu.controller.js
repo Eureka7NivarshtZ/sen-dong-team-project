@@ -1,37 +1,10 @@
-const { Op, col } = require("sequelize");
 const { VatLieu, NhaCungCap } = require("../models");
 
-const layTatCaVatLieu = async (req, res) => {
-  const { search } = req.query;
-
-  const where = {};
-
-  if (search) {
-    where.ten = {
-      [Op.like]: `%${search}%`,
-    };
-  }
-
-  const danhSach = await VatLieu.findAll({
-    where,
-    include: [{ model: NhaCungCap, as: "nha_cung_cap" }],
-    order: [["ten", "ASC"]],
-  });
-
-  res.json({
-    success: true,
-    message: "Lấy danh sách vật liệu thành công",
-    data: danhSach,
-  });
-};
+const { literal } = require("sequelize");
 
 const layVatLieuCanhBao = async (req, res) => {
   const danhSach = await VatLieu.findAll({
-    where: {
-      so_luong_ton: {
-        [Op.lte]: col("muc_canh_bao"),
-      },
-    },
+    where: literal("so_luong_ton <= muc_canh_bao"),
     include: [{ model: NhaCungCap, as: "nha_cung_cap" }],
     order: [["so_luong_ton", "ASC"]],
   });
@@ -151,7 +124,6 @@ const xoaVatLieu = async (req, res) => {
 };
 
 module.exports = {
-  layTatCaVatLieu,
   layVatLieuCanhBao,
   layChiTietVatLieu,
   themVatLieu,

@@ -1,23 +1,23 @@
 @baseUrl = http://localhost:5000/api
 
-@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjRhODhhNjJjLTI0ZTMtNGU5YS05NTczLWY5MTRhNTRiNjkzZSIsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJsb2FpIjoibmhhbl92aWVuIiwibmhhbl92aWVuX2lkIjoiY2RjOWY5NWYtYzQ0Ny00MjNiLWE1ZGEtNTNmYmU4NTE3MjBmIiwidmFpX3RybyI6InF1YW5fbHkiLCJraGFjaF9oYW5nX2lkIjpudWxsLCJpYXQiOjE3Nzk0NTg2NzYsImV4cCI6MTc4MDA2MzQ3Nn0.rm0MnwHozkwfy64p_zIZLXOxw5oh16wyJC4Q_EA0Sy0
-@customerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQ3ZDc5ZTZlLWVlNTYtNGI3My05NGRhLWRjYmFjOTc3ODhiMiIsImVtYWlsIjoia2hhY2hoYW5nMUBleGFtcGxlLmNvbSIsImxvYWkiOiJraGFjaF9oYW5nIiwibmhhbl92aWVuX2lkIjpudWxsLCJ2YWlfdHJvIjpudWxsLCJraGFjaF9oYW5nX2lkIjoiYmFjNjZhOGMtZTBiZC00NjIwLWFjOWEtMWE4MWRiZGIyZTc3IiwiaWF0IjoxNzc5Njc5MTE4LCJleHAiOjE3ODAyODM5MTh9.ftjO924L-0IIhR7yABFWDAVkXzEuE9F19bjGln-oyPE
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImU2NWY0OTViLWVmNzctNDJiNC1hOWMxLTE1ZDgzYTQ3OGE2NSIsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJsb2FpIjoibmhhbl92aWVuIiwibmhhbl92aWVuX2lkIjoiZDRjNDA3NjgtYjFkOS00YmE2LTllYzYtYWQwMmJlYjNlMjYzIiwidmFpX3RybyI6InF1YW5fbHkiLCJraGFjaF9oYW5nX2lkIjpudWxsLCJpYXQiOjE3Nzk3MDE3ODIsImV4cCI6MTc4MDMwNjU4Mn0.m9mITX0KM-NptN2bBtv-n27sGmM6AFpjavhC5FAVbP0
+@customerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjdiODBlMzYyLWI4MjQtNGFhOC04ODMzLTczZTA3MTRiMWJkYiIsImVtYWlsIjoia2hhY2hoYW5nMUBleGFtcGxlLmNvbSIsImxvYWkiOiJraGFjaF9oYW5nIiwibmhhbl92aWVuX2lkIjpudWxsLCJ2YWlfdHJvIjpudWxsLCJraGFjaF9oYW5nX2lkIjoiZTJhNzVjZDMtYmUyZi00NzZjLWFmYzAtNGUyN2RkMzc2ZTcyIiwiaWF0IjoxNzc5NzAxODUyLCJleHAiOjE3ODAzMDY2NTJ9.v0H4TkXNQa9rxmI0FXWXKudCFJZwq9ToCIE8OPPJ9Xk
 
-@danhMucId = 54f0742f-9015-4db8-ba11-a4bf0c565647
-@tacGiaId = 0e23119f-0630-452d-9e3d-7c4e9a9f29cf
-@tranhId = 73726761-d44a-4135-935f-5e741b39d59a
-@hinhAnhTranhId = be00330a-0e52-4183-a11c-c1526f627b50
-@khachHangId = b32f0c8f-9ccf-4906-8dc1-ac99b811861f
-@nhanVienId = cdc9f95f-c447-423b-a5da-53fbe851720f
-@donHangId = d4853991-7d86-4b6f-bb3d-20949fa18619
-@donViVanChuyenId = 4cff8fd0-cdb1-4452-a781-03c0d1eb09f3
-@vanDonId = 6487d133-26af-47ac-9a29-32d5c975f20a
-@hoaDonId = 6278bea7-4c71-4c9d-85fa-419f87dfd053
-@thanhToanId = 911d3beb-b5db-4e03-b5a1-9e05ce30cf4d
-@nhaCungCapId = d6ddc943-a711-441f-b630-60738c6f7c3b
-@vatLieuId = 2d4c5b48-9e71-49d4-87e9-4d340b5d69d7
-@phieuNhapVatLieuId = 7ba1f932-cc16-4ccf-ac8f-c8345bc74c0d
-@thietBiId = 7deed7c3-1e53-4664-9960-2a307f97d3aa
+@danhMucId = 1c51dcef-882d-4d3e-b1bc-a2452d6d055b
+@tacGiaId = 15ca060f-9104-41b5-86da-429e549c1c30
+@tranhId = 
+@hinhAnhTranhId = 
+@khachHangId = 
+@nhanVienId = 
+@donHangId = 
+@donViVanChuyenId = 
+@vanDonId = 
+@hoaDonId = 
+@thanhToanId = 
+@nhaCungCapId = 
+@vatLieuId = 
+@phieuNhapVatLieuId = 
+@thietBiId = 
 
 
 ### ============================================
@@ -29,7 +29,7 @@ POST {{baseUrl}}/auth/dang-nhap
 Content-Type: application/json
 
 {
-  "email": "khachhang1@example.com",
+  "email": "admin@example.com",
   "mat_khau": "123456"
 }
 
@@ -50,7 +50,7 @@ POST {{baseUrl}}/auth/dang-nhap
 Content-Type: application/json
 
 {
-  "email": "khachhang@example.com",
+  "email": "khachhang1@example.com",
   "mat_khau": "123456"
 }
 
@@ -157,7 +157,7 @@ Authorization: Bearer {{adminToken}}
 ### ============================================
 
 ### 4.1 Xem tất cả tranh
-GET {{baseUrl}}/tranh
+GET {{baseUrl}}/tranh?keyword=Night&danh_muc_id={{danhMucId}}&tac_gia_id={{tacGiaId}}&gia_min=100000&gia_max=50000000&trang_thai=ban&page=1&limit=10
 
 ### 4.2 Xem chi tiết tranh
 GET {{baseUrl}}/tranh/{{tranhId}}
@@ -174,7 +174,7 @@ Content-Type: application/json
   "danh_muc_id": "{{danhMucId}}",
   "tac_gia_id": "{{tacGiaId}}",
   "kho_id": null,
-  "gia_ban": 5000000,
+  "gia_ban": 50000000,
   "gia_von": 3000000,
   "so_luong_ton": 10,
   "trang_thai": "ban"
