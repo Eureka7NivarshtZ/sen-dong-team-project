@@ -7,7 +7,7 @@ const {
   quenMatKhau,
   datLaiMatKhau,
 } = require("../controllers/auth.controller");
-const { yeuCauDangNhap } = require("../utils/middleware");
+const { yeuCauDangNhap } = require("../config/middleware");
 
 router.post("/dang-nhap", dangNhap);
 router.post("/dang-ky-khach-hang", dangKyKhachHang);

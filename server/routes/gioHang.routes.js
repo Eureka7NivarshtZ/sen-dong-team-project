@@ -8,7 +8,7 @@ const {
   xoaTatCaGioHang,
 } = require("../controllers/gioHang.controller");
 
-const { yeuCauDangNhap, yeuCauKhachHang } = require("../utils/middleware");
+const { yeuCauDangNhap, yeuCauKhachHang } = require("../config/middleware");
 
 router.use(yeuCauDangNhap);
 router.use(yeuCauKhachHang);
