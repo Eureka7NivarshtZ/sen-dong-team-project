@@ -1,17 +1,23 @@
 import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
-const Navbar = ({ onNavigate, currentTab }) => {
+const Navbar = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [showDropdown, setShowDropdown] = useState(false);
   
   // Kiểm tra trạng thái đăng nhập thực tế từ localStorage
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
   const userRole = localStorage.getItem('userRole');
 
+  // Hàm kiểm tra xem route hiện tại có match không
+  const isActive = (path) => location.pathname === path;
+
   const handleUserIconClick = (e) => {
     e.preventDefault();
     if (!isLoggedIn) {
       // Nếu chưa đăng nhập thì dẫn thẳng về trang login
-      onNavigate('login');
+      navigate('/login');
     } else {
       // Nếu đã đăng nhập thì bật/tắt cái Menu nhỏ lựa chọn quyền Admin
       setShowDropdown(!showDropdown);
@@ -22,7 +28,11 @@ const Navbar = ({ onNavigate, currentTab }) => {
     localStorage.clear();
     setShowDropdown(false);
     alert('Đã đăng xuất tài khoản!');
-    onNavigate('home');
+    navigate('/');
+  };
+
+  const handleNavClick = (path) => {
+    navigate(path);
   };
 
   return (
@@ -35,7 +45,7 @@ const Navbar = ({ onNavigate, currentTab }) => {
       }}
     >
       {/* 1. KHỐI LOGO BÊN TRÁI */}
-      <div className="logo" onClick={() => onNavigate('home')} style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
+      <div className="logo" onClick={() => navigate('/')} style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
         <img src="/src/assets/Logo.png" alt="Sen Đông Logo" style={{ width: '200px', height: '200px', objectFit: 'contain' }} onError={(e) => { e.target.src = "https://via.placeholder.com/40?text=SD" }} />
       </div>
 
@@ -44,23 +54,23 @@ const Navbar = ({ onNavigate, currentTab }) => {
         <ul style={{ display: 'flex', listStyle: 'none', margin: 0, padding: 0, gap: '40px', alignItems: 'center', height: '100%' }}>
           {/* TRANG CHỦ */}
           <li style={{ position: 'relative', height: '70px', display: 'flex', alignItems: 'center' }}>
-            <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('home'); }} style={{ textDecoration: 'none', fontSize: '15px', color: currentTab === 'home' ? '#2e7d32' : '#333333', fontWeight: currentTab === 'home' ? '700' : '500' }}>Trang Chủ</a>
-            {currentTab === 'home' && <span style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '3px', backgroundColor: '#2e7d32', borderRadius: '2px' }}></span>}
+            <a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/'); }} style={{ textDecoration: 'none', fontSize: '15px', color: isActive('/') ? '#2e7d32' : '#333333', fontWeight: isActive('/') ? '700' : '500' }}>Trang Chủ</a>
+            {isActive('/') && <span style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '3px', backgroundColor: '#2e7d32', borderRadius: '2px' }}></span>}
           </li>
           {/* GIỚI THIỆU */}
           <li style={{ position: 'relative', height: '70px', display: 'flex', alignItems: 'center' }}>
-            <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('about'); }} style={{ textDecoration: 'none', fontSize: '15px', color: currentTab === 'about' ? '#2e7d32' : '#333333', fontWeight: currentTab === 'about' ? '700' : '500' }}>Giới thiệu</a>
-            {currentTab === 'about' && <span style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '3px', backgroundColor: '#2e7d32', borderRadius: '2px' }}></span>}
+            <a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/about'); }} style={{ textDecoration: 'none', fontSize: '15px', color: isActive('/about') ? '#2e7d32' : '#333333', fontWeight: isActive('/about') ? '700' : '500' }}>Giới thiệu</a>
+            {isActive('/about') && <span style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '3px', backgroundColor: '#2e7d32', borderRadius: '2px' }}></span>}
           </li>
           {/* BỘ SƯU TẬP */}
           <li style={{ position: 'relative', height: '70px', display: 'flex', alignItems: 'center' }}>
-            <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('collection'); }} style={{ textDecoration: 'none', fontSize: '15px', color: currentTab === 'collection' ? '#2e7d32' : '#333333', fontWeight: currentTab === 'collection' ? '700' : '500' }}>Bộ sưu tập</a>
-            {currentTab === 'collection' && <span style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '3px', backgroundColor: '#2e7d32', borderRadius: '2px' }}></span>}
+            <a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/collection'); }} style={{ textDecoration: 'none', fontSize: '15px', color: isActive('/collection') ? '#2e7d32' : '#333333', fontWeight: isActive('/collection') ? '700' : '500' }}>Bộ sưu tập</a>
+            {isActive('/collection') && <span style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '3px', backgroundColor: '#2e7d32', borderRadius: '2px' }}></span>}
           </li>
           {/* GIỎ HÀNG */}
           <li style={{ position: 'relative', height: '70px', display: 'flex', alignItems: 'center' }}>
-            <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('cart'); }} style={{ textDecoration: 'none', fontSize: '15px', color: currentTab === 'cart' ? '#2e7d32' : '#333333', fontWeight: currentTab === 'cart' ? '700' : '500' }}>Giỏ hàng</a>
-            {currentTab === 'cart' && <span style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '3px', backgroundColor: '#2e7d32', borderRadius: '2px' }}></span>}
+            <a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/cart'); }} style={{ textDecoration: 'none', fontSize: '15px', color: isActive('/cart') ? '#2e7d32' : '#333333', fontWeight: isActive('/cart') ? '700' : '500' }}>Giỏ hàng</a>
+            {isActive('/cart') && <span style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '3px', backgroundColor: '#2e7d32', borderRadius: '2px' }}></span>}
           </li>
         </ul>
       </nav>
@@ -87,7 +97,7 @@ const Navbar = ({ onNavigate, currentTab }) => {
           }}>
             {userRole === 'admin' && (
               <div 
-                onClick={() => { setShowDropdown(false); onNavigate('admin-dashboard'); }}
+                onClick={() => { setShowDropdown(false); navigate('/admin'); }}
                 style={{ padding: '10px 15px', fontSize: '14px', color: '#1c3f3a', fontWeight: 'bold', cursor: 'pointer', backgroundColor: '#f9f9f9' }}
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#edf5f1'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}

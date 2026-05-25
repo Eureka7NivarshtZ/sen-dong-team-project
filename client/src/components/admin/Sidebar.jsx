@@ -1,16 +1,25 @@
 import React from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
-function Sidebar({ onNavigate, currentTab }) {
+function Sidebar() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   // Hàm xử lý khi bấm nút Đăng xuất
   const handleLogout = () => {
     localStorage.clear(); // Xóa sạch dữ liệu tài khoản đăng nhập
     alert("Đã đăng xuất tài khoản quản trị thành công!");
-    onNavigate("home"); // Buộc quay về trang chủ giao diện khách hàng
+    navigate("/"); // Quay về trang chủ giao diện khách hàng
+  };
+
+  // Hàm kiểm tra xem route hiện tại có match không
+  const isActive = (path) => {
+    return location.pathname === path || location.pathname === `/admin${path}`;
   };
 
   // Hàm tạo Style làm nổi bật Menu đang được chọn
-  const getBtnStyle = (tabName) => ({
-    background: currentTab === tabName ? "rgba(255, 255, 255, 0.2)" : "none",
+  const getBtnStyle = (path) => ({
+    background: isActive(path) ? "rgba(255, 255, 255, 0.2)" : "none",
     border: "none",
     color: "#ffffff",
     textAlign: "left",
@@ -20,7 +29,7 @@ function Sidebar({ onNavigate, currentTab }) {
     width: "100%",
     borderRadius: "6px",
     display: "block",
-    fontWeight: currentTab === tabName ? "bold" : "normal",
+    fontWeight: isActive(path) ? "bold" : "normal",
     transition: "background 0.2s",
   });
 
@@ -28,7 +37,7 @@ function Sidebar({ onNavigate, currentTab }) {
     <div className="sidebar" style={{ width: "260px", backgroundColor: "#1c3f3a", color: "#ffffff", minHeight: "100vh", padding: "30px 20px", boxSizing: "border-box", display: "flex", flexDirection: "column", justifyContent: "space-between", position: "sticky", top: 0, height: "100vh" }}>
       <div>
         {/* LOGO - Bấm vào quay về trang chủ Client */}
-        <div className="logo" style={{ marginBottom: "35px", cursor: "pointer" }} onClick={() => onNavigate("home")}>
+        <div className="logo" style={{ marginBottom: "35px", cursor: "pointer" }} onClick={() => navigate("/")}>
           <h2 style={{ margin: 0, fontSize: "24px", fontWeight: "bold", letterSpacing: "1px" }}>SEN ĐÔNG</h2>
           <p style={{ margin: "5px 0 0 0", fontSize: "12px", color: "#a3b8b5" }}>Art Studio Admin</p>
         </div>
@@ -37,11 +46,11 @@ function Sidebar({ onNavigate, currentTab }) {
         <div className="menu" style={{ display: "flex", flexDirection: "column", gap: "8px", textAlign: "left" }}>
           <p className="menu-title" style={{ color: "#a3b8b5", margin: "0 0 10px 0", fontSize: "12px", fontWeight: "bold", textTransform: "uppercase" }}>Chính</p>
 
-          <button onClick={() => onNavigate("admin-dashboard")} style={getBtnStyle("admin-dashboard")}>📊 Tổng quan</button>
-          <button onClick={() => onNavigate("admin-orders")} style={getBtnStyle("admin-orders")}>📦 Đơn hàng</button>
-          <button onClick={() => onNavigate("admin-paintings")} style={getBtnStyle("admin-paintings")}>🎨 Quản lý tranh</button>
-          <button onClick={() => onNavigate("admin-warehouse")} style={getBtnStyle("admin-warehouse")}>🏢 Kho hàng</button>
-          <button onClick={() => onNavigate("admin-employees")} style={getBtnStyle("admin-employees")}>👥 Nhân viên</button>
+          <button onClick={() => navigate("/admin")} style={getBtnStyle("/admin")}>📊 Tổng quan</button>
+          <button onClick={() => navigate("/admin/orders")} style={getBtnStyle("/admin/orders")}>📦 Đơn hàng</button>
+          <button onClick={() => navigate("/admin/paintings")} style={getBtnStyle("/admin/paintings")}>🎨 Quản lý tranh</button>
+          <button onClick={() => navigate("/admin/warehouse")} style={getBtnStyle("/admin/warehouse")}>🏢 Kho hàng</button>
+          <button onClick={() => navigate("/admin/employees")} style={getBtnStyle("/admin/employees")}>👥 Nhân viên</button>
         </div>
       </div>
 

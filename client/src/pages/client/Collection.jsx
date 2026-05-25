@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useCart } from "../../contexts/CartContext";
 import ProductCard_TrangChu from "../../components/client/ProductCard";
 
 const images = import.meta.glob("../../assets/*.{png,jpg,jpeg,webp}", {
@@ -89,7 +91,9 @@ const categories = [
 ];
 
 // Thêm prop onNavigate để khi bấm nút mua sẽ chuyển trang
-function Collection({ onNavigate, onAddToCart }) {
+function Collection() {
+  const navigate = useNavigate();
+  const { addToCart } = useCart();
   const [selectedCategory, setSelectedCategory] = useState("Tất cả");
   const [selectedProduct, setSelectedProduct] = useState(null); // Quản lý tranh xem chi tiết
 
@@ -102,15 +106,11 @@ function Collection({ onNavigate, onAddToCart }) {
     setSelectedProduct(null);
     
     // 2. KÍCH HOẠT HÀM THÊM VÀO GIỎ HÀNG (Quan trọng nhất)
-    if (typeof onAddToCart === "function") {
-        onAddToCart(product);
-    }
+    addToCart(product);
 
     // 3. Chuyển thẳng sang trang giỏ hàng
-    if (typeof onNavigate === "function") {
-        onNavigate("cart");
-    }
-    };
+    navigate("/cart");
+  };
 
   return (
     <div 
