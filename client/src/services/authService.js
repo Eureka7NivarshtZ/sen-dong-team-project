@@ -3,17 +3,20 @@ import apiClient from "./apiClient";
 // Service xử lý các API liên quan đến Authentication
 const authService = {
   // Đăng nhập
-  dangNhap: async (email, matKhau) => {
+  dangNhap: async (email, mat_khau) => {
     try {
       const response = await apiClient.post("/auth/dang-nhap", {
         email,
-        matKhau,
+        mat_khau,
       });
 
       // Lưu token nếu đăng nhập thành công
       if (response.data.success && response.data.data?.token) {
         localStorage.setItem("authToken", response.data.data.token);
-        localStorage.setItem("user", JSON.stringify(response.data.data.user));
+        localStorage.setItem(
+          "user",
+          JSON.stringify(response.data.data.nhan_vien),
+        );
       }
 
       return response.data;
@@ -35,11 +38,11 @@ const authService = {
   ) => {
     try {
       const response = await apiClient.post("/auth/dang-ky-khach-hang", {
-        ten,
+        ho_ten: ten,
         email,
-        matKhau,
-        soDienThoai,
-        diaChi,
+        mat_khau: matKhau,
+        sdt: soDienThoai,
+        dia_chi: diaChi,
       });
 
       return response.data;
@@ -115,7 +118,18 @@ const authService = {
   // Lấy thông tin user từ local storage
   getUser: () => {
     const user = localStorage.getItem("user");
-    return user ? JSON.parse(user) : null;
+
+    if (!user || user === "undefined") {
+      return null;
+    }
+
+    try {
+      return JSON.parse(user);
+    } catch (error) {
+      console.error("Lỗi parse user từ localStorage:", error);
+      localStorage.removeItem("user");
+      return null;
+    }
   },
 
   // Kiểm tra đã đăng nhập chưa
