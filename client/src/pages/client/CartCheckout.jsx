@@ -73,7 +73,7 @@ function CartCheckout() {
             <div style={{ textAlign: "center", padding: "80px 0", color: "#888888" }}>
               <div style={{ fontSize: "50px", marginBottom: "15px" }}>🛒</div>
               <p style={{ fontSize: "16px", margin: "0 0 20px 0" }}>Giỏ hàng trống</p>
-              <button onClick={() => navigate('/bo-suu-tap')} style={{ padding: "10px 20px", backgroundColor: "#1c3f3a", color: "white", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold" }}>Khám phá bộ sưu tập ngay</button>
+              <button onClick={() => navigate('/collection')} style={{ padding: "10px 20px", backgroundColor: "#1c3f3a", color: "white", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold" }}>Khám phá bộ sưu tập ngay</button>
             </div>
           ) : (
             /* HIỂN THỊ DANH SÁCH KHI ĐÃ CÓ TRANH TRONG GIỎ */

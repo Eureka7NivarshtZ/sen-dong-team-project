@@ -27,6 +27,15 @@ const TaiKhoan = sequelize.define(
       allowNull: false,
       defaultValue: 1,
     },
+    token_dat_lai_mat_khau: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
+    token_dat_lai_mat_khau_het_han: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
     tao_luc: {
       type: DataTypes.DATE,
       allowNull: false,
