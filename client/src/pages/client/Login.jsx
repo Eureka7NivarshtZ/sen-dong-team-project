@@ -1,81 +1,284 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { authService } from "../../services";
 
 function Login() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  // 1. XỬ LÝ ĐĂNG NHẬP VỚI QUYỀN USER THÔNG THƯỜNG
-  const handleUserLogin = (e) => {
+  // XỬ LÝ ĐĂNG NHẬP VỚI API
+  const handleUserLogin = async (e) => {
     e.preventDefault();
-    localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('userRole', 'user');
-    alert('Đăng nhập thành công với quyền Khách hàng!');
-    navigate('/');
+    setError("");
+    setLoading(true);
+
+    try {
+      const result = await authService.dangNhap(email, password);
+
+      if (result.success) {
+        alert("Đăng nhập thành công!");
+        navigate("/");
+      } else {
+        setError(result.error || "Đăng nhập thất bại");
+      }
+    } catch (err) {
+      setError("Có lỗi xảy ra. Vui lòng thử lại.");
+      console.error("Login error:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // 2. XỬ LÝ ĐĂNG NHẬP VỚI QUYỀN ADMIN (CHỈ KHI BẤM NÚT ADMIN)
-  const handleAdminLogin = (e) => {
+  // XỬ LÝ ĐĂNG NHẬP ADMIN (có thể cần email/password của admin)
+  const handleAdminLogin = async (e) => {
     e.preventDefault();
-    localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('userRole', 'admin');
-    alert('Đăng nhập thành công với quyền Quản trị viên Admin!');
-    navigate('/');
+    setError("");
+    setLoading(true);
+
+    try {
+      const result = await authService.dangNhap(email, password);
+
+      if (result.success) {
+        // Kiểm tra xem người dùng có phải admin không
+        const user = authService.getUser();
+        if (user?.vai_tro === "quan_ly" || user?.vai_tro === "admin") {
+          alert("Đăng nhập thành công với quyền Admin!");
+          navigate("/admin/dashboard");
+        } else {
+          setError("Tài khoản này không có quyền Admin");
+          authService.dangXuat();
+        }
+      } else {
+        setError(result.error || "Đăng nhập thất bại");
+      }
+    } catch (err) {
+      setError("Có lỗi xảy ra. Vui lòng thử lại.");
+      console.error("Login error:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div style={{
-      width: '100%', minHeight: 'calc(100vh - 70px)', backgroundColor: '#5cb384',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Arial, sans-serif'
-    }}>
-      <div style={{
-        backgroundColor: '#ffffff', width: '480px', borderRadius: '24px',
-        padding: '50px 40px', boxSizing: 'border-box', textAlign: 'center'
-      }}>
-        <h2 style={{ fontSize: '28px', fontWeight: 'bold', margin: '0 0 10px 0', color: '#111' }}>Đăng nhập</h2>
-        <p style={{ fontSize: '14px', color: '#666', margin: '0 0 30px 0' }}>Vui lòng nhập email và mật khẩu để tiếp tục</p>
+    <div
+      style={{
+        width: "100%",
+        minHeight: "calc(100vh - 70px)",
+        backgroundColor: "#5cb384",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontFamily: "Arial, sans-serif",
+      }}
+    >
+      <div
+        style={{
+          backgroundColor: "#ffffff",
+          width: "480px",
+          borderRadius: "24px",
+          padding: "50px 40px",
+          boxSizing: "border-box",
+          textAlign: "center",
+        }}
+      >
+        <h2
+          style={{
+            fontSize: "28px",
+            fontWeight: "bold",
+            margin: "0 0 10px 0",
+            color: "#111",
+          }}
+        >
+          Đăng nhập
+        </h2>
+        <p style={{ fontSize: "14px", color: "#666", margin: "0 0 30px 0" }}>
+          Vui lòng nhập email và mật khẩu để tiếp tục
+        </p>
 
-        <form style={{ textAlign: 'left' }}>
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#333' }}>Email:</label>
-            <input type="email" placeholder="Vui lòng nhập email" value={email} onChange={(e) => setEmail(e.target.value)} style={{ width: '100%', padding: '12px 15px', borderRadius: '8px', border: '1px solid #e0e0e0', backgroundColor: '#f4f6f9', boxSizing: 'border-box' }} required />
-          </div>
-
-          <div style={{ marginBottom: '15px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <label style={{ fontSize: '14px', color: '#333' }}>Mật Khẩu:</label>
-              <a href="#" onClick={(e) => e.preventDefault()} style={{ fontSize: '13px', color: '#666', textDecoration: 'none' }}>Quên mật khẩu?</a>
-            </div>
-            <input type="password" placeholder="Vui lòng nhập mật khẩu" value={password} onChange={(e) => setPassword(e.target.value)} style={{ width: '100%', padding: '12px 15px', borderRadius: '8px', border: '1px solid #e0e0e0', backgroundColor: '#f4f6f9', boxSizing: 'border-box' }} required />
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '25px' }}>
-            <input type="checkbox" id="remember" defaultChecked style={{ cursor: 'pointer' }} />
-            <label htmlFor="remember" style={{ fontSize: '13px', color: '#666', cursor: 'pointer' }}>Nhớ mật khẩu</label>
-          </div>
-
-          {/* NÚT 1: ĐĂNG NHẬP QUYỀN USER (MÀU XANH THEO FIGMA) */}
-          <button 
-            type="button" 
-            onClick={handleUserLogin}
-            style={{ width: '100%', padding: '14px', backgroundColor: '#5cb384', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', marginBottom: '12px', transition: 'background 0.2s' }}
+        {error && (
+          <div
+            style={{
+              marginBottom: "20px",
+              padding: "12px",
+              backgroundColor: "#fee",
+              borderRadius: "8px",
+              color: "#c33",
+              fontSize: "14px",
+            }}
           >
-            Đăng nhập
+            {error}
+          </div>
+        )}
+
+        <form style={{ textAlign: "left" }}>
+          <div style={{ marginBottom: "20px" }}>
+            <label
+              style={{
+                display: "block",
+                marginBottom: "8px",
+                fontSize: "14px",
+                color: "#333",
+              }}
+            >
+              Email:
+            </label>
+            <input
+              type="email"
+              placeholder="Vui lòng nhập email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
+              style={{
+                width: "100%",
+                padding: "12px 15px",
+                borderRadius: "8px",
+                border: "1px solid #e0e0e0",
+                backgroundColor: "#f4f6f9",
+                boxSizing: "border-box",
+                opacity: loading ? 0.6 : 1,
+              }}
+              required
+            />
+          </div>
+
+          <div style={{ marginBottom: "15px" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginBottom: "8px",
+              }}
+            >
+              <label style={{ fontSize: "14px", color: "#333" }}>
+                Mật Khẩu:
+              </label>
+              <a
+                href="#"
+                onClick={(e) => e.preventDefault()}
+                style={{
+                  fontSize: "13px",
+                  color: "#666",
+                  textDecoration: "none",
+                }}
+              >
+                Quên mật khẩu?
+              </a>
+            </div>
+            <input
+              type="password"
+              placeholder="Vui lòng nhập mật khẩu"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
+              style={{
+                width: "100%",
+                padding: "12px 15px",
+                borderRadius: "8px",
+                border: "1px solid #e0e0e0",
+                backgroundColor: "#f4f6f9",
+                boxSizing: "border-box",
+                opacity: loading ? 0.6 : 1,
+              }}
+              required
+            />
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              marginBottom: "25px",
+            }}
+          >
+            <input
+              type="checkbox"
+              id="remember"
+              defaultChecked
+              disabled={loading}
+              style={{ cursor: "pointer", opacity: loading ? 0.6 : 1 }}
+            />
+            <label
+              htmlFor="remember"
+              style={{
+                fontSize: "13px",
+                color: "#666",
+                cursor: "pointer",
+                opacity: loading ? 0.6 : 1,
+              }}
+            >
+              Nhớ mật khẩu
+            </label>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleUserLogin}
+            disabled={loading}
+            style={{
+              width: "100%",
+              padding: "14px",
+              backgroundColor: loading ? "#aaa" : "#5cb384",
+              color: "#fff",
+              border: "none",
+              borderRadius: "8px",
+              fontSize: "16px",
+              fontWeight: "bold",
+              cursor: loading ? "not-allowed" : "pointer",
+              marginBottom: "12px",
+              transition: "background 0.2s",
+            }}
+          >
+            {loading ? "Đang đăng nhập..." : "Đăng nhập"}
           </button>
 
-          {/* NÚT 2: ĐĂNG NHẬP QUYỀN ADMIN (MÀU TỐI SANG TRỌNG) */}
-          <button 
-            type="button" 
+          <button
+            type="button"
             onClick={handleAdminLogin}
-            style={{ width: '100%', padding: '14px', backgroundColor: '#1c3f3a', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', transition: 'background 0.2s' }}
+            disabled={loading}
+            style={{
+              width: "100%",
+              padding: "14px",
+              backgroundColor: loading ? "#666" : "#1c3f3a",
+              color: "#fff",
+              border: "none",
+              borderRadius: "8px",
+              fontSize: "16px",
+              fontWeight: "bold",
+              cursor: loading ? "not-allowed" : "pointer",
+              transition: "background 0.2s",
+            }}
           >
-            Đăng nhập với quyền Admin 🛠️
+            {loading ? "Đang đăng nhập..." : "Đăng nhập với quyền Admin 🛠️"}
           </button>
         </form>
 
-        <p style={{ fontSize: '14px', color: '#555', marginTop: '25px', marginBottom: 0 }}>
-          Chưa có tài khoản? <a href="#" onClick={(e) => { e.preventDefault(); navigate('/dang-ky'); }} style={{ color: '#2f80ed', textDecoration: 'none', fontWeight: 'bold' }}>Tạo tài khoản</a>
+        <p
+          style={{
+            fontSize: "14px",
+            color: "#555",
+            marginTop: "25px",
+            marginBottom: 0,
+          }}
+        >
+          Chưa có tài khoản?{" "}
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate("/dang-ky");
+            }}
+            style={{
+              color: "#2f80ed",
+              textDecoration: "none",
+              fontWeight: "bold",
+            }}
+          >
+            Tạo tài khoản
+          </a>
         </p>
       </div>
     </div>

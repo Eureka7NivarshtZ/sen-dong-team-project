@@ -1,135 +1,55 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { FaShoppingCart } from "react-icons/fa";
-import { useCart } from "../../contexts/CartContext";
+import { tranhService, gioHangService, authService } from "../../services";
 
 const images = import.meta.glob("../../assets/*.{png,jpg,jpeg,webp}", {
   eager: true,
 });
 
-const products = [
-  {
-    id: 1,
-    title: "Tranh Đêm đầy sao",
-    category: "Tranh sơn dầu",
-    price: "3.600.000 đ",
-    image: images["../../assets/dem-day-sao.jpg"]?.default,
-    description:
-      "Tác phẩm khắc họa khung cảnh ban đêm huyền ảo với những vòng xoáy năng lượng cuồn cuộn, thể hiện cá tính nghệ thuật độc bản và sâu lắng.",
-    size: "73.7cm x 92.1cm x 3.5cm",
-    author: "Vincent van Gogh",
-    material: "Sơn dầu trên canvas",
-  },
-  {
-    id: 2,
-    title: "Tranh Hoa diên vĩ",
-    category: "Tranh sơn dầu",
-    price: "3.600.000 đ",
-    image: images["../../assets/hoa-diên-vĩ.jpeg"]?.default,
-    description:
-      "Bức tranh hoa diên vĩ mang sắc xanh dịu mát tràn đầy sức sống tươi mới, đem lại nét sang trọng, tao nhã cho không gian nội thất của bạn.",
-    size: "60cm x 80cm",
-    author: "Vincent van Gogh",
-    material: "Sơn dầu trên canvas",
-  },
-  {
-    id: 3,
-    title: "Tranh Hoa hướng dương",
-    category: "Tranh sơn dầu canvas",
-    price: "3.600.000 đ",
-    image: images["../../assets/hoa-hướng-dương.jpeg"]?.default,
-    description:
-      "Sử dụng chất liệu canvas cao cấp phối cùng sắc vàng rực rỡ của nắng, tác phẩm tượng trưng cho năng lượng tích cực, may mắn và thịnh vượng.",
-    size: "60cm x 80cm",
-    author: "Vincent van Gogh",
-    material: "Sơn dầu canvas",
-  },
-  {
-    id: 4,
-    title: "Vườn xuân Trung Nam Bắc",
-    category: "Tranh sơn mài",
-    price: "3.600.000 đ",
-    image: images["../../assets/vuon-xuan-trung-nam-bac.jpg"]?.default,
-    description:
-      "Kiệt tác sơn mài tinh xảo tái hiện không khí lễ hội mùa xuân rộn ràng khắp ba miền đất nước.",
-    size: "80cm x 120cm",
-    author: "Danh họa Việt Nam",
-    material: "Sơn mài",
-  },
-  {
-    id: 5,
-    title: "Chùa tháp Phổ Minh",
-    category: "Tranh sơn mài",
-    price: "3.600.000 đ",
-    image: images["../../assets/chua-thap-pho-minh.jpg"]?.default,
-    description:
-      "Tác phẩm mang phong vị cổ kính trầm mặc, tôn vinh vẻ đẹp kiến trúc tâm linh Việt Nam.",
-    size: "70cm x 100cm",
-    author: "Danh họa Việt Nam",
-    material: "Sơn mài",
-  },
-  {
-    id: 6,
-    title: "Bác Hồ ở chiến khu Việt Bắc",
-    category: "Tranh sơn mài",
-    price: "3.600.000 đ",
-    image: images["../../assets/uncle-ho-at-viet-bac.jpg"]?.default,
-    description:
-      "Bức tranh sơn mài lịch sử giàu cảm xúc, khắc họa hình ảnh vị lãnh tụ giản dị giữa núi rừng Việt Bắc.",
-    size: "70cm x 100cm",
-    author: "Danh họa Việt Nam",
-    material: "Sơn mài",
-  },
-  {
-    id: 7,
-    title: "Đám cưới chuột Hàng Trống",
-    category: "Tranh khắc gỗ dân gian Đông Hồ",
-    price: "3.600.000 đ",
-    image: images["../../assets/dam-cuoi-chuot-hang-trong.jpg"]?.default,
-    description:
-      "Bức tranh mang đậm tính châm biếm sâu cay và hóm hỉnh của dân gian xưa.",
-    size: "50cm x 70cm",
-    author: "Nghệ nhân dân gian",
-    material: "Tranh khắc gỗ",
-  },
-  {
-    id: 8,
-    title: "Lợn đàn",
-    category: "Tranh khắc gỗ dân gian Đông Hồ",
-    price: "3.600.000 đ",
-    image: images["../../assets/lon-dan.jpg"]?.default,
-    description:
-      "Hình ảnh đàn lợn béo tròn ngộ nghĩnh thể hiện ước vọng về cuộc sống sung túc, no đủ.",
-    size: "50cm x 70cm",
-    author: "Nghệ nhân dân gian",
-    material: "Tranh Đông Hồ",
-  },
-  {
-    id: 9,
-    title: "Mona Lisa 2",
-    category: "Tranh sơn dầu",
-    price: "3.600.000 đ",
-    image: images["../../assets/mona-lihạnh.jpg"]?.default,
-    description: "Kích thước: 60x80cm. Chất liệu: Sơn dầu trên vải canvas.",
-    size: "60cm x 80cm",
-    author: "Leonardo da Vinci",
-    material: "Sơn dầu trên canvas",
-  },
-];
-
 function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { addToCart } = useCart();
 
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [quantity, setQuantity] = useState(1);
+  const [addingToCart, setAddingToCart] = useState(false);
 
-  const product = products.find((item) => item.id === Number(id));
+  // Lấy chi tiết tranh từ API
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const result = await tranhService.layChiTietTranh(id);
+        if (result.success) {
+          setProduct(result.data);
+        } else {
+          setError(result.error || "Không tìm thấy sản phẩm");
+        }
+      } catch (err) {
+        setError("Có lỗi xảy ra");
+        console.error("Error fetching product:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  if (!product) {
+    fetchProduct();
+  }, [id]);
+
+  if (loading) {
     return (
       <div style={{ padding: "80px 100px", textAlign: "center" }}>
-        <h2>Không tìm thấy sản phẩm</h2>
+        <p>Đang tải sản phẩm...</p>
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div style={{ padding: "80px 100px", textAlign: "center" }}>
+        <h2>{error || "Không tìm thấy sản phẩm"}</h2>
         <button
           onClick={() => navigate("/collection")}
           style={{
@@ -155,12 +75,29 @@ function ProductDetail() {
     setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
   };
 
-  const handleAddToCart = (product, quantity) => {
-    addToCart({
-      ...product,
-      quantity,
-    });
-    alert(`Đã thêm x${quantity} tranh ${product.title} vào giỏ hàng`);
+  const handleAddToCart = async () => {
+    // Kiểm tra xem người dùng đã đăng nhập không
+    if (!authService.isAuthenticated()) {
+      alert("Vui lòng đăng nhập trước khi thêm vào giỏ hàng");
+      navigate("/dang-nhap");
+      return;
+    }
+
+    setAddingToCart(true);
+    try {
+      const result = await gioHangService.themVaoGioHang(product.id, quantity);
+      if (result.success) {
+        alert(`Đã thêm x${quantity} tranh vào giỏ hàng`);
+        setQuantity(1);
+      } else {
+        alert("Có lỗi xảy ra: " + result.error);
+      }
+    } catch (err) {
+      alert("Có lỗi xảy ra khi thêm vào giỏ hàng");
+      console.error("Error adding to cart:", err);
+    } finally {
+      setAddingToCart(false);
+    }
   };
 
   return (
@@ -229,7 +166,7 @@ function ProductDetail() {
               margin: "0 0 12px",
             }}
           >
-            {product.title}
+            {product.ten}
           </h1>
 
           <div
@@ -240,7 +177,7 @@ function ProductDetail() {
               marginBottom: "28px",
             }}
           >
-            {product.price}
+            {product.giaBan ? `${product.giaBan.toLocaleString()}đ` : "Liên hệ"}
           </div>
 
           <div style={{ marginBottom: "26px" }}>
@@ -325,21 +262,22 @@ function ProductDetail() {
               marginBottom: "30px",
             }}
           >
-            {product.description}
+            {product.moTa || "Không có mô tả"}
           </p>
 
           <button
-            onClick={() => handleAddToCart(product, quantity)}
+            onClick={handleAddToCart}
+            disabled={addingToCart}
             style={{
               width: "100%",
               maxWidth: "430px",
               height: "48px",
-              backgroundColor: "#27ae60",
+              backgroundColor: addingToCart ? "#999" : "#27ae60",
               color: "#fff",
               border: "none",
               fontSize: "15px",
               fontWeight: "600",
-              cursor: "pointer",
+              cursor: addingToCart ? "not-allowed" : "pointer",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -361,16 +299,13 @@ function ProductDetail() {
             }}
           >
             <div>
-              <strong>Tác giả:</strong> {product.author}
+              <strong>Tác giả:</strong> {product.tacGia?.ten || "N/A"}
             </div>
             <div>
-              <strong>Loại:</strong> {product.category}
+              <strong>Danh mục:</strong> {product.danhMuc?.ten || "N/A"}
             </div>
             <div>
-              <strong>Kích thước:</strong> {product.size}
-            </div>
-            <div>
-              <strong>Chất liệu:</strong> {product.material}
+              <strong>Số lượng tồn:</strong> {product.soLuongTon || 0}
             </div>
           </div>
         </div>
