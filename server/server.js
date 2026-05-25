@@ -8,6 +8,9 @@ async function main() {
     await sequelize.authenticate();
     console.log("Database connected");
 
+    await sequelize.sync({ alter: true });
+    console.log("Tables synced");
+
     const PORT = process.env.DB_PORT || 5000;
 
     app.listen(PORT, () => {
