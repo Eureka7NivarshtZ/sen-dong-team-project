@@ -1,23 +1,23 @@
 @baseUrl = http://localhost:5000/api
 
-@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImU2NWY0OTViLWVmNzctNDJiNC1hOWMxLTE1ZDgzYTQ3OGE2NSIsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJsb2FpIjoibmhhbl92aWVuIiwibmhhbl92aWVuX2lkIjoiZDRjNDA3NjgtYjFkOS00YmE2LTllYzYtYWQwMmJlYjNlMjYzIiwidmFpX3RybyI6InF1YW5fbHkiLCJraGFjaF9oYW5nX2lkIjpudWxsLCJpYXQiOjE3Nzk2ODgyMDksImV4cCI6MTc4MDI5MzAwOX0.XtcHySNm0ed3sZpJzAyg9VihULkUsTeXGkCwSMNsgK4
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImU2NWY0OTViLWVmNzctNDJiNC1hOWMxLTE1ZDgzYTQ3OGE2NSIsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJsb2FpIjoibmhhbl92aWVuIiwibmhhbl92aWVuX2lkIjoiZDRjNDA3NjgtYjFkOS00YmE2LTllYzYtYWQwMmJlYjNlMjYzIiwidmFpX3RybyI6InF1YW5fbHkiLCJraGFjaF9oYW5nX2lkIjpudWxsLCJpYXQiOjE3Nzk2OTEwNDMsImV4cCI6MTc4MDI5NTg0M30.bWgStc5xDOWAB0V6PGm-Up2i-Wf5-dVsyiD03qOxWH0
 @customerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQ3ZDc5ZTZlLWVlNTYtNGI3My05NGRhLWRjYmFjOTc3ODhiMiIsImVtYWlsIjoia2hhY2hoYW5nMUBleGFtcGxlLmNvbSIsImxvYWkiOiJraGFjaF9oYW5nIiwibmhhbl92aWVuX2lkIjpudWxsLCJ2YWlfdHJvIjpudWxsLCJraGFjaF9oYW5nX2lkIjoiYmFjNjZhOGMtZTBiZC00NjIwLWFjOWEtMWE4MWRiZGIyZTc3IiwiaWF0IjoxNzc5Njc5MTE4LCJleHAiOjE3ODAyODM5MTh9.ftjO924L-0IIhR7yABFWDAVkXzEuE9F19bjGln-oyPE
 
-@danhMucId = 54f0742f-9015-4db8-ba11-a4bf0c565647
-@tacGiaId = 0e23119f-0630-452d-9e3d-7c4e9a9f29cf
-@tranhId = 73726761-d44a-4135-935f-5e741b39d59a
-@hinhAnhTranhId = be00330a-0e52-4183-a11c-c1526f627b50
-@khachHangId = b32f0c8f-9ccf-4906-8dc1-ac99b811861f
-@nhanVienId = cdc9f95f-c447-423b-a5da-53fbe851720f
-@donHangId = d4853991-7d86-4b6f-bb3d-20949fa18619
-@donViVanChuyenId = 4cff8fd0-cdb1-4452-a781-03c0d1eb09f3
-@vanDonId = 6487d133-26af-47ac-9a29-32d5c975f20a
-@hoaDonId = 6278bea7-4c71-4c9d-85fa-419f87dfd053
-@thanhToanId = 911d3beb-b5db-4e03-b5a1-9e05ce30cf4d
-@nhaCungCapId = d6ddc943-a711-441f-b630-60738c6f7c3b
-@vatLieuId = 2d4c5b48-9e71-49d4-87e9-4d340b5d69d7
-@phieuNhapVatLieuId = 7ba1f932-cc16-4ccf-ac8f-c8345bc74c0d
-@thietBiId = 7deed7c3-1e53-4664-9960-2a307f97d3aa
+@danhMucId = b22a0442-a0b6-483e-8733-02e5deedb565
+@tacGiaId = 
+@tranhId = 
+@hinhAnhTranhId = 
+@khachHangId = 
+@nhanVienId = 
+@donHangId = 
+@donViVanChuyenId = 
+@vanDonId = 
+@hoaDonId = 
+@thanhToanId =
+@nhaCungCapId = 
+@vatLieuId = 
+@phieuNhapVatLieuId =
+@thietBiId = 
 
 
 ### ============================================
