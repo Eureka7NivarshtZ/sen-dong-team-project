@@ -265,7 +265,6 @@ router.delete("/kho/nha-cung-cap/:id", kiemTraVaiTro("quan_ly"), xoaNhaCungCap);
 
 // ==================== KHO: VẬT LIỆU ====================
 const {
-  layTatCaVatLieu,
   layVatLieuCanhBao,
   layChiTietVatLieu,
   themVatLieu,
@@ -273,7 +272,11 @@ const {
   xoaVatLieu,
 } = require("../controllers/vatLieu.controller");
 
-router.get("/kho/vat-lieu", kiemTraVaiTro(["quan_ly", "kho"]), layTatCaVatLieu);
+router.get(
+  "/kho/vat-lieu",
+  kiemTraVaiTro(["quan_ly", "kho"]),
+  layVatLieuCanhBao,
+);
 
 router.get(
   "/kho/vat-lieu/canh-bao",
