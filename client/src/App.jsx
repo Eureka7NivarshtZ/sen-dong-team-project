@@ -9,6 +9,7 @@ import Collection from './pages/client/Collection';
 import CartCheckout from './pages/client/CartCheckout';
 import Login from './pages/client/Login';        
 import Register from './pages/client/Register'; 
+import ProductDetail from './pages/client/ProductDetail';
 
 // ADMIN PAGES
 import Dashboard from './pages/admin/Dashboard';
@@ -25,6 +26,7 @@ function App() {
         <Route path='/' element={<Home />} />
         <Route path='/about' element={<About />} />
         <Route path='/collection' element={<Collection />} />
+        <Route path='/product/:id' element={<ProductDetail />} />
         <Route path='/cart' element={<CartCheckout />} />
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
