@@ -205,6 +205,45 @@ const Navbar = () => {
               ></span>
             )}
           </li>
+          
+
+          <li
+            style={{
+              position: "relative",
+              height: "70px",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate("/support"); // Gọi Router chuyển sang đường dẫn /support ngay lập tức
+              }}
+              style={{
+                textDecoration: "none",
+                fontSize: "15px",
+                color: location.pathname === "/support" ? "#2e7d32" : "#333333",
+                fontWeight: location.pathname === "/support" ? "700" : "500",
+              }}
+            >
+              Hỗ trợ
+            </a>
+            {location.pathname === "/support" && (
+              <span
+                style={{
+                  position: "absolute",
+                  bottom: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "3px",
+                  backgroundColor: "#2e7d32",
+                  borderRadius: "2px",
+                }}
+              ></span>
+            )}
+          </li>
         </ul>
       </nav>
 

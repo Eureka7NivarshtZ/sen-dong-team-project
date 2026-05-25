@@ -49,6 +49,10 @@ function Sidebar() {
           <button onClick={() => navigate("/admin")} style={getBtnStyle("/admin")}>📊 Tổng quan</button>
           <button onClick={() => navigate("/admin/orders")} style={getBtnStyle("/admin/orders")}>📦 Đơn hàng</button>
           <button onClick={() => navigate("/admin/paintings")} style={getBtnStyle("/admin/paintings")}>🎨 Quản lý tranh</button>
+          
+          {/* 🛠️ NÚT KHUYẾN MÃI MỚI */}
+          <button onClick={() => navigate("/admin/promotions")} style={getBtnStyle("/admin/promotions")}>🏷️ Khuyến mãi</button>
+          
           <button onClick={() => navigate("/admin/warehouse")} style={getBtnStyle("/admin/warehouse")}>🏢 Kho hàng</button>
           <button onClick={() => navigate("/admin/employees")} style={getBtnStyle("/admin/employees")}>👥 Nhân viên</button>
         </div>
