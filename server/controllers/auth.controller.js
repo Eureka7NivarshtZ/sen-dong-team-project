@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { TaiKhoan, KhachHang, NhanVien } = require("../models");
+const crypto = require("crypto");
+const { TaiKhoan, KhachHang, NhanVien, sequelize } = require("../models");
 
 const taoToken = (taiKhoan) => {
   return jwt.sign(
@@ -158,4 +159,113 @@ const dangKyKhachHang = async (req, res) => {
   });
 };
 
-module.exports = { dangNhap, xemThongTinCuaToi, dangKyKhachHang };
+const quenMatKhau = async (req, res) => {
+  const { email } = req.body || {};
+
+  if (!email) {
+    return res.status(400).json({
+      success: false,
+      error: "Vui long nhap email",
+    });
+  }
+
+  const taiKhoan = await TaiKhoan.findOne({
+    where: { email },
+  });
+
+  // Không tiết lộ email có tồn tại hay không
+  if (!taiKhoan) {
+    return res.json({
+      success: true,
+      message: "Neu email ton tai, lien ket dat lai mat khau da duoc tao",
+    });
+  }
+
+  const tokenRaw = crypto.randomBytes(32).toString("hex");
+
+  const tokenHash = crypto.createHash("sha256").update(tokenRaw).digest("hex");
+
+  taiKhoan.token_dat_lai_mat_khau = tokenHash;
+  taiKhoan.token_dat_lai_mat_khau_het_han = new Date(
+    Date.now() + 15 * 60 * 1000,
+  );
+
+  await taiKhoan.save();
+
+  // Thực tế nên gửi tokenRaw qua email
+  // Ví dụ link:
+  // http://localhost:3000/dat-lai-mat-khau?token=tokenRaw
+
+  res.json({
+    success: true,
+    message: "Tao token dat lai mat khau thanh cong",
+    data: {
+      reset_token: tokenRaw,
+      het_han_sau_phut: 15,
+    },
+  });
+};
+
+const datLaiMatKhau = async (req, res) => {
+  const { token, mat_khau_moi } = req.body;
+
+  if (!token || !mat_khau_moi) {
+    return res.status(400).json({
+      success: false,
+      error: "Vui long nhap token va mat khau moi",
+    });
+  }
+
+  if (mat_khau_moi.length < 6) {
+    return res.status(400).json({
+      success: false,
+      error: "Mat khau moi phai co it nhat 6 ky tu",
+    });
+  }
+
+  const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+
+  const taiKhoan = await TaiKhoan.findOne({
+    where: {
+      token_dat_lai_mat_khau: tokenHash,
+    },
+  });
+
+  if (!taiKhoan) {
+    return res.status(400).json({
+      success: false,
+      error: "Token khong hop le",
+    });
+  }
+
+  if (
+    !taiKhoan.token_dat_lai_mat_khau_het_han ||
+    taiKhoan.token_dat_lai_mat_khau_het_han < new Date()
+  ) {
+    return res.status(400).json({
+      success: false,
+      error: "Token da het han",
+    });
+  }
+
+  const mat_khau_hash = await bcrypt.hash(mat_khau_moi, 10);
+
+  taiKhoan.mat_khau_hash = mat_khau_hash;
+  taiKhoan.token_dat_lai_mat_khau = null;
+  taiKhoan.token_dat_lai_mat_khau_het_han = null;
+
+  await taiKhoan.save();
+
+  res.json({
+    success: true,
+    message: "Dat lai mat khau thanh cong",
+  });
+};
+
+module.exports = {
+  dangNhap,
+  xemThongTinCuaToi,
+  dangKyKhachHang,
+  quenMatKhau,
+  datLaiMatKhau,
+};

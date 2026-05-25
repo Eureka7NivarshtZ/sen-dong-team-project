@@ -1,7 +1,7 @@
 @baseUrl = http://localhost:5000/api
 
 @adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjRhODhhNjJjLTI0ZTMtNGU5YS05NTczLWY5MTRhNTRiNjkzZSIsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJsb2FpIjoibmhhbl92aWVuIiwibmhhbl92aWVuX2lkIjoiY2RjOWY5NWYtYzQ0Ny00MjNiLWE1ZGEtNTNmYmU4NTE3MjBmIiwidmFpX3RybyI6InF1YW5fbHkiLCJraGFjaF9oYW5nX2lkIjpudWxsLCJpYXQiOjE3Nzk0NTg2NzYsImV4cCI6MTc4MDA2MzQ3Nn0.rm0MnwHozkwfy64p_zIZLXOxw5oh16wyJC4Q_EA0Sy0
-@customerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjgzZjMwMzYyLWQzNDYtNGU2Mi1hNTY3LTE2NGJmN2JiNDIxYSIsImVtYWlsIjoia2hhY2hoYW5nQGV4YW1wbGUuY29tIiwibG9haSI6ImtoYWNoX2hhbmciLCJuaGFuX3ZpZW5faWQiOm51bGwsInZhaV90cm8iOm51bGwsImtoYWNoX2hhbmdfaWQiOiJiMzJmMGM4Zi05Y2NmLTQ5MDYtOGRjMS1hYzk5YjgxMTg2MWYiLCJpYXQiOjE3Nzk0NTk0NjcsImV4cCI6MTc4MDA2NDI2N30.YZUjhn6Jpm0BdEHykbHDXZR5pafLuYfYyQKFrpSOMfk
+@customerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQ3ZDc5ZTZlLWVlNTYtNGI3My05NGRhLWRjYmFjOTc3ODhiMiIsImVtYWlsIjoia2hhY2hoYW5nMUBleGFtcGxlLmNvbSIsImxvYWkiOiJraGFjaF9oYW5nIiwibmhhbl92aWVuX2lkIjpudWxsLCJ2YWlfdHJvIjpudWxsLCJraGFjaF9oYW5nX2lkIjoiYmFjNjZhOGMtZTBiZC00NjIwLWFjOWEtMWE4MWRiZGIyZTc3IiwiaWF0IjoxNzc5Njc5MTE4LCJleHAiOjE3ODAyODM5MTh9.ftjO924L-0IIhR7yABFWDAVkXzEuE9F19bjGln-oyPE
 
 @danhMucId = 54f0742f-9015-4db8-ba11-a4bf0c565647
 @tacGiaId = 0e23119f-0630-452d-9e3d-7c4e9a9f29cf
@@ -29,7 +29,7 @@ POST {{baseUrl}}/auth/dang-nhap
 Content-Type: application/json
 
 {
-  "email": "admin@example.com",
+  "email": "khachhang1@example.com",
   "mat_khau": "123456"
 }
 
@@ -38,7 +38,7 @@ POST {{baseUrl}}/auth/dang-ky-khach-hang
 Content-Type: application/json
 
 {
-  "email": "khachhang@example.com",
+  "email": "khachhang1@example.com",
   "mat_khau": "123456",
   "ho_ten": "Nguyễn Văn A",
   "sdt": "0901234567",
@@ -57,6 +57,23 @@ Content-Type: application/json
 ### 1.4 Xem thông tin của tôi
 GET {{baseUrl}}/auth/thong-tin-cua-toi
 Authorization: Bearer {{customerToken}}
+
+### 1.5 Quên mật khẩu
+POST {{baseUrl}}/auth/quen-mat-khau
+Content-Type: application/json
+
+{
+  "email": "khachhang1@example.com"
+}
+
+### 1.6 Đặt lại mật khẩu
+POST {{baseUrl}}/auth/dat-lai-mat-khau
+Content-Type: application/json
+
+{
+  "token": "592779908d460a678470e15480720d2fb0875a099c1cc291ffdbc5fdc772af1e",
+  "mat_khau_moi": "666666"
+}
 
 
 ### ============================================
