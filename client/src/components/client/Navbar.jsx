@@ -180,18 +180,18 @@ const Navbar = () => {
               href="#"
               onClick={(e) => {
                 e.preventDefault();
-                handleNavClick("/collection");
+                handleNavClick("/tranh");
               }}
               style={{
                 textDecoration: "none",
                 fontSize: "15px",
-                color: isActive("/collection") ? "#2e7d32" : "#333333",
-                fontWeight: isActive("/collection") ? "700" : "500",
+                color: isActive("/tranh") ? "#2e7d32" : "#333333",
+                fontWeight: isActive("/tranh") ? "700" : "500",
               }}
             >
               Bộ sưu tập
             </a>
-            {isActive("/collection") && (
+            {isActive("/tranh") && (
               <span
                 style={{
                   position: "absolute",
@@ -205,7 +205,6 @@ const Navbar = () => {
               ></span>
             )}
           </li>
-          
 
           <li
             style={{
@@ -272,7 +271,7 @@ const Navbar = () => {
           href="#"
           onClick={(e) => {
             e.preventDefault();
-            handleNavClick("/cart");
+            handleNavClick("/gio-hang");
           }}
           style={{ textDecoration: "none", fontSize: "15px", color: "#333333" }}
         >

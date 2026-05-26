@@ -51,7 +51,7 @@ function ProductDetail() {
       <div style={{ padding: "80px 100px", textAlign: "center" }}>
         <h2>{error || "Không tìm thấy sản phẩm"}</h2>
         <button
-          onClick={() => navigate("/collection")}
+          onClick={() => navigate("/bo-suu-tap")}
           style={{
             marginTop: "20px",
             padding: "12px 28px",
