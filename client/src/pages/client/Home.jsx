@@ -36,29 +36,8 @@ const mockReviews = [
   },
 ];
 
-function Home() {
+function Home({ products }) {
   const navigate = useNavigate();
-  const [featuredProducts, setFeaturedProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  // Lấy danh sách tranh từ API khi component mount
-  useEffect(() => {
-    const layDanhSachTranh = async () => {
-      try {
-        const result = await tranhService.layTatCaTranh();
-        if (result.success) {
-          // Lấy 4 tranh đầu tiên làm sản phẩm nổi bật
-          setFeaturedProducts(result.data.slice(0, 4) || []);
-        }
-      } catch (err) {
-        console.error("Lỗi lấy danh sách tranh:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    layDanhSachTranh();
-  }, []);
 
   return (
     <div
@@ -311,18 +290,8 @@ function Home() {
             gap: "25px",
           }}
         >
-          {loading ? (
-            <div
-              style={{
-                gridColumn: "1 / -1",
-                textAlign: "center",
-                padding: "40px",
-              }}
-            >
-              <p>Đang tải sản phẩm...</p>
-            </div>
-          ) : featuredProducts.length > 0 ? (
-            featuredProducts.map((product) => (
+          {products.length > 0 ? (
+            products.map((product) => (
               <ProductCard_TrangChu
                 key={product.id}
                 image={
@@ -336,9 +305,7 @@ function Home() {
                     ? `${Number(product.gia_ban).toLocaleString()}đ`
                     : "0đ"
                 }
-                onOpenDetail={() =>
-                  navigate(`/chi-tiet-san-pham/${product.id}`)
-                }
+                onOpenDetail={() => navigate(`/tranh/${product.id}`)}
               />
             ))
           ) : (
