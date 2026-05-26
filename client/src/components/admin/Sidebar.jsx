@@ -55,6 +55,7 @@ function Sidebar() {
           
           <button onClick={() => navigate("/admin/warehouse")} style={getBtnStyle("/admin/warehouse")}>🏢 Kho hàng</button>
           <button onClick={() => navigate("/admin/employees")} style={getBtnStyle("/admin/employees")}>👥 Nhân viên</button>
+          <button onClick={() => navigate("/admin/support")} style={getBtnStyle("/admin/support")}>💬 Trả lời khách hàng</button>
         </div>
       </div>
 

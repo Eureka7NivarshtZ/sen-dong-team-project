@@ -1,10 +1,31 @@
 import React, { useState, useEffect } from "react";
 import { authService } from "../../services";
 
-function SupportTickets({ onNavigate, currentTab }) {
+function SupportTickets() {
+  // 🛠️ NÂNG CẤP: Cấu trúc mảng replies chứa Object có senderRole rõ ràng để không bị nhận nhầm thành Admin
   const [tickets, setTickets] = useState([
-    { id: "101", title: "Đơn hàng giao trễ", content: "Mình đặt hàng từ 3 ngày trước nhưng chưa thấy cập nhật vận chuyển.", status: "Đang xử lý", type: "Giao hàng", level: "Cao", sender: "Khách hàng demo" },
-    { id: "102", title: "Cần đổi số điện thoại nhận hàng", content: "Shop hỗ trợ đổi số điện thoại giúp mình nhé.", status: "Đã phản hồi", type: "Đơn hàng", level: "Bình thường", sender: "Khách hàng demo", replies: ["Bạn gửi số điện thoại mới để bên mình cập nhật nhé."] }
+    { 
+      id: "101", 
+      title: "Đơn hàng giao trễ", 
+      content: "Mình đặt hàng từ 3 ngày trước nhưng chưa thấy cập nhật vận chuyển.", 
+      status: "Đang xử lý", 
+      type: "Giao hàng", 
+      level: "Cao", 
+      sender: "Khách hàng demo",
+      replies: [] 
+    },
+    { 
+      id: "102", 
+      title: "Cần đổi số điện thoại nhận hàng", 
+      content: "Shop hỗ trợ đổi số điện thoại giúp mình nhé.", 
+      status: "Đã phản hồi", 
+      type: "Đơn hàng", 
+      level: "Bình thường", 
+      sender: "Khách hàng demo", 
+      replies: [
+        { senderRole: "admin", text: "Bạn gửi số điện thoại mới để bên mình cập nhật nhé." }
+      ] 
+    }
   ]);
 
   const [activeTicket, setActiveTicket] = useState(null);
@@ -20,7 +41,7 @@ function SupportTickets({ onNavigate, currentTab }) {
 
   useEffect(() => {
     if (tickets.length > 0 && !activeTicket) {
-      setActiveTicket(tickets[1]); // Mặc định mở ticket #102 giống ảnh mẫu của bạn
+      setActiveTicket(tickets[1]); // Mặc định mở ticket #102
     }
   }, [tickets]);
 
@@ -47,14 +68,20 @@ function SupportTickets({ onNavigate, currentTab }) {
 
   const handleSendReply = (e) => {
     e.preventDefault();
-    if (!replyText) return;
+    if (!replyText.trim()) return;
+
+    // Định nghĩa Object tin nhắn mới: Tự động nhận diện vai trò người đang gõ để gán nhãn
+    const newReplyObject = {
+      senderRole: isAdmin ? "admin" : "user",
+      text: replyText
+    };
 
     const updatedTickets = tickets.map((t) => {
       if (t.id === activeTicket.id) {
         return {
           ...t,
           status: isAdmin ? "Đã phản hồi" : "Khách đã hồi đáp",
-          replies: [...(t.replies || []), replyText]
+          replies: [...(t.replies || []), newReplyObject] // Đẩy object mới vào mảng
         };
       }
       return t;
@@ -76,7 +103,7 @@ function SupportTickets({ onNavigate, currentTab }) {
 
       <div style={{ display: "grid", gridTemplateColumns: "400px 1fr", gap: "30px", alignItems: "start" }}>
         
-        {/* BLOCK BÊN TRÁI: DÀNH CHO KHÁCH HÀNG TẠO MỚI HOẶC LIST TICKET */}
+        {/* BLOCK BÊN TRÁI: TẠO MỚI HOẶC LIST TICKET */}
         <div style={{ display: "flex", flexDirection: "column", gap: "25px" }}>
           
           {/* FORM TẠO YÊU CẦU MỚI (Ẩn đi nếu là tài khoản Admin) */}
@@ -108,14 +135,14 @@ function SupportTickets({ onNavigate, currentTab }) {
             </div>
           )}
 
-          {/* DANH SÁCH YÊU CẦU CỦA TÔI */}
+          {/* DANH SÁCH TICKET */}
           <div style={{ backgroundColor: "#ffffff", padding: "24px", borderRadius: "12px", boxShadow: "0 4px 12px rgba(0,0,0,0.05)", textAlign: "left" }}>
             <h3 style={{ margin: "0 0 15px 0", fontSize: "16px", fontWeight: "bold", color: "#333" }}>
               {isAdmin ? "📋 Danh sách Ticket chờ duyệt" : "📬 Yêu cầu của tôi"}
             </h3>
             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
               {tickets.map((t) => (
-                <div key={t.id} onClick={() => setActiveTicket(t)} style={{ padding: "15px", borderRadius: "8px", border: activeTicket?.id === t.id ? "2px solid #1c3f3a" : "1px solid #eee", backgroundColor: activeTicket?.id === t.id ? "#f5f9f7" : "#fff", cursor: "pointer", transition: "all 0.2s" }}>
+                <div key={t.id} onClick={() => setActiveTicket(t)} style={{ padding: "15px", borderRadius: "8px", border: activeTicket?.id === t.id ? "2px solid #1c3f3a" : "1px solid #f0f0f0", backgroundColor: activeTicket?.id === t.id ? "#f5f9f7" : "#fff", cursor: "pointer", transition: "all 0.2s" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
                     <span style={{ fontSize: "14px", fontWeight: "bold", color: "#1c3f3a" }}>{t.title}</span>
                     <span style={{ fontSize: "12px", color: "#888" }}>#{t.id}</span>
@@ -131,7 +158,7 @@ function SupportTickets({ onNavigate, currentTab }) {
           </div>
         </div>
 
-        {/* BLOCK BÊN PHẢI: KHUNG HIỂN THỊ CHI TIẾT VÀ CHAT CHĂM SÓC KHÁCH HÀNG */}
+        {/* BLOCK BÊN PHẢI: KHUNG CHAT BOX CHI TIẾT */}
         {activeTicket ? (
           <div style={{ backgroundColor: "#ffffff", borderRadius: "12px", boxShadow: "0 4px 12px rgba(0,0,0,0.05)", display: "flex", flexDirection: "column", height: "650px" }}>
             
@@ -147,10 +174,10 @@ function SupportTickets({ onNavigate, currentTab }) {
               </div>
             </div>
 
-            {/* Nội dung cuộc trò chuyện */}
+            {/* VÙNG NỘI DUNG CUỘC TRÒ CHUYỆN REAL-TIME */}
             <div style={{ flex: 1, padding: "30px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "20px", backgroundColor: "#fafafa" }}>
               
-              {/* Tin nhắn gốc từ khách hàng */}
+              {/* Tin nhắn mở đầu gốc của Khách hàng (Luôn nằm bên phải diện tích chat) */}
               <div style={{ alignSelf: "flex-end", maxWidth: "70%", textAlign: "right" }}>
                 <span style={{ fontSize: "11px", color: "#888", display: "block", marginBottom: "4px" }}>{activeTicket.sender}</span>
                 <div style={{ backgroundColor: "#1c3f3a", color: "#fff", padding: "12px 16px", borderRadius: "12px 12px 0 12px", fontSize: "14px", textAlign: "left", lineHeight: "1.5" }}>
@@ -158,15 +185,38 @@ function SupportTickets({ onNavigate, currentTab }) {
                 </div>
               </div>
 
-              {/* Mảng câu trả lời phản hồi */}
-              {activeTicket.replies && activeTicket.replies.map((reply, index) => (
-                <div key={index} style={{ alignSelf: "flex-start", maxWidth: "70%", textAlign: "left" }}>
-                  <span style={{ fontSize: "11px", color: "#888", display: "block", marginBottom: "4px" }}>Nhân viên CSKH Sen Đông</span>
-                  <div style={{ backgroundColor: "#eef2f5", color: "#333", padding: "12px 16px", borderRadius: "12px 12px 12px 0", fontSize: "14px", lineHeight: "1.5" }}>
-                    {reply}
+              {/* 🛠️ SỬA LỖI TẠI ĐÂY: Quét mảng Object và gán Class hiển thị theo vai trò người gửi */}
+              {activeTicket.replies && activeTicket.replies.map((reply, index) => {
+                const isReplyFromAdmin = reply.senderRole === "admin";
+                
+                return (
+                  <div 
+                    key={index} 
+                    style={{ 
+                      alignSelf: isReplyFromAdmin ? "flex-start" : "flex-end", // Admin bên trái, Khách hàng bồi thêm bên phải
+                      maxWidth: "70%", 
+                      textAlign: isReplyFromAdmin ? "left" : "right" 
+                    }}
+                  >
+                    <span style={{ fontSize: "11px", color: "#888", display: "block", marginBottom: "4px" }}>
+                      {isReplyFromAdmin ? "Nhân viên CSKH Sen Đông" : activeTicket.sender}
+                    </span>
+                    <div 
+                      style={{ 
+                        backgroundColor: isReplyFromAdmin ? "#eef2f5" : "#1c3f3a", 
+                        color: isReplyFromAdmin ? "#333" : "#fff", 
+                        padding: "12px 16px", 
+                        borderRadius: isReplyFromAdmin ? "12px 12px 12px 0" : "12px 12px 0 12px", 
+                        fontSize: "14px", 
+                        textAlign: "left",
+                        lineHeight: "1.5" 
+                      }}
+                    >
+                      {reply.text}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Ô soạn thảo câu trả lời chân trang */}
@@ -195,7 +245,6 @@ function SupportTickets({ onNavigate, currentTab }) {
   );
 }
 
-// Cấu hình Style bổ trợ nhanh
 const inputStyle = { width: "100%", padding: "10px 12px", marginBottom: "12px", borderRadius: "6px", border: "1px solid #ddd", boxSizing: "border-box", fontSize: "14px", outline: "none" };
 const selectStyle = { flex: 1, padding: "10px", borderRadius: "6px", border: "1px solid #ddd", fontSize: "14px", outline: "none" };
 
