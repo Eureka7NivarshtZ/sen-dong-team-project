@@ -17,16 +17,34 @@ import Orders from "./pages/admin/Orders";
 import Paintings from "./pages/admin/Paintings";
 import Warehouse from "./pages/admin/Warehouse";
 import Employees from "./pages/admin/Employees";
+import { useEffect, useState } from "react";
+import { tranhService } from "./services";
 
 function App() {
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    const layTatCaTranh = async () => {
+      const result = await tranhService.layTatCaTranh();
+      if (result.success) {
+        setProducts(result.data || []);
+      }
+    };
+
+    layTatCaTranh();
+  }, []);
+
   return (
     <Routes>
       {/* CLIENT ROUTES - với Navbar & Footer */}
       <Route element={<ClientLayout />}>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Home products={products} />} />
         <Route path="/about" element={<About />} />
-        <Route path="/collection" element={<Collection />} />
-        <Route path="/product/:id" element={<ProductDetail />} />
+        <Route
+          path="/collection"
+          element={<Collection products={products} />}
+        />
+        <Route path="/tranh/:id" element={<ProductDetail />} />
         <Route path="/cart" element={<CartCheckout />} />
         <Route path="/auth/dang-nhap" element={<Login />} />
         <Route path="/auth/dang-ky-khach-hang" element={<Register />} />

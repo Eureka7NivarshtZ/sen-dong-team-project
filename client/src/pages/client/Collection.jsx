@@ -1,40 +1,20 @@
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { tranhService } from "../../services";
 import ProductCard_TrangChu from "../../components/client/ProductCard";
 
-function Collection() {
+function Collection({ products }) {
   const navigate = useNavigate();
 
-  const [allProducts, setAllProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Tất cả");
 
   useEffect(() => {
-    const layDanhSachTranh = async () => {
-      try {
-        const result = await tranhService.layTatCaTranh();
-
-        if (result.success) {
-          setAllProducts(result.data || []);
-          setFilteredProducts(result.data || []);
-        }
-      } catch (err) {
-        console.error("Lỗi lấy danh sách tranh:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    layDanhSachTranh();
-  }, []);
+    setFilteredProducts(products || []);
+  }, [products]);
 
   const getCategories = () => {
-    const cats = new Set(
-      allProducts.map((p) => p.danh_muc?.ten).filter(Boolean),
-    );
+    const cats = new Set(products.map((p) => p.danh_muc?.ten).filter(Boolean));
 
     return ["Tất cả", ...Array.from(cats)];
   };
@@ -43,7 +23,7 @@ function Collection() {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
 
-    const filtered = allProducts.filter(
+    const filtered = products.filter(
       (product) =>
         product.ten_tranh?.toLowerCase().includes(query) ||
         product.mo_ta?.toLowerCase().includes(query),
@@ -57,9 +37,9 @@ function Collection() {
     setSelectedCategory(category);
 
     if (category === "Tất cả") {
-      setFilteredProducts(allProducts);
+      setFilteredProducts(products);
     } else {
-      const filtered = allProducts.filter((p) => p.danh_muc?.ten === category);
+      const filtered = products.filter((p) => p.danh_muc?.ten === category);
 
       setFilteredProducts(filtered);
     }
@@ -162,11 +142,7 @@ function Collection() {
         </aside>
 
         <main style={{ minWidth: 0 }}>
-          {loading ? (
-            <div style={{ textAlign: "center", padding: "40px" }}>
-              <p>Đang tải sản phẩm...</p>
-            </div>
-          ) : (
+          {
             <div
               style={{
                 display: "grid",
@@ -194,7 +170,7 @@ function Collection() {
                           : "0đ"
                       }
                       onOpenDetail={() =>
-                        navigate(`/chi-tiet-san-pham/${product.id}`)
+                        navigate(`/tranh/${product.id}`)
                       }
                     />
                   );
@@ -211,7 +187,7 @@ function Collection() {
                 </div>
               )}
             </div>
-          )}
+          }
         </main>
       </div>
     </div>
