@@ -10,14 +10,15 @@ import CartCheckout from "./pages/client/CartCheckout";
 import Login from "./pages/client/Login";
 import Register from "./pages/client/Register";
 import ProductDetail from "./pages/client/ProductDetail";
-
+import SupportTickets from "./pages/client/SupportTickets";
 // ADMIN PAGES
 import Dashboard from "./pages/admin/Dashboard";
 import Orders from "./pages/admin/Orders";
 import Paintings from "./pages/admin/Paintings";
 import Warehouse from "./pages/admin/Warehouse";
 import Employees from "./pages/admin/Employees";
-
+import Promotions from "./pages/admin/Promotions";
+import AnswerSupport from "./pages/admin/AnswerSupport";
 function App() {
   return (
     <Routes>
@@ -29,7 +30,8 @@ function App() {
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/cart" element={<CartCheckout />} />
         <Route path="/auth/dang-nhap" element={<Login />} />
-        <Route path="/auth/dang-ky-khach-hang" element={<Register />} />
+        <Route path="/auth/dang-ky" element={<Register />} />
+        <Route path="/support" element={<SupportTickets />} />
       </Route>
 
       {/* ADMIN ROUTES - với Sidebar */}
@@ -40,6 +42,8 @@ function App() {
         <Route path="/admin/paintings" element={<Paintings />} />
         <Route path="/admin/warehouse" element={<Warehouse />} />
         <Route path="/admin/employees" element={<Employees />} />
+        <Route path="/admin/promotions" element={<Promotions />} />
+        <Route path='/admin/support' element={<AnswerSupport />} />
       </Route>
     </Routes>
   );
