@@ -20,7 +20,7 @@ export function CartProvider({ children }) {
                 ...item,
                 quantity: item.quantity + (product.quantity || 1),
               }
-            : item
+            : item,
         );
       }
 
@@ -48,8 +48,8 @@ export function CartProvider({ children }) {
               ...item,
               quantity,
             }
-          : item
-      )
+          : item,
+      ),
     );
   };
 

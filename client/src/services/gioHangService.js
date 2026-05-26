@@ -16,11 +16,11 @@ const gioHangService = {
   },
 
   // Thêm vào giỏ hàng
-  themVaoGioHang: async (tranhId, soLuong = 1) => {
+  themVaoGioHang: async (tranh_id, so_luong = 1) => {
     try {
       const response = await apiClient.post("/gio-hang/them", {
-        tranhId,
-        soLuong,
+        tranh_id,
+        so_luong,
       });
       return response.data;
     } catch (error) {
@@ -32,10 +32,10 @@ const gioHangService = {
   },
 
   // Cập nhật số lượng item trong giỏ hàng
-  capNhatSoLuong: async (gioHangChiTietId, soLuong) => {
+  capNhatSoLuong: async (gioHangChiTietId, so_luong) => {
     try {
       const response = await apiClient.put(`/gio-hang/${gioHangChiTietId}`, {
-        soLuong,
+        so_luong,
       });
       return response.data;
     } catch (error) {

@@ -79,7 +79,7 @@ function ProductDetail() {
     // Kiểm tra xem người dùng đã đăng nhập không
     if (!authService.isAuthenticated()) {
       alert("Vui lòng đăng nhập trước khi thêm vào giỏ hàng");
-      navigate("/dang-nhap");
+      navigate("/auth/dang-nhap");
       return;
     }
 
@@ -166,7 +166,7 @@ function ProductDetail() {
               margin: "0 0 12px",
             }}
           >
-            {product.ten}
+            {product.ten_tranh}
           </h1>
 
           <div
@@ -177,7 +177,9 @@ function ProductDetail() {
               marginBottom: "28px",
             }}
           >
-            {product.giaBan ? `${product.giaBan.toLocaleString()}đ` : "Liên hệ"}
+            {product.gia_ban
+              ? `${product.gia_ban.toLocaleString()}đ`
+              : "Liên hệ"}
           </div>
 
           <div style={{ marginBottom: "26px" }}>
@@ -262,7 +264,7 @@ function ProductDetail() {
               marginBottom: "30px",
             }}
           >
-            {product.moTa || "Không có mô tả"}
+            {product.mo_ta || "Không có mô tả"}
           </p>
 
           <button
@@ -299,13 +301,13 @@ function ProductDetail() {
             }}
           >
             <div>
-              <strong>Tác giả:</strong> {product.tacGia?.ten || "N/A"}
+              <strong>Tác giả:</strong> {product.tac_gia?.ho_ten || "N/A"}
             </div>
             <div>
-              <strong>Danh mục:</strong> {product.danhMuc?.ten || "N/A"}
+              <strong>Danh mục:</strong> {product.danh_muc?.ten || "N/A"}
             </div>
             <div>
-              <strong>Số lượng tồn:</strong> {product.soLuongTon || 0}
+              <strong>Số lượng tồn:</strong> {product.so_luong_ton || 0}
             </div>
           </div>
         </div>

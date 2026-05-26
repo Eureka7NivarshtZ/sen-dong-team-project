@@ -120,7 +120,11 @@ const xemChiTietTranh = async (req, res) => {
   const { id } = req.params;
 
   const tranh = await Tranh.findByPk(id, {
-    include: [{ model: HinhAnhTranh, as: "hinh_anh" }],
+    include: [
+      { model: HinhAnhTranh, as: "hinh_anh" },
+      { model: TacGia, as: "tac_gia" },
+      { model: DanhMuc, as: "danh_muc" },
+    ],
   });
 
   if (!tranh) {
