@@ -10,7 +10,7 @@ import CartCheckout from "./pages/client/CartCheckout";
 import Login from "./pages/client/Login";
 import Register from "./pages/client/Register";
 import ProductDetail from "./pages/client/ProductDetail";
-
+import SupportTickets from "./pages/client/SupportTickets";
 // ADMIN PAGES
 import Dashboard from "./pages/admin/Dashboard";
 import Orders from "./pages/admin/Orders";
@@ -19,6 +19,8 @@ import Warehouse from "./pages/admin/Warehouse";
 import Employees from "./pages/admin/Employees";
 import ProtectedAdminRoute from "./components/admin/ProtectedAdminRoute";
 
+import Promotions from "./pages/admin/Promotions";
+import AnswerSupport from "./pages/admin/AnswerSupport";
 import { useEffect, useState } from "react";
 import { tranhService } from "./services";
 
@@ -46,7 +48,8 @@ function App() {
         <Route path="/tranh/:id" element={<ProductDetail />} />
         <Route path="/gio-hang" element={<CartCheckout />} />
         <Route path="/auth/dang-nhap" element={<Login />} />
-        <Route path="/auth/dang-ky-khach-hang" element={<Register />} />
+        <Route path="/auth/dang-ky" element={<Register />} />
+        <Route path="/support" element={<SupportTickets />} />
       </Route>
 
       {/* ADMIN ROUTES */}
