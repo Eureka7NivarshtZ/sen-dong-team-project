@@ -58,7 +58,7 @@ const kiemTraKhuyenMaiHopLe = async (khuyenMai, khach_hang_id, tongTien) => {
   return null;
 };
 
-const adminTaoKhuyenMai = async (req, res) => {
+const taoKhuyenMai = async (req, res) => {
   const {
     ma,
     ten,
@@ -83,12 +83,10 @@ const adminTaoKhuyenMai = async (req, res) => {
     !ngay_bat_dau ||
     !ngay_ket_thuc
   ) {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        error: "Vui long nhap day du thong tin khuyen mai",
-      });
+    return res.status(400).json({
+      success: false,
+      error: "Vui long nhap day du thong tin khuyen mai",
+    });
   }
 
   const khuyenMai = await KhuyenMai.create({
@@ -128,7 +126,7 @@ const adminTaoKhuyenMai = async (req, res) => {
   });
 };
 
-const adminXemTatCaKhuyenMai = async (req, res) => {
+const xemTatCaKhuyenMai = async (req, res) => {
   const { trang_thai, keyword } = req.query;
   const where = {};
 
@@ -152,7 +150,7 @@ const adminXemTatCaKhuyenMai = async (req, res) => {
   });
 };
 
-const adminXemChiTietKhuyenMai = async (req, res) => {
+const xemChiTietKhuyenMai = async (req, res) => {
   const { id } = req.params;
 
   const khuyenMai = await KhuyenMai.findByPk(id, {
@@ -175,7 +173,7 @@ const adminXemChiTietKhuyenMai = async (req, res) => {
   });
 };
 
-const adminCapNhatKhuyenMai = async (req, res) => {
+const capNhatKhuyenMai = async (req, res) => {
   const { id } = req.params;
   const khuyenMai = await KhuyenMai.findByPk(id);
 
@@ -197,7 +195,7 @@ const adminCapNhatKhuyenMai = async (req, res) => {
   });
 };
 
-const adminXoaKhuyenMai = async (req, res) => {
+const xoaKhuyenMai = async (req, res) => {
   const { id } = req.params;
   const khuyenMai = await KhuyenMai.findByPk(id);
 
@@ -255,10 +253,10 @@ const kiemTraMaKhuyenMai = async (req, res) => {
 module.exports = {
   tinhSoTienGiam,
   kiemTraKhuyenMaiHopLe,
-  adminTaoKhuyenMai,
-  adminXemTatCaKhuyenMai,
-  adminXemChiTietKhuyenMai,
-  adminCapNhatKhuyenMai,
-  adminXoaKhuyenMai,
+  taoKhuyenMai,
+  xemTatCaKhuyenMai,
+  xemChiTietKhuyenMai,
+  capNhatKhuyenMai,
+  xoaKhuyenMai,
   kiemTraMaKhuyenMai,
 };

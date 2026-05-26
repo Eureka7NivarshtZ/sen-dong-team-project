@@ -44,7 +44,7 @@ Content-Type: application/json
 }
 
 ### 1.3 Đăng ký khách hàng
-POST {{baseUrl}}/auth/dang-ky-khach-hang
+POST {{baseUrl}}/auth/dang-ky
 Content-Type: application/json
 
 {
@@ -56,7 +56,7 @@ Content-Type: application/json
 }
 
 ### 1.4 Xem thông tin của tôi
-GET {{baseUrl}}/auth/thong-tin-cua-toi
+GET {{baseUrl}}/auth/thong-tin
 Authorization: Bearer {{customerToken}}
 
 ### 1.5 Quên mật khẩu
@@ -88,17 +88,17 @@ GET {{baseUrl}}/danh-muc
 GET {{baseUrl}}/danh-muc/{{danhMucId}}
 
 ### 2.3 Admin thêm danh mục
-POST {{baseUrl}}/admin/danh-muc
+POST {{baseUrl}}/danh-muc
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
 {
-  "ten": "Tranh sơn nước",
+  "ten": "Tranh sơn dau",
   "cha_id": null
 }
 
 ### 2.4 Admin cập nhật danh mục
-PUT {{baseUrl}}/admin/danh-muc/{{danhMucId}}
+PUT {{baseUrl}}/danh-muc/{{danhMucId}}
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -108,7 +108,7 @@ Content-Type: application/json
 }
 
 ### 2.5 Admin xóa danh mục
-DELETE {{baseUrl}}/admin/danh-muc/{{danhMucId}}
+DELETE {{baseUrl}}/danh-muc/{{danhMucId}}
 Authorization: Bearer {{adminToken}}
 
 
@@ -123,7 +123,7 @@ GET {{baseUrl}}/tac-gia
 GET {{baseUrl}}/tac-gia/{{tacGiaId}}
 
 ### 3.3 Admin thêm tác giả
-POST {{baseUrl}}/admin/tac-gia
+POST {{baseUrl}}/tac-gia
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -136,7 +136,7 @@ Content-Type: application/json
 }
 
 ### 3.4 Admin cập nhật tác giả
-PUT {{baseUrl}}/admin/tac-gia/{{tacGiaId}}
+PUT {{baseUrl}}/tac-gia/{{tacGiaId}}
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -149,7 +149,7 @@ Content-Type: application/json
 }
 
 ### 3.5 Admin xóa tác giả
-DELETE {{baseUrl}}/admin/tac-gia/{{tacGiaId}}
+DELETE {{baseUrl}}/tac-gia/{{tacGiaId}}
 Authorization: Bearer {{adminToken}}
 
 
@@ -164,7 +164,7 @@ GET {{baseUrl}}/tranh?keyword=Night&danh_muc_id={{danhMucId}}&tac_gia_id={{tacGi
 GET {{baseUrl}}/tranh/{{tranhId}}
 
 ### 4.3 Admin thêm tranh
-POST {{baseUrl}}/admin/tranh
+POST {{baseUrl}}/tranh
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -182,7 +182,7 @@ Content-Type: application/json
 }
 
 ### 4.4 Admin cập nhật tranh
-PUT {{baseUrl}}/admin/tranh/{{tranhId}}
+PUT {{baseUrl}}/tranh/{{tranhId}}
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -200,11 +200,11 @@ Content-Type: application/json
 }
 
 ### 4.5 Admin ẩn tranh
-PUT {{baseUrl}}/admin/tranh/{{tranhId}}/an
+PUT {{baseUrl}}/tranh/{{tranhId}}/an
 Authorization: Bearer {{adminToken}}
 
 ### 4.6 Admin xóa tranh
-DELETE {{baseUrl}}/admin/tranh/{{tranhId}}
+DELETE {{baseUrl}}/tranh/{{tranhId}}
 Authorization: Bearer {{adminToken}}
 
 
@@ -213,7 +213,7 @@ Authorization: Bearer {{adminToken}}
 ### ============================================
 
 ### 4B.1 Admin thêm hình ảnh tranh
-POST {{baseUrl}}/admin/tranh/{{tranhId}}/hinh-anh
+POST {{baseUrl}}/tranh/{{tranhId}}/hinh-anh
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -224,7 +224,7 @@ Content-Type: application/json
 }
 
 ### 4B.2 Admin cập nhật hình ảnh tranh
-PUT {{baseUrl}}/admin/tranh/hinh-anh/{{hinhAnhTranhId}}
+PUT {{baseUrl}}/tranh/hinh-anh/{{hinhAnhTranhId}}
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -235,11 +235,11 @@ Content-Type: application/json
 }
 
 ### 4B.3 Admin đặt ảnh chính
-PUT {{baseUrl}}/admin/tranh/hinh-anh/{{hinhAnhTranhId}}/chinh
+PUT {{baseUrl}}/tranh/hinh-anh/{{hinhAnhTranhId}}/chinh
 Authorization: Bearer {{adminToken}}
 
 ### 4B.4 Admin xóa hình ảnh tranh
-DELETE {{baseUrl}}/admin/tranh/hinh-anh/{{hinhAnhTranhId}}
+DELETE {{baseUrl}}/tranh/hinh-anh/{{hinhAnhTranhId}}
 Authorization: Bearer {{adminToken}}
 
 ### Khách hàng xem đánh giá của một tranh
@@ -283,11 +283,11 @@ GET {{baseUrl}}/danh-gia/cua-toi
 Authorization: Bearer {{customerToken}}
 
 ### Admin xem tất cả đánh giá
-GET {{baseUrl}}/admin/danh-gia
+GET {{baseUrl}}/danh-gia
 Authorization: Bearer {{adminToken}}
 
 ### Admin duyệt đánh giá
-PATCH {{baseUrl}}/admin/danh-gia/{{danhGiaId}}/trang-thai
+PATCH {{baseUrl}}/danh-gia/{{danhGiaId}}/trang-thai
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -296,7 +296,7 @@ Content-Type: application/json
 }
 
 ### Admin ẩn đánh giá
-PATCH {{baseUrl}}/admin/danh-gia/{{danhGiaId}}/trang-thai
+PATCH {{baseUrl}}/danh-gia/{{danhGiaId}}/trang-thai
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -305,7 +305,7 @@ Content-Type: application/json
 }
 
 ### Admin phản hồi đánh giá
-PATCH {{baseUrl}}/admin/danh-gia/{{danhGiaId}}/phan-hoi
+PATCH {{baseUrl}}/danh-gia/{{danhGiaId}}/phan-hoi
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -318,15 +318,15 @@ Content-Type: application/json
 ### ============================================
 
 ### 5.1 Admin xem tất cả nhân viên
-GET {{baseUrl}}/admin/nhan-vien
+GET {{baseUrl}}/nhan-vien
 Authorization: Bearer {{adminToken}}
 
 ### 5.2 Admin xem chi tiết nhân viên
-GET {{baseUrl}}/admin/nhan-vien/{{nhanVienId}}
+GET {{baseUrl}}/nhan-vien/{{nhanVienId}}
 Authorization: Bearer {{adminToken}}
 
 ### 5.3 Admin thêm nhân viên
-POST {{baseUrl}}/admin/nhan-vien
+POST {{baseUrl}}/nhan-vien
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -341,7 +341,7 @@ Content-Type: application/json
 }
 
 ### 5.4 Admin cập nhật nhân viên
-PUT {{baseUrl}}/admin/nhan-vien/{{nhanVienId}}
+PUT {{baseUrl}}/nhan-vien/{{nhanVienId}}
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -355,11 +355,11 @@ Content-Type: application/json
 }
 
 ### 5.5 Admin khóa/mở nhân viên
-PATCH {{baseUrl}}/admin/nhan-vien/{{nhanVienId}}/khoa-mo
+PATCH {{baseUrl}}/nhan-vien/{{nhanVienId}}/khoa-mo
 Authorization: Bearer {{adminToken}}
 
 ### 5.6 Admin đổi mật khẩu nhân viên
-PATCH {{baseUrl}}/admin/nhan-vien/{{nhanVienId}}/doi-mat-khau
+PATCH {{baseUrl}}/nhan-vien/{{nhanVienId}}/doi-mat-khau
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -368,7 +368,7 @@ Content-Type: application/json
 }
 
 ### 5.7 Admin xóa / vô hiệu hóa nhân viên
-DELETE {{baseUrl}}/admin/nhan-vien/{{nhanVienId}}
+DELETE {{baseUrl}}/nhan-vien/{{nhanVienId}}
 Authorization: Bearer {{adminToken}}
 
 
@@ -377,15 +377,15 @@ Authorization: Bearer {{adminToken}}
 ### ============================================
 
 ### 6.1 Admin xem tất cả khách hàng
-GET {{baseUrl}}/admin/khach-hang?page=1&limit=10
+GET {{baseUrl}}/khach-hang?page=1&limit=10
 Authorization: Bearer {{adminToken}}
 
 ### 6.2 Admin xem chi tiết khách hàng
-GET {{baseUrl}}/admin/khach-hang/{{khachHangId}}
+GET {{baseUrl}}/khach-hang/{{khachHangId}}
 Authorization: Bearer {{adminToken}}
 
 ### 6.3 Admin khóa tài khoản khách hàng
-PUT {{baseUrl}}/admin/khach-hang/{{khachHangId}}/khoa
+PUT {{baseUrl}}/khach-hang/{{khachHangId}}/khoa
 Authorization: Bearer {{adminToken}}
 
 
@@ -398,7 +398,7 @@ GET {{baseUrl}}/gio-hang
 Authorization: Bearer {{customerToken}}
 
 ### 7.2 Khách hàng thêm vào giỏ hàng
-POST {{baseUrl}}/gio-hang/them
+POST {{baseUrl}}/gio-hang/
 Authorization: Bearer {{customerToken}}
 Content-Type: application/json
 
@@ -408,7 +408,7 @@ Content-Type: application/json
 }
 
 ### 7.3 Khách hàng cập nhật số lượng
-PUT {{baseUrl}}/gio-hang/cap-nhat/{{tranhId}}
+PUT {{baseUrl}}/gio-hang/{{tranhId}}
 Authorization: Bearer {{customerToken}}
 Content-Type: application/json
 
@@ -417,11 +417,11 @@ Content-Type: application/json
 }
 
 ### 7.4 Khách hàng xóa sản phẩm khỏi giỏ hàng
-DELETE {{baseUrl}}/gio-hang/xoa/{{tranhId}}
+DELETE {{baseUrl}}/gio-hang/{{tranhId}}
 Authorization: Bearer {{customerToken}}
 
 ### 7.5 Khách hàng xóa tất cả giỏ hàng
-DELETE {{baseUrl}}/gio-hang/xoa-tat-ca
+DELETE {{baseUrl}}/gio-hang/
 Authorization: Bearer {{customerToken}}
 
 
@@ -453,15 +453,15 @@ PUT {{baseUrl}}/don-hang/cua-toi/{{donHangId}}/huy
 Authorization: Bearer {{customerToken}}
 
 ### 8.5 Admin xem tất cả đơn hàng
-GET {{baseUrl}}/admin/don-hang?trang_thai=cho_xac_nhan&page=1&limit=10
+GET {{baseUrl}}/don-hang?trang_thai=cho_xac_nhan&page=1&limit=10
 Authorization: Bearer {{adminToken}}
 
 ### 8.6 Admin xem chi tiết đơn hàng
-GET {{baseUrl}}/admin/don-hang/{{donHangId}}
+GET {{baseUrl}}/don-hang/{{donHangId}}
 Authorization: Bearer {{adminToken}}
 
 ### 8.7 Admin cập nhật trạng thái đơn hàng
-PUT {{baseUrl}}/admin/don-hang/{{donHangId}}/trang-thai
+PUT {{baseUrl}}/don-hang/{{donHangId}}/trang-thai
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -470,7 +470,7 @@ Content-Type: application/json
 }
 
 ### 8.8 Admin hủy đơn hàng
-PUT {{baseUrl}}/admin/don-hang/{{donHangId}}/huy
+PUT {{baseUrl}}/don-hang/{{donHangId}}/huy
 Authorization: Bearer {{adminToken}}
 
 
@@ -488,15 +488,15 @@ GET {{baseUrl}}/don-vi-van-chuyen
 GET {{baseUrl}}/don-vi-van-chuyen/{{donViVanChuyenId}}
 
 ### 9.4 Admin xem tất cả đơn vị vận chuyển
-GET {{baseUrl}}/admin/don-vi-van-chuyen
+GET {{baseUrl}}/don-vi-van-chuyen
 Authorization: Bearer {{adminToken}}
 
 ### 9.5 Admin xem chi tiết đơn vị vận chuyển
-GET {{baseUrl}}/admin/don-vi-van-chuyen/{{donViVanChuyenId}}
+GET {{baseUrl}}/don-vi-van-chuyen/{{donViVanChuyenId}}
 Authorization: Bearer {{adminToken}}
 
 ### 9.6 Admin thêm đơn vị vận chuyển
-POST {{baseUrl}}/admin/don-vi-van-chuyen
+POST {{baseUrl}}/don-vi-van-chuyen
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -509,7 +509,7 @@ Content-Type: application/json
 }
 
 ### 9.7 Admin cập nhật đơn vị vận chuyển
-PUT {{baseUrl}}/admin/don-vi-van-chuyen/{{donViVanChuyenId}}
+PUT {{baseUrl}}/don-vi-van-chuyen/{{donViVanChuyenId}}
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -522,11 +522,11 @@ Content-Type: application/json
 }
 
 ### 9.8 Admin khóa/mở đơn vị vận chuyển
-PATCH {{baseUrl}}/admin/don-vi-van-chuyen/{{donViVanChuyenId}}/khoa-mo
+PATCH {{baseUrl}}/don-vi-van-chuyen/{{donViVanChuyenId}}/khoa-mo
 Authorization: Bearer {{adminToken}}
 
 ### 9.9 Admin xóa đơn vị vận chuyển
-DELETE {{baseUrl}}/admin/don-vi-van-chuyen/{{donViVanChuyenId}}
+DELETE {{baseUrl}}/don-vi-van-chuyen/{{donViVanChuyenId}}
 Authorization: Bearer {{adminToken}}
 
 
@@ -535,15 +535,15 @@ Authorization: Bearer {{adminToken}}
 ### ============================================
 
 ### 10.1 Tổng quan dashboard
-GET {{baseUrl}}/admin/dashboard
+GET {{baseUrl}}/dashboard
 Authorization: Bearer {{adminToken}}
 
 ### 10.2 Đơn hàng gần đây
-GET {{baseUrl}}/admin/dashboard/don-hang-gan-day
+GET {{baseUrl}}/dashboard/don-hang-gan-day
 Authorization: Bearer {{adminToken}}
 
 ### 10.3 Doanh thu theo tháng
-GET {{baseUrl}}/admin/dashboard/doanh-thu-theo-thang?nam=2026
+GET {{baseUrl}}/dashboard/doanh-thu-theo-thang?nam=2026
 Authorization: Bearer {{adminToken}}
 
 
@@ -552,7 +552,7 @@ Authorization: Bearer {{adminToken}}
 ### ============================================
 
 ### 11.1 Admin tạo vận đơn cho đơn hàng
-POST {{baseUrl}}/admin/van-don/don-hang/{{donHangId}}
+POST {{baseUrl}}/van-don/don-hang/{{donHangId}}
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -565,15 +565,15 @@ Content-Type: application/json
 }
 
 ### 11.2 Admin xem tất cả vận đơn
-GET {{baseUrl}}/admin/van-don
+GET {{baseUrl}}/van-don
 Authorization: Bearer {{adminToken}}
 
 ### 11.3 Admin xem chi tiết vận đơn
-GET {{baseUrl}}/admin/van-don/{{vanDonId}}
+GET {{baseUrl}}/van-don/{{vanDonId}}
 Authorization: Bearer {{adminToken}}
 
 ### 11.4 Admin cập nhật vận đơn
-PUT {{baseUrl}}/admin/van-don/{{vanDonId}}
+PUT {{baseUrl}}/van-don/{{vanDonId}}
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -586,7 +586,7 @@ Content-Type: application/json
 }
 
 ### 11.5 Admin cập nhật trạng thái vận đơn
-PATCH {{baseUrl}}/admin/van-don/{{vanDonId}}/trang-thai
+PATCH {{baseUrl}}/van-don/{{vanDonId}}/trang-thai
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -595,7 +595,7 @@ Content-Type: application/json
 }
 
 ### 11.6 Admin xóa vận đơn
-DELETE {{baseUrl}}/admin/van-don/{{vanDonId}}
+DELETE {{baseUrl}}/van-don/{{vanDonId}}
 Authorization: Bearer {{adminToken}}
 
 
@@ -604,15 +604,15 @@ Authorization: Bearer {{adminToken}}
 ### ============================================
 
 ### 12.1 Admin xem tất cả hóa đơn
-GET {{baseUrl}}/admin/hoa-don
+GET {{baseUrl}}/hoa-don
 Authorization: Bearer {{adminToken}}
 
 ### 12.2 Admin xem chi tiết hóa đơn
-GET {{baseUrl}}/admin/hoa-don/{{hoaDonId}}
+GET {{baseUrl}}/hoa-don/{{hoaDonId}}
 Authorization: Bearer {{adminToken}}
 
 ### 12.3 Admin tạo hóa đơn
-POST {{baseUrl}}/admin/hoa-don
+POST {{baseUrl}}/hoa-don
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -627,7 +627,7 @@ Content-Type: application/json
 }
 
 ### 12.4 Admin hủy hóa đơn
-PATCH {{baseUrl}}/admin/hoa-don/{{hoaDonId}}/huy
+PATCH {{baseUrl}}/hoa-don/{{hoaDonId}}/huy
 Authorization: Bearer {{adminToken}}
 
 
@@ -636,15 +636,15 @@ Authorization: Bearer {{adminToken}}
 ### ============================================
 
 ### 13.1 Admin xem tất cả thanh toán
-GET {{baseUrl}}/admin/thanh-toan
+GET {{baseUrl}}/thanh-toan
 Authorization: Bearer {{adminToken}}
 
 ### 13.2 Admin xem chi tiết thanh toán
-GET {{baseUrl}}/admin/thanh-toan/{{thanhToanId}}
+GET {{baseUrl}}/thanh-toan/{{thanhToanId}}
 Authorization: Bearer {{adminToken}}
 
 ### 13.3 Admin tạo thanh toán
-POST {{baseUrl}}/admin/thanh-toan
+POST {{baseUrl}}/thanh-toan
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -657,7 +657,7 @@ Content-Type: application/json
 }
 
 ### 13.4 Admin cập nhật trạng thái thanh toán
-PATCH {{baseUrl}}/admin/thanh-toan/{{thanhToanId}}/trang-thai
+PATCH {{baseUrl}}/thanh-toan/{{thanhToanId}}/trang-thai
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -682,15 +682,15 @@ Content-Type: application/json
 }
 
 ### Admin xem tất cả khuyến mãi
-GET {{baseUrl}}/admin/khuyen-mai
+GET {{baseUrl}}/khuyen-mai
 Authorization: Bearer {{adminToken}}
 
 ### Admin xem chi tiết khuyến mãi
-GET {{baseUrl}}/admin/khuyen-mai/{{khuyenMaiId}}
+GET {{baseUrl}}/khuyen-mai/{{khuyenMaiId}}
 Authorization: Bearer {{adminToken}}
 
 ### Admin tạo khuyến mãi
-POST {{baseUrl}}/admin/khuyen-mai
+POST {{baseUrl}}/khuyen-mai
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -709,7 +709,7 @@ Content-Type: application/json
 }
 
 ### Admin cập nhật khuyến mãi
-PUT {{baseUrl}}/admin/khuyen-mai/{{khuyenMaiId}}
+PUT {{baseUrl}}/khuyen-mai/{{khuyenMaiId}}
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -719,7 +719,7 @@ Content-Type: application/json
 }
 
 ### Admin xóa khuyến mãi
-DELETE {{baseUrl}}/admin/khuyen-mai/{{khuyenMaiId}}
+DELETE {{baseUrl}}/khuyen-mai/{{khuyenMaiId}}
 Authorization: Bearer {{adminToken}}
 
 
@@ -760,11 +760,11 @@ Content-Type: application/json
 }
 
 ### Admin xem tất cả yêu cầu hỗ trợ
-GET {{baseUrl}}/admin/ho-tro
+GET {{baseUrl}}/ho-tro
 Authorization: Bearer {{adminToken}}
 
 ### Admin cập nhật yêu cầu hỗ trợ
-PATCH {{baseUrl}}/admin/ho-tro/{{hoTroId}}
+PATCH {{baseUrl}}/ho-tro/{{hoTroId}}
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -774,7 +774,7 @@ Content-Type: application/json
 }
 
 ### Admin phản hồi yêu cầu hỗ trợ
-POST {{baseUrl}}/admin/ho-tro/{{hoTroId}}/phan-hoi
+POST {{baseUrl}}/ho-tro/{{hoTroId}}/phan-hoi
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -813,19 +813,19 @@ GET {{baseUrl}}/lich-su-don-hang/{{donHangId}}/trang-thai
 Authorization: Bearer {{customerToken}}
 
 ### ============================================
-### 14. KHO - NHÀ CUNG CẤP
+### 14. NHÀ CUNG CẤP
 ### ============================================
 
 ### 14.1 Admin xem tất cả nhà cung cấp
-GET {{baseUrl}}/admin/kho/nha-cung-cap
+GET {{baseUrl}}/nha-cung-cap
 Authorization: Bearer {{adminToken}}
 
 ### 14.2 Admin xem chi tiết nhà cung cấp
-GET {{baseUrl}}/admin/kho/nha-cung-cap/{{nhaCungCapId}}
+GET {{baseUrl}}/nha-cung-cap/{{nhaCungCapId}}
 Authorization: Bearer {{adminToken}}
 
 ### 14.3 Admin thêm nhà cung cấp
-POST {{baseUrl}}/admin/kho/nha-cung-cap
+POST {{baseUrl}}/nha-cung-cap
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -838,7 +838,7 @@ Content-Type: application/json
 }
 
 ### 14.4 Admin cập nhật nhà cung cấp
-PUT {{baseUrl}}/admin/kho/nha-cung-cap/{{nhaCungCapId}}
+PUT {{baseUrl}}/nha-cung-cap/{{nhaCungCapId}}
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -851,28 +851,28 @@ Content-Type: application/json
 }
 
 ### 14.5 Admin xóa nhà cung cấp
-DELETE {{baseUrl}}/admin/kho/nha-cung-cap/{{nhaCungCapId}}
+DELETE {{baseUrl}}/nha-cung-cap/{{nhaCungCapId}}
 Authorization: Bearer {{adminToken}}
 
 
 ### ============================================
-### 15. KHO - VẬT LIỆU
+### 15. VẬT LIỆU
 ### ============================================
 
 ### 15.1 Admin xem tất cả vật liệu
-GET {{baseUrl}}/admin/kho/vat-lieu
+GET {{baseUrl}}/vat-lieu
 Authorization: Bearer {{adminToken}}
 
 ### 15.2 Admin xem vật liệu cảnh báo tồn kho thấp
-GET {{baseUrl}}/admin/kho/vat-lieu/canh-bao
+GET {{baseUrl}}/vat-lieu/canh-bao
 Authorization: Bearer {{adminToken}}
 
 ### 15.3 Admin xem chi tiết vật liệu
-GET {{baseUrl}}/admin/kho/vat-lieu/{{vatLieuId}}
+GET {{baseUrl}}/vat-lieu/{{vatLieuId}}
 Authorization: Bearer {{adminToken}}
 
 ### 15.4 Admin thêm vật liệu
-POST {{baseUrl}}/admin/kho/vat-lieu
+POST {{baseUrl}}/vat-lieu
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -887,7 +887,7 @@ Content-Type: application/json
 }
 
 ### 15.5 Admin cập nhật vật liệu
-PUT {{baseUrl}}/admin/kho/vat-lieu/{{vatLieuId}}
+PUT {{baseUrl}}/vat-lieu/{{vatLieuId}}
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -902,24 +902,24 @@ Content-Type: application/json
 }
 
 ### 15.6 Admin xóa vật liệu
-DELETE {{baseUrl}}/admin/kho/vat-lieu/{{vatLieuId}}
+DELETE {{baseUrl}}/vat-lieu/{{vatLieuId}}
 Authorization: Bearer {{adminToken}}
 
 
 ### ============================================
-### 16. KHO - PHIẾU NHẬP VẬT LIỆU
+### 16. PHIẾU NHẬP VẬT LIỆU
 ### ============================================
 
 ### 16.1 Admin xem tất cả phiếu nhập
-GET {{baseUrl}}/admin/kho/phieu-nhap
+GET {{baseUrl}}/phieu-nhap
 Authorization: Bearer {{adminToken}}
 
 ### 16.2 Admin xem chi tiết phiếu nhập
-GET {{baseUrl}}/admin/kho/phieu-nhap/{{phieuNhapVatLieuId}}
+GET {{baseUrl}}/phieu-nhap/{{phieuNhapVatLieuId}}
 Authorization: Bearer {{adminToken}}
 
 ### 16.3 Admin tạo phiếu nhập
-POST {{baseUrl}}/admin/kho/phieu-nhap
+POST {{baseUrl}}/phieu-nhap
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -935,28 +935,28 @@ Content-Type: application/json
 }
 
 ### 16.4 Admin nhập kho phiếu nhập
-PATCH {{baseUrl}}/admin/kho/phieu-nhap/{{phieuNhapVatLieuId}}/nhap-kho
+PATCH {{baseUrl}}/phieu-nhap/{{phieuNhapVatLieuId}}/nhap-kho
 Authorization: Bearer {{adminToken}}
 
 ### 16.5 Admin hủy phiếu nhập
-PATCH {{baseUrl}}/admin/kho/phieu-nhap/{{phieuNhapVatLieuId}}/huy
+PATCH {{baseUrl}}/phieu-nhap/{{phieuNhapVatLieuId}}/huy
 Authorization: Bearer {{adminToken}}
 
 
 ### ============================================
-### 17. KHO - THIẾT BỊ
+### 17. THIẾT BỊ
 ### ============================================
 
 ### 17.1 Admin xem tất cả thiết bị
-GET {{baseUrl}}/admin/kho/thiet-bi
+GET {{baseUrl}}/thiet-bi
 Authorization: Bearer {{adminToken}}
 
 ### 17.2 Admin xem chi tiết thiết bị
-GET {{baseUrl}}/admin/kho/thiet-bi/{{thietBiId}}
+GET {{baseUrl}}/thiet-bi/{{thietBiId}}
 Authorization: Bearer {{adminToken}}
 
 ### 17.3 Admin thêm thiết bị
-POST {{baseUrl}}/admin/kho/thiet-bi
+POST {{baseUrl}}/thiet-bi
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -971,7 +971,7 @@ Content-Type: application/json
 }
 
 ### 17.4 Admin cập nhật thiết bị
-PUT {{baseUrl}}/admin/kho/thiet-bi/{{thietBiId}}
+PUT {{baseUrl}}/thiet-bi/{{thietBiId}}
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -986,5 +986,5 @@ Content-Type: application/json
 }
 
 ### 17.5 Admin xóa thiết bị
-DELETE {{baseUrl}}/admin/kho/thiet-bi/{{thietBiId}}
+DELETE {{baseUrl}}/thiet-bi/{{thietBiId}}
 Authorization: Bearer {{adminToken}}
