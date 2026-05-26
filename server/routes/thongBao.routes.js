@@ -12,8 +12,8 @@ const { yeuCauDangNhap } = require("../utils/middleware");
 
 router.use(yeuCauDangNhap);
 router.get("/", xemThongBaoCuaToi);
-router.get("/chua-doc/dem", demThongBaoChuaDoc);
-router.patch("/:id/da-doc", danhDauDaDoc);
-router.patch("/da-doc/tat-ca", danhDauTatCaDaDoc);
+router.patch("/:id/doc", danhDauDaDoc);
+router.patch("/doc-tat-ca", danhDauTatCaDaDoc);
+router.get("/dem-chua-doc", demThongBaoChuaDoc);
 
 module.exports = router;
