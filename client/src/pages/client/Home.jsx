@@ -87,7 +87,7 @@ function Home({ products }) {
           </p>
           <div style={{ display: "flex", gap: "15px" }}>
             <button
-              onClick={() => navigate("/collection")}
+              onClick={() => navigate("/tranh")}
               style={{
                 padding: "12px 24px",
                 backgroundColor: "#39b441",

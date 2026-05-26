@@ -17,6 +17,8 @@ import Orders from "./pages/admin/Orders";
 import Paintings from "./pages/admin/Paintings";
 import Warehouse from "./pages/admin/Warehouse";
 import Employees from "./pages/admin/Employees";
+import ProtectedAdminRoute from "./components/admin/ProtectedAdminRoute";
+
 import Promotions from "./pages/admin/Promotions";
 import AnswerSupport from "./pages/admin/AnswerSupport";
 import { useEffect, useState } from "react";
@@ -38,31 +40,33 @@ function App() {
 
   return (
     <Routes>
-      {/* CLIENT ROUTES - với Navbar & Footer */}
+      {/* CLIENT ROUTES */}
       <Route element={<ClientLayout />}>
         <Route path="/" element={<Home products={products} />} />
         <Route path="/about" element={<About />} />
-        <Route
-          path="/collection"
-          element={<Collection products={products} />}
-        />
+        <Route path="/tranh" element={<Collection products={products} />} />
         <Route path="/tranh/:id" element={<ProductDetail />} />
-        <Route path="/cart" element={<CartCheckout />} />
+        <Route path="/gio-hang" element={<CartCheckout />} />
         <Route path="/auth/dang-nhap" element={<Login />} />
         <Route path="/auth/dang-ky" element={<Register />} />
         <Route path="/support" element={<SupportTickets />} />
       </Route>
 
-      {/* ADMIN ROUTES - với Sidebar */}
-      <Route element={<AdminLayout />}>
-        <Route path="/admin" element={<Dashboard />} />
-        <Route path="/admin/dashboard" element={<Dashboard />} />
-        <Route path="/admin/orders" element={<Orders />} />
-        <Route path="/admin/paintings" element={<Paintings />} />
-        <Route path="/admin/warehouse" element={<Warehouse />} />
-        <Route path="/admin/employees" element={<Employees />} />
-        <Route path="/admin/promotions" element={<Promotions />} />
-        <Route path='/admin/support' element={<AnswerSupport />} />
+      {/* ADMIN ROUTES */}
+      <Route
+        path="/admin"
+        element={
+          <ProtectedAdminRoute>
+            <AdminLayout />
+          </ProtectedAdminRoute>
+        }
+      >
+        <Route index element={<Dashboard />} />
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="don-hang" element={<Orders />} />
+        <Route path="tranh" element={<Paintings />} />
+        <Route path="warehouse" element={<Warehouse />} />
+        <Route path="nhan-vien" element={<Employees />} />
       </Route>
     </Routes>
   );

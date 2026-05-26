@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useCart } from "../../contexts/CartContext";
 import { gioHangService } from "../../services";
 
 function CartCheckout() {
   const navigate = useNavigate();
-  const { cartItems, clearCart, setCartItems } = useCart();
+
+  // Quản lý giỏ hàng trực tiếp trong trang này, không dùng CartContext nữa
+  const [cartItems, setCartItems] = useState([]);
 
   // Quản lý các bước: 1: Giỏ hàng, 2: Thông tin đặt hàng, 3: Vận chuyển, 4: Thanh toán, 5: Thành công
   const [step, setStep] = useState(1);
+
   const [shippingInfo, setShippingInfo] = useState({
     name: "",
     phone: "",
@@ -18,23 +20,50 @@ function CartCheckout() {
     payment: "cod",
   });
 
-  // --- HỆ THỐNG MÃ KHUYẾN MÃI (ĐỒNG BỘ VỚI DỮ LIỆU TRANG ADMIN CỦA BẠN) ---
-  const [couponCode, setCouponCode] = useState(""); // Ô nhập chữ của khách hàng
-  const [appliedCoupon, setAppliedCoupon] = useState(null); // Lưu thông tin mã sau khi áp dụng thành công
-  const [couponError, setCouponError] = useState(""); // Lưu thông báo lỗi nếu mã không hợp lệ
+  // --- HỆ THỐNG MÃ KHUYẾN MÃI ---
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponError, setCouponError] = useState("");
 
   useEffect(() => {
     const layTatCaGioHang = async () => {
-      const result = await gioHangService.layGioHangCuaToi();
-      if (result.success) {
-        
+      try {
+        const result = await gioHangService.xemGioHang();
+
+        if (result.success) {
+          setCartItems(result.data || []);
+        }
+      } catch (error) {
+        console.error("Lỗi khi lấy giỏ hàng:", error);
       }
-    }
-    
+    };
+
     layTatCaGioHang();
   }, []);
 
-  // Danh sách mã khuyến mãi mẫu (Có thể kết nối API từ promotions sau này)
+  const clearCart = () => {
+    setCartItems([]);
+  };
+
+  const removeFromCart = (id) => {
+    setCartItems((prevItems) => prevItems.filter((item) => item.id !== id));
+  };
+
+  const updateQuantity = (id, quantity) => {
+    if (quantity < 1) return;
+
+    setCartItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              quantity,
+            }
+          : item,
+      ),
+    );
+  };
+
   const availableCoupons = [
     {
       code: "SUMMER20",
@@ -56,19 +85,16 @@ function CartCheckout() {
     },
   ];
 
-  // Hàm chuyển đổi chuỗi giá "3.600.000 đ" về dạng Số nguyên để tính toán tiền bạc
   const parsePrice = (priceStr) => {
     if (!priceStr) return 0;
     if (typeof priceStr === "number") return priceStr;
     return parseInt(priceStr.replace(/[^0-9]/g, ""), 10);
   };
 
-  // Tính tiền tranh (subtotal) an toàn bằng việc phòng hờ trường hợp mảng trống hoặc undefined
-  const subtotal = (cartItems || []).reduce((sum, item) => {
+  const subtotal = (cartItems.danh_sach || []).reduce((sum, item) => {
     return sum + parsePrice(item.price) * item.quantity;
   }, 0);
 
-  // --- LOGIC TÍNH TOÁN KHUYẾN MÃI REAL-TIME ---
   const handleApplyCoupon = (e) => {
     e.preventDefault();
     setCouponError("");
@@ -78,7 +104,6 @@ function CartCheckout() {
       return;
     }
 
-    // Tìm mã khớp trong hệ thống
     const foundCoupon = availableCoupons.find(
       (c) => c.code.toUpperCase() === couponCode.trim().toUpperCase(),
     );
@@ -89,7 +114,6 @@ function CartCheckout() {
       return;
     }
 
-    // Kiểm tra điều kiện đơn hàng tối thiểu (minSpend)
     if (subtotal < foundCoupon.minSpend) {
       setCouponError(
         `Mã này chỉ áp dụng cho đơn hàng từ ${foundCoupon.minSpend.toLocaleString("vi-VN")} đ trở lên!`,
@@ -98,27 +122,26 @@ function CartCheckout() {
       return;
     }
 
-    // Nếu thỏa mãn tất cả điều kiện
     setAppliedCoupon(foundCoupon);
     setCouponError("");
     alert(`Áp dụng mã ${foundCoupon.code} thành công!`);
   };
 
-  // Hàm tính toán số tiền được giảm giá
   const calculateDiscount = () => {
     if (!appliedCoupon) return 0;
+
     if (appliedCoupon.value.includes("%")) {
       const percentage = parseInt(appliedCoupon.value.replace("%", ""), 10);
       return (subtotal * percentage) / 100;
-    } else {
-      return parseInt(appliedCoupon.value, 10);
     }
+
+    return parseInt(appliedCoupon.value, 10);
   };
+
+  console.log(cartItems);
 
   const discountAmount = calculateDiscount();
   const shippingFee = shippingInfo.method === "express" ? 50000 : 30000;
-
-  // Tổng tiền cuối cùng = Tiền hàng - Giảm giá + Phí vận chuyển (chỉ tính phí vận chuyển từ bước 3 trở đi)
   const total = subtotal - discountAmount + (step >= 3 ? shippingFee : 0);
 
   const formatPrice = (num) => num.toLocaleString("vi-VN") + " đ";
@@ -161,7 +184,6 @@ function CartCheckout() {
         </div>
       )}
 
-      {/* THANH ĐIỀU HƯỚNG TIẾN TRÌNH */}
       {step < 5 && (
         <div
           style={{
@@ -203,6 +225,7 @@ function CartCheckout() {
                 </div>
                 <span style={{ fontSize: "14px" }}>{s.label}</span>
               </div>
+
               {index < stepsTitle.length - 1 && (
                 <div
                   style={{
@@ -218,7 +241,6 @@ function CartCheckout() {
       )}
 
       <div style={{ textAlign: "left" }}>
-        {/* ================= BƯỚC 1: GIỎ HÀNG ================= */}
         {step === 1 &&
           (!cartItems || cartItems.length === 0 ? (
             <div
@@ -233,7 +255,7 @@ function CartCheckout() {
                 Giỏ hàng trống
               </p>
               <button
-                onClick={() => navigate("/collection")}
+                onClick={() => navigate("/bo-suu-tap")}
                 style={{
                   padding: "10px 20px",
                   backgroundColor: "#1c3f3a",
@@ -256,7 +278,7 @@ function CartCheckout() {
               }}
             >
               <div>
-                {cartItems.map((item) => (
+                {cartItems.danh_sach.map((item) => (
                   <div
                     key={item.id}
                     style={{
@@ -269,7 +291,7 @@ function CartCheckout() {
                   >
                     <img
                       src={item.image}
-                      alt={item.title}
+                      alt={item.tranh.ten_tranh}
                       style={{
                         width: "90px",
                         height: "90px",
@@ -278,6 +300,7 @@ function CartCheckout() {
                         borderRadius: "4px",
                       }}
                     />
+
                     <div style={{ flex: 1 }}>
                       <h4
                         style={{
@@ -286,7 +309,7 @@ function CartCheckout() {
                           fontWeight: "bold",
                         }}
                       >
-                        {item.title}
+                        {item.tranh.ten_tranh}
                       </h4>
                       <span style={{ color: "#888", fontSize: "13px" }}>
                         {item.category}
@@ -298,11 +321,12 @@ function CartCheckout() {
                           fontSize: "15px",
                         }}
                       >
-                        {typeof item.price === "number"
-                          ? formatPrice(item.price)
-                          : item.price}
+                        {typeof item.thanh_tien === "number"
+                          ? formatPrice(item.thanh_tien)
+                          : item.thanh_tien}
                       </div>
                     </div>
+
                     <div
                       style={{
                         display: "flex",
@@ -328,22 +352,16 @@ function CartCheckout() {
                             fontSize: "16px",
                           }}
                           onClick={() =>
-                            item.quantity > 1
-                              ? setCartItems(
-                                  cartItems.map((i) =>
-                                    i.id === item.id
-                                      ? { ...i, quantity: i.quantity - 1 }
-                                      : i,
-                                  ),
-                                )
-                              : null
+                            updateQuantity(item.id, item.so_luong - 1)
                           }
                         >
                           -
                         </button>
+
                         <span style={{ fontSize: "14px" }}>
-                          {item.quantity}
+                          {item.so_luong}
                         </span>
+
                         <button
                           style={{
                             border: "none",
@@ -352,24 +370,15 @@ function CartCheckout() {
                             fontSize: "16px",
                           }}
                           onClick={() =>
-                            setCartItems(
-                              cartItems.map((i) =>
-                                i.id === item.id
-                                  ? { ...i, quantity: i.quantity + 1 }
-                                  : i,
-                              ),
-                            )
+                            updateQuantity(item.id, item.so_luong + 1)
                           }
                         >
                           +
                         </button>
                       </div>
+
                       <button
-                        onClick={() =>
-                          setCartItems(
-                            cartItems.filter((i) => i.id !== item.id),
-                          )
-                        }
+                        onClick={() => removeFromCart(item.id)}
                         style={{
                           border: "none",
                           background: "none",
@@ -387,7 +396,6 @@ function CartCheckout() {
                 ))}
               </div>
 
-              {/* Tóm tắt tính tiền đơn hàng bên phải */}
               <div
                 style={{
                   border: "1px solid #f0f0f0",
@@ -407,6 +415,7 @@ function CartCheckout() {
                 >
                   Tóm tắt đơn hàng
                 </h3>
+
                 <div
                   style={{
                     display: "flex",
@@ -419,6 +428,7 @@ function CartCheckout() {
                     {formatPrice(subtotal)}
                   </strong>
                 </div>
+
                 <button
                   onClick={() => setStep(2)}
                   style={{
@@ -439,7 +449,6 @@ function CartCheckout() {
             </div>
           ))}
 
-        {/* ================= BƯỚC 2: THÔNG TIN ĐẶT HÀNG ================= */}
         {step === 2 && (
           <div
             style={{
@@ -460,6 +469,7 @@ function CartCheckout() {
                 }
                 style={inputStyle}
               />
+
               <input
                 type="text"
                 placeholder="Số điện thoại *"
@@ -469,6 +479,7 @@ function CartCheckout() {
                 }
                 style={inputStyle}
               />
+
               <input
                 type="text"
                 placeholder="Địa chỉ nhận tranh chi tiết *"
@@ -478,6 +489,7 @@ function CartCheckout() {
                 }
                 style={inputStyle}
               />
+
               <textarea
                 placeholder="Ghi chú đơn hàng..."
                 rows="3"
@@ -487,6 +499,7 @@ function CartCheckout() {
                 }
                 style={{ ...inputStyle, resize: "none" }}
               />
+
               <div
                 style={{
                   display: "flex",
@@ -506,6 +519,7 @@ function CartCheckout() {
                 >
                   Quay lại
                 </button>
+
                 <button
                   onClick={() => setStep(3)}
                   style={{
@@ -523,9 +537,9 @@ function CartCheckout() {
               </div>
             </div>
 
-            {/* Tóm tắt tiền bên cột nhỏ */}
             <div style={summaryBoxStyle}>
               <h4>Sản phẩm ({cartItems.length})</h4>
+
               {cartItems.map((i) => (
                 <div
                   key={i.id}
@@ -546,6 +560,7 @@ function CartCheckout() {
                   </span>
                 </div>
               ))}
+
               <div
                 style={{
                   borderTop: "1px solid #eee",
@@ -562,7 +577,6 @@ function CartCheckout() {
           </div>
         )}
 
-        {/* ================= BƯỚC 3: VẬN CHUYỂN ================= */}
         {step === 3 && (
           <div
             style={{
@@ -597,6 +611,7 @@ function CartCheckout() {
                 </div>
                 <strong>30.000 đ</strong>
               </div>
+
               <div
                 onClick={() =>
                   setShippingInfo({ ...shippingInfo, method: "express" })
@@ -620,6 +635,7 @@ function CartCheckout() {
                 </div>
                 <strong>50.000 đ</strong>
               </div>
+
               <div
                 style={{
                   display: "flex",
@@ -639,6 +655,7 @@ function CartCheckout() {
                 >
                   Quay lại
                 </button>
+
                 <button
                   onClick={() => setStep(4)}
                   style={{
@@ -656,16 +673,17 @@ function CartCheckout() {
               </div>
             </div>
 
-            {/* Tóm tắt tiền bên cột nhỏ */}
             <div style={summaryBoxStyle}>
               <div style={summaryRowStyle}>
                 <span>Tiền hàng</span>
                 <span>{formatPrice(subtotal)}</span>
               </div>
+
               <div style={summaryRowStyle}>
                 <span>Phí vận chuyển</span>
                 <span>{formatPrice(shippingFee)}</span>
               </div>
+
               <div
                 style={{
                   ...summaryRowStyle,
@@ -683,7 +701,6 @@ function CartCheckout() {
           </div>
         )}
 
-        {/* ================= BƯỚC 4: THANH TOÁN & ÁP MÃ KHUYẾN MÃI ================= */}
         {step === 4 && (
           <div
             style={{
@@ -692,7 +709,6 @@ function CartCheckout() {
               gap: "50px",
             }}
           >
-            {/* Phương thức thanh toán bên trái */}
             <div
               style={{ display: "flex", flexDirection: "column", gap: "15px" }}
             >
@@ -713,6 +729,7 @@ function CartCheckout() {
                 />
                 <h4>Thanh toán khi nhận hàng (COD)</h4>
               </div>
+
               <div
                 onClick={() =>
                   setShippingInfo({ ...shippingInfo, payment: "bank" })
@@ -736,6 +753,7 @@ function CartCheckout() {
                   />
                   <h4>Chuyển khoản tài khoản ngân hàng</h4>
                 </div>
+
                 {shippingInfo.payment === "bank" && (
                   <div
                     style={{
@@ -747,11 +765,14 @@ function CartCheckout() {
                     }}
                   >
                     Số tài khoản: <strong>123456789</strong>
-                    <br /> Ngân hàng: <strong>Vietcombank</strong>
-                    <br /> Chủ tài khoản: <strong>XƯỞNG TRANH SEN ĐÔNG</strong>
+                    <br />
+                    Ngân hàng: <strong>Vietcombank</strong>
+                    <br />
+                    Chủ tài khoản: <strong>XƯỞNG TRANH SEN ĐÔNG</strong>
                   </div>
                 )}
               </div>
+
               <div
                 style={{
                   display: "flex",
@@ -771,6 +792,7 @@ function CartCheckout() {
                 >
                   Quay lại
                 </button>
+
                 <button
                   onClick={() => setStep(5)}
                   style={{
@@ -789,7 +811,6 @@ function CartCheckout() {
               </div>
             </div>
 
-            {/* 🛠️ NÂNG CẤP KHỐI BÊN PHẢI: TÍNH TIỀN CHI TIẾT & Ô ÁP MÃ VOUCHER REAL-TIME */}
             <div style={summaryBoxStyle}>
               <h3
                 style={{
@@ -802,7 +823,6 @@ function CartCheckout() {
                 Chi tiết thanh toán
               </h3>
 
-              {/* Khung nhập Voucher */}
               <div style={{ marginBottom: "20px" }}>
                 <form
                   onSubmit={handleApplyCoupon}
@@ -822,6 +842,7 @@ function CartCheckout() {
                       outline: "none",
                     }}
                   />
+
                   <button
                     type="submit"
                     style={{
@@ -838,6 +859,7 @@ function CartCheckout() {
                     Áp dụng
                   </button>
                 </form>
+
                 {couponError && (
                   <p
                     style={{
@@ -849,6 +871,7 @@ function CartCheckout() {
                     {couponError}
                   </p>
                 )}
+
                 {appliedCoupon && (
                   <p
                     style={{
@@ -863,7 +886,6 @@ function CartCheckout() {
                 )}
               </div>
 
-              {/* Bảng hóa đơn tiền tệ đối chiếu rõ ràng */}
               <div style={summaryRowStyle}>
                 <span>Tổng tiền hàng:</span>
                 <span>{formatPrice(subtotal)}</span>
@@ -902,7 +924,6 @@ function CartCheckout() {
           </div>
         )}
 
-        {/* ================= BƯỚC 5: ĐẶT HÀNG THÀNH CÔNG ================= */}
         {step === 5 && (
           <div style={{ textAlign: "center", padding: "50px 0" }}>
             <div
@@ -915,15 +936,17 @@ function CartCheckout() {
                 fontSize: "32px",
                 display: "inline-flex",
                 alignItems: "center",
-                justify: "center",
+                justifyContent: "center",
                 marginBottom: "20px",
               }}
             >
               ✓
             </div>
+
             <h2 style={{ color: "#2e7d32", margin: "0 0 10px 0" }}>
               Đặt hàng thành công!
             </h2>
+
             <p
               style={{
                 color: "#555",
@@ -935,11 +958,12 @@ function CartCheckout() {
               Cảm ơn bạn đã ủng hộ xưởng tranh Sen Đông. Nhân viên xưởng sẽ sớm
               liên hệ qua điện thoại để xác nhận đơn hàng.
             </p>
+
             <button
               onClick={() => {
                 setStep(1);
                 clearCart();
-                setAppliedCoupon(null); // Reset voucher
+                setAppliedCoupon(null);
                 setCouponCode("");
                 navigate("/", { replace: true });
               }}
@@ -962,7 +986,6 @@ function CartCheckout() {
   );
 }
 
-// Hệ thống Style Inline dùng chung gọn gàng
 const inputStyle = {
   width: "100%",
   padding: "12px",
@@ -970,6 +993,7 @@ const inputStyle = {
   border: "1px solid #ccc",
   boxSizing: "border-box",
 };
+
 const summaryBoxStyle = {
   border: "1px solid #f0f0f0",
   padding: "20px",
@@ -977,6 +1001,7 @@ const summaryBoxStyle = {
   backgroundColor: "#fafafa",
   height: "fit-content",
 };
+
 const methodBoxStyle = {
   display: "flex",
   alignItems: "center",
@@ -988,6 +1013,7 @@ const methodBoxStyle = {
   boxSizing: "border-box",
   width: "100%",
 };
+
 const summaryRowStyle = {
   display: "flex",
   justifyContent: "space-between",

@@ -169,7 +169,7 @@ Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
 {
-  "ten_tranh": "Starry Night",
+  "ten_tranh": "Mona Lisa",
   "mo_ta": "Bức tranh nổi tiếng của Van Gogh",
   "kich_thuoc": "60x80cm",
   "danh_muc_id": "{{danhMucId}}",
@@ -398,7 +398,7 @@ GET {{baseUrl}}/gio-hang
 Authorization: Bearer {{customerToken}}
 
 ### 7.2 Khách hàng thêm vào giỏ hàng
-POST {{baseUrl}}/gio-hang/
+POST {{baseUrl}}/gio-hang/them
 Authorization: Bearer {{customerToken}}
 Content-Type: application/json
 
