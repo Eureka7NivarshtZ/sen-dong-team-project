@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, Navigate } from "react-router-dom";
 import ClientLayout from "./layouts/ClientLayout";
 import AdminLayout from "./layouts/AdminLayout";
 
@@ -17,12 +17,21 @@ import Orders from "./pages/admin/Orders";
 import Paintings from "./pages/admin/Paintings";
 import Warehouse from "./pages/admin/Warehouse";
 import Employees from "./pages/admin/Employees";
-import ProtectedAdminRoute from "./components/admin/ProtectedAdminRoute";
 
 import Promotions from "./pages/admin/Promotions";
 import AnswerSupport from "./pages/admin/AnswerSupport";
 import { useEffect, useState } from "react";
-import { tranhService } from "./services";
+import { authService, tranhService } from "./services";
+
+function ProtectedAdminRoute({ children }) {
+  const user = authService.getUser();
+  const isAdmin =
+    user?.loai === "nhan_vien" ||
+    user?.vai_tro === "quan_ly" ||
+    user?.vai_tro === "nhan_vien";
+
+  return isAdmin ? children : <Navigate to="/" replace />;
+}
 
 function App() {
   const [products, setProducts] = useState([]);
@@ -62,10 +71,9 @@ function App() {
         }
       >
         <Route index element={<Dashboard />} />
-        <Route path="dashboard" element={<Dashboard />} />
         <Route path="don-hang" element={<Orders />} />
         <Route path="tranh" element={<Paintings />} />
-        <Route path="warehouse" element={<Warehouse />} />
+        <Route path="kho-hang" element={<Warehouse />} />
         <Route path="nhan-vien" element={<Employees />} />
         <Route path="khuyen-mai" element={<Promotions />} />
         <Route path="ho-tro" element={<AnswerSupport />} />

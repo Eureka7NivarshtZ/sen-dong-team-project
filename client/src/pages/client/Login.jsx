@@ -9,7 +9,6 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // XỬ LÝ ĐĂNG NHẬP VỚI API
   const handleUserLogin = async (e) => {
     e.preventDefault();
     setError("");
@@ -19,44 +18,21 @@ function Login() {
       const result = await authService.dangNhap(email, password);
 
       if (result.success) {
-        alert("Đăng nhập thành công!");
-        navigate("/");
-      } else {
-        setError(result.error || "Đăng nhập thất bại");
-      }
-    } catch (err) {
-      setError("Có lỗi xảy ra. Vui lòng thử lại.");
-      console.error("Login error:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // XỬ LÝ ĐĂNG NHẬP ADMIN (có thể cần email/password của admin)
-  const handleAdminLogin = async (e) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-
-    try {
-      const result = await authService.dangNhap(email, password);
-
-      if (result.success) {
-        // Kiểm tra xem người dùng có phải admin không
         const user = authService.getUser();
-        if (user?.vai_tro === "quan_ly") {
-          alert("Đăng nhập thành công với quyền Admin!");
-          navigate("/admin/dashboard");
+        const isAdmin =
+          user?.loai === "nhan_vien" ||
+          user?.vai_tro === "quan_ly" ||
+          user?.vai_tro === "nhan_vien";
+        if (isAdmin) {
+          navigate("/admin");
         } else {
-          setError("Tài khoản này không có quyền Admin");
-          authService.dangXuat();
+          navigate("/");
         }
       } else {
-        setError(result.error || "Đăng nhập thất bại");
+        setError(result.error || "Tài khoản hoặc mật khẩu không chính xác");
       }
     } catch (err) {
       setError("Có lỗi xảy ra. Vui lòng thử lại.");
-      console.error("Login error:", err);
     } finally {
       setLoading(false);
     }
@@ -233,26 +209,6 @@ function Login() {
             }}
           >
             {loading ? "Đang đăng nhập..." : "Đăng nhập"}
-          </button>
-
-          <button
-            type="button"
-            onClick={handleAdminLogin}
-            disabled={loading}
-            style={{
-              width: "100%",
-              padding: "14px",
-              backgroundColor: loading ? "#666" : "#1c3f3a",
-              color: "#fff",
-              border: "none",
-              borderRadius: "8px",
-              fontSize: "16px",
-              fontWeight: "bold",
-              cursor: loading ? "not-allowed" : "pointer",
-              transition: "background 0.2s",
-            }}
-          >
-            {loading ? "Đang đăng nhập..." : "Đăng nhập với quyền Admin 🛠️"}
           </button>
         </form>
 
