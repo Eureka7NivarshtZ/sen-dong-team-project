@@ -13,10 +13,11 @@ const authService = {
       // Lưu token nếu đăng nhập thành công
       if (response.data.success && response.data.data?.token) {
         localStorage.setItem("authToken", response.data.data.token);
-        localStorage.setItem(
-          "user",
-          JSON.stringify(response.data.data.nhan_vien),
-        );
+        const userData =
+          response.data.data.nhan_vien ||
+          response.data.data.khach_hang ||
+          response.data.data.user;
+        localStorage.setItem("user", JSON.stringify(userData));
       }
 
       return response.data;
@@ -91,7 +92,7 @@ const authService = {
   // Lấy thông tin người dùng hiện tại
   xemThongTinCuaToi: async () => {
     try {
-      const response = await apiClient.get("/auth/thong-tin-cua-toi");
+      const response = await apiClient.get("/auth/thong-tin");
 
       if (response.data.success) {
         localStorage.setItem("user", JSON.stringify(response.data.data));

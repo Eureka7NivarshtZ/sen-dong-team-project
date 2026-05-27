@@ -47,15 +47,12 @@ function Sidebar() {
           <p className="menu-title" style={{ color: "#a3b8b5", margin: "0 0 10px 0", fontSize: "12px", fontWeight: "bold", textTransform: "uppercase" }}>Chính</p>
 
           <button onClick={() => navigate("/admin")} style={getBtnStyle("/admin")}>📊 Tổng quan</button>
-          <button onClick={() => navigate("/admin/orders")} style={getBtnStyle("/admin/orders")}>📦 Đơn hàng</button>
-          <button onClick={() => navigate("/admin/paintings")} style={getBtnStyle("/admin/paintings")}>🎨 Quản lý tranh</button>
-          
-          {/* 🛠️ NÚT KHUYẾN MÃI MỚI */}
-          <button onClick={() => navigate("/admin/promotions")} style={getBtnStyle("/admin/promotions")}>🏷️ Khuyến mãi</button>
-          
-          <button onClick={() => navigate("/admin/warehouse")} style={getBtnStyle("/admin/warehouse")}>🏢 Kho hàng</button>
-          <button onClick={() => navigate("/admin/employees")} style={getBtnStyle("/admin/employees")}>👥 Nhân viên</button>
-          <button onClick={() => navigate("/admin/support")} style={getBtnStyle("/admin/support")}>💬 Trả lời khách hàng</button>
+          <button onClick={() => navigate("/admin/tranh")} style={getBtnStyle("/admin/tranh")}>🎨 Quản lý tranh</button>  
+          <button onClick={() => navigate("/admin/don-hang")} style={getBtnStyle("/admin/don-hang")}>📦 Đơn hàng</button>
+          <button onClick={() => navigate("/admin/kho-hang")} style={getBtnStyle("/admin/kho-hang")}>🏢 Kho hàng</button>
+          <button onClick={() => navigate("/admin/nhan-vien")} style={getBtnStyle("/admin/nhan-vien")}>👥 Nhân viên</button>
+          <button onClick={() => navigate("/admin/khuyen-mai")} style={getBtnStyle("/admin/khuyen-mai")}>🏷️ Khuyến mãi</button>
+          <button onClick={() => navigate("/admin/ho-tro")} style={getBtnStyle("/admin/ho-tro")}>💬 Trả lời khách hàng</button>
         </div>
       </div>
 

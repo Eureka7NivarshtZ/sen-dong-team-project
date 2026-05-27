@@ -17,7 +17,6 @@ import Orders from "./pages/admin/Orders";
 import Paintings from "./pages/admin/Paintings";
 import Warehouse from "./pages/admin/Warehouse";
 import Employees from "./pages/admin/Employees";
-import ProtectedAdminRoute from "./components/admin/ProtectedAdminRoute";
 
 import Promotions from "./pages/admin/Promotions";
 import AnswerSupport from "./pages/admin/AnswerSupport";
@@ -53,19 +52,11 @@ function App() {
       </Route>
 
       {/* ADMIN ROUTES */}
-      <Route
-        path="/admin"
-        element={
-          <ProtectedAdminRoute>
-            <AdminLayout />
-          </ProtectedAdminRoute>
-        }
-      >
+      <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<Dashboard />} />
-        <Route path="dashboard" element={<Dashboard />} />
         <Route path="don-hang" element={<Orders />} />
         <Route path="tranh" element={<Paintings />} />
-        <Route path="warehouse" element={<Warehouse />} />
+        <Route path="kho-hang" element={<Warehouse />} />{" "}
         <Route path="nhan-vien" element={<Employees />} />
         <Route path="khuyen-mai" element={<Promotions />} />
         <Route path="ho-tro" element={<AnswerSupport />} />
