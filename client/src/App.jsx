@@ -43,13 +43,13 @@ function App() {
       {/* CLIENT ROUTES */}
       <Route element={<ClientLayout />}>
         <Route path="/" element={<Home products={products} />} />
-        <Route path="/about" element={<About />} />
+        <Route path="/gioi-thieu" element={<About />} />
         <Route path="/tranh" element={<Collection products={products} />} />
         <Route path="/tranh/:id" element={<ProductDetail />} />
         <Route path="/gio-hang" element={<CartCheckout />} />
         <Route path="/auth/dang-nhap" element={<Login />} />
         <Route path="/auth/dang-ky" element={<Register />} />
-        <Route path="/support" element={<SupportTickets />} />
+        <Route path="/ho-tro" element={<SupportTickets />} />
       </Route>
 
       {/* ADMIN ROUTES */}
@@ -67,6 +67,8 @@ function App() {
         <Route path="tranh" element={<Paintings />} />
         <Route path="warehouse" element={<Warehouse />} />
         <Route path="nhan-vien" element={<Employees />} />
+        <Route path="khuyen-mai" element={<Promotions />} />
+        <Route path="ho-tro" element={<AnswerSupport />} />
       </Route>
     </Routes>
   );

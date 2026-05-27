@@ -1,321 +1,187 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { authService } from "../../services";
+import {
+  AppBar,
+  Box,
+  Button,
+  Container,
+  IconButton,
+  Menu,
+  MenuItem,
+  Toolbar,
+  Typography,
+} from "@mui/material";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import PersonIcon from "@mui/icons-material/Person";
+import LogoutIcon from "@mui/icons-material/Logout";
+
+const navButtonStyle = {
+  color: "#333333",
+};
+
+const iconButtonStyle = {
+  color: "#333333",
+};
 
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [user, setUser] = useState(null);
 
-  // Lấy thông tin người dùng từ localStorage khi component mount
+  const [user, setUser] = useState(null);
+  const [userMenuAnchor, setUserMenuAnchor] = useState(null);
+
+  const isUserMenuOpen = Boolean(userMenuAnchor);
+
   useEffect(() => {
     if (authService.isAuthenticated()) {
       setUser(authService.getUser());
+    } else {
+      setUser(null);
     }
-  }, [location]); // Update khi route thay đổi
 
-  // Hàm kiểm tra xem route hiện tại có match không
-  const isActive = (path) => location.pathname === path;
+    setUserMenuAnchor(null);
+  }, [location.pathname]);
 
-  const handleUserIconClick = (e) => {
-    e.preventDefault();
+  const handleLogoClick = () => {
+    navigate("/");
+  };
+
+  const handleUserClick = (event) => {
     if (!authService.isAuthenticated()) {
       navigate("/auth/dang-nhap");
-    } else {
-      setShowDropdown(!showDropdown);
+      return;
     }
+
+    setUserMenuAnchor(event.currentTarget);
+  };
+
+  const handleCloseUserMenu = () => {
+    setUserMenuAnchor(null);
   };
 
   const handleLogout = () => {
     authService.dangXuat();
     setUser(null);
-    setShowDropdown(false);
+    setUserMenuAnchor(null);
     alert("Đã đăng xuất tài khoản!");
     navigate("/");
   };
 
-  const handleNavClick = (path) => {
-    navigate(path);
-  };
-
   return (
-    <header
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        padding: "12px 100px",
-        borderBottom: "1px solid #f0f0f0",
+    <AppBar
+      position="static"
+      sx={{
         backgroundColor: "#ffffff",
-        position: "sticky",
-        top: 0,
-        zIndex: 1000,
-        fontFamily: "'Inter', Arial, sans-serif",
-        boxSizing: "border-box",
-        width: "100%",
-        height: "70px",
+        color: "#333333",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
       }}
     >
-      {/* 1. KHỐI LOGO BÊN TRÁI */}
-      <div
-        className="logo"
-        onClick={() => navigate("/")}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "12px",
-          cursor: "pointer",
-        }}
-      >
-        <img
-          src="/src/assets/Logo.png"
-          alt="Sen Đông Logo"
-          style={{ width: "200px", height: "200px", objectFit: "contain" }}
-          onError={(e) => {
-            e.target.src = "https://via.placeholder.com/40?text=SD";
-          }}
-        />
-      </div>
-
-      {/* 2. MENU ĐIỀU HƯỚNG Ở GIỮA */}
-      <nav style={{ display: "block" }}>
-        <ul
-          style={{
+      <Container maxWidth="xl">
+        <Toolbar
+          disableGutters
+          sx={{
             display: "flex",
-            listStyle: "none",
-            margin: 0,
-            padding: 0,
-            gap: "40px",
+            justifyContent: "space-between",
             alignItems: "center",
-            height: "100%",
           }}
         >
-          {/* TRANG CHỦ */}
-          <li
-            style={{
-              position: "relative",
-              height: "70px",
+          {/* Logo */}
+          <Box
+            onClick={handleLogoClick}
+            sx={{
               display: "flex",
               alignItems: "center",
+              gap: "12px",
+              cursor: "pointer",
             }}
           >
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                handleNavClick("/");
-              }}
-              style={{
-                textDecoration: "none",
-                fontSize: "15px",
-                color: isActive("/") ? "#2e7d32" : "#333333",
-                fontWeight: isActive("/") ? "700" : "500",
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 600,
+                color: "#333333",
               }}
             >
-              Trang Chủ
-            </a>
-            {isActive("/") && (
-              <span
-                style={{
-                  position: "absolute",
-                  bottom: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "3px",
-                  backgroundColor: "#2e7d32",
-                  borderRadius: "2px",
-                }}
-              ></span>
-            )}
-          </li>
-          {/* GIỚI THIỆU */}
-          <li
-            style={{
-              position: "relative",
-              height: "70px",
+              SEN DONG
+            </Typography>
+          </Box>
+
+          {/* Menu chính */}
+          <Box
+            sx={{
               display: "flex",
               alignItems: "center",
+              gap: 1,
             }}
           >
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                handleNavClick("/about");
-              }}
-              style={{
-                textDecoration: "none",
-                fontSize: "15px",
-                color: isActive("/about") ? "#2e7d32" : "#333333",
-                fontWeight: isActive("/about") ? "700" : "500",
-              }}
-            >
+            <Button sx={navButtonStyle} component={Link} to="/">
+              Trang chủ
+            </Button>
+
+            <Button sx={navButtonStyle} component={Link} to="/gioi-thieu">
               Giới thiệu
-            </a>
-            {isActive("/about") && (
-              <span
-                style={{
-                  position: "absolute",
-                  bottom: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "3px",
-                  backgroundColor: "#2e7d32",
-                  borderRadius: "2px",
-                }}
-              ></span>
-            )}
-          </li>
-          {/* BỘ SƯU TẬP */}
-          <li
-            style={{
-              position: "relative",
-              height: "70px",
-              display: "flex",
-              alignItems: "center",
-            }}
-          >
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                handleNavClick("/tranh");
-              }}
-              style={{
-                textDecoration: "none",
-                fontSize: "15px",
-                color: isActive("/tranh") ? "#2e7d32" : "#333333",
-                fontWeight: isActive("/tranh") ? "700" : "500",
-              }}
-            >
+            </Button>
+
+            <Button sx={navButtonStyle} component={Link} to="/tranh">
               Bộ sưu tập
-            </a>
-            {isActive("/tranh") && (
-              <span
-                style={{
-                  position: "absolute",
-                  bottom: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "3px",
-                  backgroundColor: "#2e7d32",
-                  borderRadius: "2px",
-                }}
-              ></span>
-            )}
-          </li>
+            </Button>
 
-          <li
-            style={{
-              position: "relative",
-              height: "70px",
+            <Button sx={navButtonStyle} component={Link} to="/ho-tro">
+              Hỗ trợ
+            </Button>
+          </Box>
+
+          {/* Icon bên phải */}
+          <Box
+            sx={{
               display: "flex",
               alignItems: "center",
+              gap: 1,
             }}
           >
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                navigate("/support"); // Gọi Router chuyển sang đường dẫn /support ngay lập tức
+            <IconButton sx={iconButtonStyle} onClick={handleUserClick}>
+              <PersonIcon />
+            </IconButton>
+
+            <IconButton sx={iconButtonStyle} component={Link} to="/gio-hang">
+              <ShoppingCartIcon />
+            </IconButton>
+
+            <Menu
+              anchorEl={userMenuAnchor}
+              open={isUserMenuOpen}
+              onClose={handleCloseUserMenu}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "right",
               }}
-              style={{
-                textDecoration: "none",
-                fontSize: "15px",
-                color: location.pathname === "/support" ? "#2e7d32" : "#333333",
-                fontWeight: location.pathname === "/support" ? "700" : "500",
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "right",
               }}
             >
-              Hỗ trợ
-            </a>
-            {location.pathname === "/support" && (
-              <span
-                style={{
-                  position: "absolute",
-                  bottom: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "3px",
-                  backgroundColor: "#2e7d32",
-                  borderRadius: "2px",
+              {user && (
+                <MenuItem disabled>
+                  Xin chào, {user.hoTen || user.ten || user.email || "User"}
+                </MenuItem>
+              )}
+
+              <MenuItem
+                onClick={handleLogout}
+                sx={{
+                  color: "#e74c3c",
+                  gap: 1,
                 }}
-              ></span>
-            )}
-          </li>
-        </ul>
-      </nav>
-
-      {/* 3. CỤM ICON TÀI KHOẢN CÓ DROPDOWN CHỌN QUYỀN ADMIN */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "24px",
-          position: "relative",
-        }}
-      >
-        <a
-          href="#"
-          onClick={handleUserIconClick}
-          style={{
-            display: "flex",
-            alignItems: "center",
-
-            transition: "color 0.2s",
-          }}
-        >
-          <i className="fa-regular fa-user"></i>
-        </a>
-        <a
-          href="#"
-          onClick={(e) => {
-            e.preventDefault();
-            handleNavClick("/gio-hang");
-          }}
-          style={{ textDecoration: "none", fontSize: "15px", color: "#333333" }}
-        >
-          <i className="fa-solid fa-cart-shopping"></i>
-        </a>
-
-        {/* MENU POPUP THẢ XUỐNG KHI BẤM VÀO ICON USER ĐÃ ĐĂNG NHẬP */}
-        {showDropdown && (
-          <div
-            style={{
-              position: "absolute",
-              top: "40px",
-              right: 0,
-              backgroundColor: "#ffffff",
-              boxShadow: "0 4px 15px rgba(0,0,0,0.15)",
-              borderRadius: "8px",
-              width: "180px",
-              padding: "8px 0",
-              zIndex: 2000,
-              border: "1px solid #f0f0f0",
-              textAlign: "left",
-            }}
-          >
-            <div
-              onClick={handleLogout}
-              style={{
-                padding: "10px 15px",
-                fontSize: "14px",
-                color: "#e74c3c",
-                cursor: "pointer",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.backgroundColor = "#fff5f5")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.backgroundColor = "transparent")
-              }
-            >
-              🚪 Đăng xuất
-            </div>
-          </div>
-        )}
-      </div>
-    </header>
+              >
+                <LogoutIcon fontSize="small" />
+                Đăng xuất
+              </MenuItem>
+            </Menu>
+          </Box>
+        </Toolbar>
+      </Container>
+    </AppBar>
   );
 };
 
