@@ -17,13 +17,15 @@ const {
   kiemTraVaiTro,
 } = require("../utils/middleware");
 
+// ========== KHÁCH HÀNG: Kiểm tra mã khuyến mãi ==========
 router.use(yeuCauDangNhap);
 router.post("/kiem-tra", yeuCauKhachHang, kiemTraMaKhuyenMai);
 
-router.use(yeuCauNhanVien);
+// ========== NHÂN VIÊN: Xem khuyến mãi ==========
 router.get("/", xemTatCaKhuyenMai);
 router.get("/:id", xemChiTietKhuyenMai);
 
+// ========== QUẢN LÝ: Quản lý khuyến mãi ==========
 router.use(kiemTraVaiTro("quan_ly"));
 router.post("/", taoKhuyenMai);
 router.put("/:id", capNhatKhuyenMai);

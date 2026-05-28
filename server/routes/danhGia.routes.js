@@ -16,19 +16,18 @@ const {
   kiemTraVaiTro,
 } = require("../utils/middleware");
 
-router.use(yeuCauDangNhap);
+// ========== CÔNG KHAI: Xem đánh giá ==========
+router.get("/tranh/:tranhId", xemDanhGiaTheoTranh);
 
+// ========== KHÁCH HÀNG: Quản lý đánh giá của mình ==========
+router.use(yeuCauDangNhap);
 router.post("/", yeuCauKhachHang, taoDanhGia);
 router.get("/cua-toi", yeuCauKhachHang, xemDanhGiaCuaToi);
 
-router.get("/tranh/:tranhId", xemDanhGiaTheoTranh);
-
-router.get("/", kiemTraVaiTro("quan_ly"), adminXemTatCaDanhGia);
-router.patch(
-  "/:id/trang-thai",
-  kiemTraVaiTro("quan_ly"),
-  adminCapNhatTrangThaiDanhGia,
-);
-router.patch("/:id/phan-hoi", kiemTraVaiTro("quan_ly"), adminPhanHoiDanhGia);
+// ========== QUẢN LÝ: Quản lý tất cả đánh giá ==========
+router.use(kiemTraVaiTro("quan_ly"));
+router.get("/", adminXemTatCaDanhGia);
+router.patch("/:id/trang-thai", adminCapNhatTrangThaiDanhGia);
+router.patch("/:id/phan-hoi", adminPhanHoiDanhGia);
 
 module.exports = router;

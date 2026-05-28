@@ -13,10 +13,11 @@ const {
   yeuCauNhanVien,
 } = require("../utils/middleware");
 
+// ========== TẤT CẢ: Xem chi tiết hóa đơn ==========
+router.get("/:id", yeuCauDangNhap, layChiTietHoaDon);
+
+// ========== NHÂN VIÊN: Quản lý hóa đơn ==========
 router.use(yeuCauDangNhap);
-
-router.get("/:id", layChiTietHoaDon);
-
 router.use(yeuCauNhanVien);
 
 router.get("/", layTatCaHoaDon);

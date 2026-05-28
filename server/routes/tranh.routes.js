@@ -22,14 +22,19 @@ const {
   yeuCauNhanVien,
 } = require("../utils/middleware");
 
+// ========== CÔNG KHAI: Xem tranh ==========
 router.get("/", xemTatCaTranh);
 router.get("/:id", xemChiTietTranh);
 
+// ========== NHÂN VIÊN: Quản lý tranh và hình ảnh ==========
 router.use(yeuCauDangNhap);
 router.use(yeuCauNhanVien);
+
 router.post("/", taoTranh);
 router.put("/:id", capNhatTranh);
 router.delete("/:id", xoaTranh);
+
+// Hình ảnh tranh
 router.post("/:tranhId/hinh-anh", themHinhAnhTranh);
 router.delete("/hinh-anh/:id", xoaHinhAnhTranh);
 // router.put("/hinh-anh/:id", capNhatHinhAnhTranh);

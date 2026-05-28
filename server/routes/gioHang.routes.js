@@ -10,6 +10,7 @@ const {
 
 const { yeuCauDangNhap, yeuCauKhachHang } = require("../utils/middleware");
 
+// ========== KHÁCH HÀNG: Quản lý giỏ hàng ==========
 router.use(yeuCauDangNhap);
 router.use(yeuCauKhachHang);
 

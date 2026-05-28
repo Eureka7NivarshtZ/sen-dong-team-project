@@ -12,9 +12,10 @@ const {
   doanhThuTheoThang,
 } = require("../controllers/dashboard.controller");
 
+// ========== QUẢN LÝ: Thống kê quản lý ==========
 router.use(yeuCauDangNhap);
 router.use(yeuCauNhanVien);
-router.use(kiemTraVaiTro(["quan_ly"]));
+router.use(kiemTraVaiTro("quan_ly"));
 
 router.get("/", tongQuanDashboard);
 router.get("/don-hang-gan-day", donHangGanDay);

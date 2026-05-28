@@ -16,26 +16,26 @@ const {
   xoaNhanVien,
 } = require("../controllers/nhanVien.controller");
 
+// ========== NHÂN VIÊN / QUẢN LÝ: Xem nhân viên ==========
 router.use(yeuCauDangNhap);
 router.use(yeuCauNhanVien);
 
-// Nhân viên / quản lý xem
 router.get("/", layTatCaNhanVien);
 router.get("/:id", layChiTietNhanVien);
 
-// Chỉ quản lý được thêm, sửa, khóa/mở, xóa nhân viên
-router.post("/", kiemTraVaiTro(["quan_ly"]), themNhanVien);
+// ========== QUẢN LÝ: Quản lý nhân viên ==========
+router.post("/", kiemTraVaiTro("quan_ly"), themNhanVien);
 
-router.put("/:id", kiemTraVaiTro(["quan_ly"]), capNhatNhanVien);
+router.put("/:id", kiemTraVaiTro("quan_ly"), capNhatNhanVien);
 
-router.patch("/:id/khoa-mo", kiemTraVaiTro(["quan_ly"]), khoaMoNhanVien);
+router.patch("/:id/khoa-mo", kiemTraVaiTro("quan_ly"), khoaMoNhanVien);
 
 router.patch(
   "/:id/doi-mat-khau",
-  kiemTraVaiTro(["quan_ly"]),
+  kiemTraVaiTro("quan_ly"),
   doiMatKhauNhanVien,
 );
 
-router.delete("/:id", kiemTraVaiTro(["quan_ly"]), xoaNhanVien);
+router.delete("/:id", kiemTraVaiTro("quan_ly"), xoaNhanVien);
 
 module.exports = router;
