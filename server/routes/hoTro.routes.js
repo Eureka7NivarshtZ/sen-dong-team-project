@@ -19,15 +19,16 @@ const {
 
 router.use(yeuCauDangNhap);
 
+// ========== KHÁCH HÀNG: Quản lý yêu cầu hỗ trợ của mình ==========
 router.post("/", yeuCauKhachHang, taoYeuCauHoTro);
+router.get("/cua-toi", yeuCauKhachHang, xemYeuCauHoTroCuaToi);
+router.get("/chi-tiet/:id", yeuCauKhachHang, xemChiTietYeuCauHoTro);
+router.post("/phan-hoi/:id", yeuCauKhachHang, khachHangPhanHoiHoTro);
 
-router.get("/:id", xemChiTietYeuCauHoTro);
-router.get("/cua-toi", xemYeuCauHoTroCuaToi);
-router.post("/:id/phan-hoi", khachHangPhanHoiHoTro);
-
-router.get("/", yeuCauNhanVien, adminXemTatCaYeuCauHoTro);
-
-router.patch("/:id", yeuCauNhanVien, adminCapNhatYeuCauHoTro);
-router.post("/:id/phan-hoi", yeuCauNhanVien, adminPhanHoiHoTro);
+// ========== NHÂN VIÊN: Quản lý tất cả yêu cầu hỗ trợ ==========
+router.use(yeuCauNhanVien);
+router.get("/", adminXemTatCaYeuCauHoTro);
+router.patch("/:id", adminCapNhatYeuCauHoTro);
+router.post("/:id/phan-hoi", adminPhanHoiHoTro);
 
 module.exports = router;

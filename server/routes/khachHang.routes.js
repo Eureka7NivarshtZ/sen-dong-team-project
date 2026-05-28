@@ -12,12 +12,13 @@ const {
   yeuCauNhanVien,
 } = require("../utils/middleware");
 
+// ========== NHÂN VIÊN / QUẢN LÝ: Xem khách hàng ==========
 router.use(yeuCauDangNhap);
 router.use(yeuCauNhanVien);
-
 router.get("/", xemTatCaKhachHang);
 router.get("/:id", xemChiTietKhachHang);
 
-router.put("/:id/khoa", kiemTraVaiTro(["quan_ly"]), khoa_KhachHang);
+// ========== QUẢN LÝ: Khóa khách hàng ==========
+router.put("/:id/khoa", kiemTraVaiTro("quan_ly"), khoa_KhachHang);
 
 module.exports = router;

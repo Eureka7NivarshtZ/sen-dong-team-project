@@ -17,12 +17,16 @@ const {
   yeuCauNhanVien,
 } = require("../utils/middleware");
 
-router.use(yeuCauDangNhap);
+// ========== CÔNG KHAI: Xem đơn vị vận chuyển hoạt động ==========
 router.get("/hoat-dong", layDonViVanChuyenHoatDong);
 
-router.get("/", yeuCauNhanVien, layTatCaDonViVanChuyen);
-router.get("/:id", yeuCauNhanVien, layChiTietDonViVanChuyen);
+// ========== NHÂN VIÊN: Xem đơn vị vận chuyển ==========
+router.use(yeuCauDangNhap);
+router.use(yeuCauNhanVien);
+router.get("/", layTatCaDonViVanChuyen);
+router.get("/:id", layChiTietDonViVanChuyen);
 
+// ========== QUẢN LÝCTẨN: Quản lý đơn vị vận chuyển ==========
 router.use(kiemTraVaiTro("quan_ly"));
 router.post("/", themDonViVanChuyen);
 router.put("/:id", capNhatDonViVanChuyen);

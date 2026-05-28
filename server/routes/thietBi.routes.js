@@ -14,14 +14,15 @@ const {
   yeuCauNhanVien,
 } = require("../utils/middleware");
 
+// ========== NHÂN VIÊN: Xem thiết bị ==========
 router.use(yeuCauDangNhap);
+router.use(yeuCauNhanVien);
+router.get("/", layTatCaThietBi);
+router.get("/:id", layChiTietThietBi);
 
-router.get("/", yeuCauNhanVien, layTatCaThietBi);
-router.get("/:id", yeuCauNhanVien, layChiTietThietBi);
-
-router.post("/", kiemTraVaiTro("quan_ly"), themThietBi);
-router.put("/:id", kiemTraVaiTro("quan_ly"), capNhatThietBi);
-router.delete("/:id", kiemTraVaiTro("quan_ly"), xoaThietBi);
-
+// ========== QUẢN LÝ: Quản lý thiết bị ==========
+router.use(kiemTraVaiTro("quan_ly"));
+router.post("/", themThietBi);
+router.put("/:id", capNhatThietBi);
+router.delete("/:id", xoaThietBi);
 module.exports = router;
-

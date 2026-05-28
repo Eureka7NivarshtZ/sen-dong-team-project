@@ -15,6 +15,7 @@ const {
   kiemTraVaiTro,
 } = require("../utils/middleware");
 
+// ========== NHÂN VIÊN: Quản lý vận đơn ==========
 router.use(yeuCauDangNhap);
 router.use(yeuCauNhanVien);
 

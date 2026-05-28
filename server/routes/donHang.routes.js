@@ -19,11 +19,13 @@ const {
 
 router.use(yeuCauDangNhap);
 
+// ========== KHÁCH HÀNG: Quản lý đơn hàng của riêng mình ==========
 router.post("/", yeuCauKhachHang, taoDonHang);
 router.get("/cua-toi", yeuCauKhachHang, xemDonCuaToi);
-router.get("/:id", yeuCauKhachHang, xemChiTietDonCuaToi);
-router.put("/:id/huy", yeuCauKhachHang, huyDonCuaToi);
+router.get("/chi-tiet/:id", yeuCauKhachHang, xemChiTietDonCuaToi);
+router.put("/huy/:id", yeuCauKhachHang, huyDonCuaToi);
 
+// ========== NHÂN VIÊN: Quản lý tất cả đơn hàng ==========
 router.use(yeuCauNhanVien);
 router.get("/", xemTatCaDonHang);
 router.get("/:id", xemChiTietDonBatKy);

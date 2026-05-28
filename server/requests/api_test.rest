@@ -6,7 +6,7 @@
 @danhMucId = fb1b22d2-badb-4efb-bb53-a1ae7e8f30a5
 @tacGiaId = 2a12253b-45d8-4215-b163-c8cdfa57d120
 @tranhId = d6cccb3d-fecb-4a1d-9fab-5069bfd615cd
-@hinhAnhTranhId = 
+@hinhAnhTranhId = 8602ee25-70fc-4156-8050-82d875a6a504
 @khachHangId = 698530ca-e35a-48f4-affb-cd26f0c06f5b
 @nhanVienId = 54c932d9-aa48-48a1-b205-1a00acebae43
 @donHangId = 
@@ -199,11 +199,7 @@ Content-Type: application/json
   "trang_thai": "ban"
 }
 
-### 4.5 Admin ẩn tranh
-PUT {{baseUrl}}/tranh/{{tranhId}}/an
-Authorization: Bearer {{adminToken}}
-
-### 4.6 Admin xóa tranh
+### 4.5 Admin xóa tranh
 DELETE {{baseUrl}}/tranh/{{tranhId}}
 Authorization: Bearer {{adminToken}}
 
@@ -223,22 +219,7 @@ Content-Type: application/json
   "thu_tu": 1
 }
 
-### 4B.2 Admin cập nhật hình ảnh tranh
-PUT {{baseUrl}}/tranh/hinh-anh/{{hinhAnhTranhId}}
-Authorization: Bearer {{adminToken}}
-Content-Type: application/json
-
-{
-  "url": "https://example.com/starry-night-updated.jpg",
-  "la_chinh": false,
-  "thu_tu": 2
-}
-
-### 4B.3 Admin đặt ảnh chính
-PUT {{baseUrl}}/tranh/hinh-anh/{{hinhAnhTranhId}}/chinh
-Authorization: Bearer {{adminToken}}
-
-### 4B.4 Admin xóa hình ảnh tranh
+### 4B.2 Admin xóa hình ảnh tranh
 DELETE {{baseUrl}}/tranh/hinh-anh/{{hinhAnhTranhId}}
 Authorization: Bearer {{adminToken}}
 
@@ -430,7 +411,7 @@ Authorization: Bearer {{customerToken}}
 ### ============================================
 
 ### 8.1 Khách hàng tạo đơn hàng
-POST {{baseUrl}}/don-hang/tao
+POST {{baseUrl}}/don-hang
 Authorization: Bearer {{customerToken}}
 Content-Type: application/json
 
@@ -445,11 +426,11 @@ GET {{baseUrl}}/don-hang/cua-toi
 Authorization: Bearer {{customerToken}}
 
 ### 8.3 Khách hàng xem chi tiết đơn hàng của tôi
-GET {{baseUrl}}/don-hang/cua-toi/{{donHangId}}
+GET {{baseUrl}}/don-hang/chi-tiet/{{donHangId}}
 Authorization: Bearer {{customerToken}}
 
 ### 8.4 Khách hàng hủy đơn hàng của tôi
-PUT {{baseUrl}}/don-hang/cua-toi/{{donHangId}}/huy
+PUT {{baseUrl}}/don-hang/huy/{{donHangId}}
 Authorization: Bearer {{customerToken}}
 
 ### 8.5 Admin xem tất cả đơn hàng
@@ -747,7 +728,7 @@ GET {{baseUrl}}/ho-tro/cua-toi
 Authorization: Bearer {{customerToken}}
 
 ### Khách hàng xem chi tiết yêu cầu hỗ trợ
-GET {{baseUrl}}/ho-tro/{{hoTroId}}
+GET {{baseUrl}}/ho-tro/chi-tiet/{{hoTroId}}
 Authorization: Bearer {{customerToken}}
 
 ### Khách hàng phản hồi yêu cầu hỗ trợ
@@ -793,15 +774,15 @@ GET {{baseUrl}}/thong-bao
 Authorization: Bearer {{customerToken}}
 
 ### Đếm thông báo chưa đọc
-GET {{baseUrl}}/thong-bao/chua-doc/dem
+GET {{baseUrl}}/thong-bao/dem-chua-doc
 Authorization: Bearer {{customerToken}}
 
 ### Đánh dấu tất cả thông báo đã đọc
-PATCH {{baseUrl}}/thong-bao/da-doc/tat-ca
+PATCH {{baseUrl}}/thong-bao/doc-tat-ca
 Authorization: Bearer {{customerToken}}
 
 ### Đánh dấu một thông báo đã đọc
-PATCH {{baseUrl}}/thong-bao/{{thongBaoId}}/da-doc
+PATCH {{baseUrl}}/thong-bao/{{thongBaoId}}/doc
 Authorization: Bearer {{customerToken}}
 
 ### ============================================
@@ -863,11 +844,7 @@ Authorization: Bearer {{adminToken}}
 GET {{baseUrl}}/vat-lieu
 Authorization: Bearer {{adminToken}}
 
-### 15.2 Admin xem vật liệu cảnh báo tồn kho thấp
-GET {{baseUrl}}/vat-lieu/canh-bao
-Authorization: Bearer {{adminToken}}
-
-### 15.3 Admin xem chi tiết vật liệu
+### 15.2 Admin xem chi tiết vật liệu
 GET {{baseUrl}}/vat-lieu/{{vatLieuId}}
 Authorization: Bearer {{adminToken}}
 
