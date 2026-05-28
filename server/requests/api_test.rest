@@ -9,16 +9,19 @@
 @hinhAnhTranhId = 8602ee25-70fc-4156-8050-82d875a6a504
 @khachHangId = 698530ca-e35a-48f4-affb-cd26f0c06f5b
 @nhanVienId = 54c932d9-aa48-48a1-b205-1a00acebae43
-@donHangId = 
-@donViVanChuyenId = 
-@vanDonId = 
-@hoaDonId = 
-@thanhToanId = 
-@nhaCungCapId = 
-@vatLieuId = 
-@phieuNhapVatLieuId = 
-@thietBiId = 
+@donHangId = 9554170e-ded0-4bfd-ad8c-aa315404fcff
+@donViVanChuyenId = cac2ac96-0d51-4723-80c4-b3a33e4003bb
+@vanDonId = 12b34118-58a8-4909-9587-27c049337796
+@hoaDonId = e1acb38e-8594-416d-a9e2-b2858d6f8d15
+@thanhToanId = 169b95dc-572c-4502-a328-d6e69e2ace70
+@nhaCungCapId = c18d60e5-dfa4-48bd-84aa-077027993c66
+@vatLieuId = a605a071-bc4d-48fe-a9a5-c5f6888eaea0
+@phieuNhapVatLieuId = 5646a6dd-61d6-4cb9-8de6-0f5ad7a454a9
+@thietBiId = 2b95b928-893d-40c9-b1bd-0e14132ec46f
 @danhGiaId = 
+@thongBaoId = 
+@hoTroId = 8647b4ae-ad91-4573-86d5-2df1644f464d
+@khuyenMaiId = eb47ed5d-3ced-439e-9a81-8a66b6d4ca8d
 
 
 ### ============================================
@@ -650,7 +653,7 @@ Content-Type: application/json
 ### KHUYẾN MÃI
 ### ============================================
 
-@khuyenMaiId = 
+
 
 ### Khách hàng kiểm tra mã khuyến mãi
 POST {{baseUrl}}/khuyen-mai/kiem-tra
@@ -708,7 +711,7 @@ Authorization: Bearer {{adminToken}}
 ### HỖ TRỢ KHÁCH HÀNG
 ### ============================================
 
-@hoTroId = 
+
 
 ### Khách hàng tạo yêu cầu hỗ trợ
 POST {{baseUrl}}/ho-tro
@@ -767,7 +770,7 @@ Content-Type: application/json
 ### THÔNG BÁO
 ### ============================================
 
-@thongBaoId = 
+
 
 ### Xem thông báo của tôi
 GET {{baseUrl}}/thong-bao
