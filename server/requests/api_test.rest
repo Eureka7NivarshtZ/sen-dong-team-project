@@ -711,8 +711,6 @@ Authorization: Bearer {{adminToken}}
 ### HỖ TRỢ KHÁCH HÀNG
 ### ============================================
 
-
-
 ### Khách hàng tạo yêu cầu hỗ trợ
 POST {{baseUrl}}/ho-tro
 Authorization: Bearer {{customerToken}}
