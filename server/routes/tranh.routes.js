@@ -37,7 +37,7 @@ router.delete("/:id", xoaTranh);
 // Hình ảnh tranh
 router.post("/:tranhId/hinh-anh", themHinhAnhTranh);
 router.delete("/hinh-anh/:id", xoaHinhAnhTranh);
-// router.put("/hinh-anh/:id", capNhatHinhAnhTranh);
-// router.put("/hinh-anh/:id/chinh", datAnhChinh);
+router.put("/hinh-anh/:id", capNhatHinhAnhTranh);
+router.put("/hinh-anh/:id/chinh", datAnhChinh);
 
 module.exports = router;

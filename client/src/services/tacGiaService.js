@@ -22,7 +22,7 @@ const tacGiaService = {
   // Tạo tác giả mới (admin)
   themTacGia: async (tacGiaData) => {
     try {
-      const response = await apiClient.post("/admin/tac-gia", tacGiaData);
+      const response = await apiClient.post("/tac-gia", tacGiaData);
       return response.data;
     } catch (error) {
       return {
@@ -35,7 +35,7 @@ const tacGiaService = {
   // Cập nhật tác giả (admin)
   capNhatTacGia: async (id, tacGiaData) => {
     try {
-      const response = await apiClient.put(`/admin/tac-gia/${id}`, tacGiaData);
+      const response = await apiClient.put(`/tac-gia/${id}`, tacGiaData);
       return response.data;
     } catch (error) {
       return {
@@ -48,7 +48,7 @@ const tacGiaService = {
   // Xóa tác giả (admin)
   xoaTacGia: async (id) => {
     try {
-      const response = await apiClient.delete(`/admin/tac-gia/${id}`);
+      const response = await apiClient.delete(`/tac-gia/${id}`);
       return response.data;
     } catch (error) {
       return {

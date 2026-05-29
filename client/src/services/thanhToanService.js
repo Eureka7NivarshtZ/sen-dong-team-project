@@ -5,7 +5,7 @@ const thanhToanService = {
   // Lấy tất cả thanh toán
   layTatCaThanhToan: async (params = {}) => {
     try {
-      const response = await apiClient.get("/admin/thanh-toan/", { params });
+      const response = await apiClient.get("/thanh-toan/", { params });
       return response.data;
     } catch (error) {
       return {
@@ -19,7 +19,7 @@ const thanhToanService = {
   // Lấy chi tiết thanh toán
   layChiTietThanhToan: async (id) => {
     try {
-      const response = await apiClient.get(`/admin/thanh-toan/${id}`);
+      const response = await apiClient.get(`/thanh-toan/${id}`);
       return response.data;
     } catch (error) {
       return {
@@ -34,7 +34,7 @@ const thanhToanService = {
   taoThanhToan: async (thanhToanData) => {
     try {
       const response = await apiClient.post(
-        "/admin/thanh-toan/",
+        "/thanh-toan/",
         thanhToanData,
       );
       return response.data;
@@ -50,7 +50,7 @@ const thanhToanService = {
   capNhatTrangThaiThanhToan: async (id, trangThaiMoi) => {
     try {
       const response = await apiClient.patch(
-        `/admin/thanh-toan/${id}/trang-thai`,
+        `/thanh-toan/${id}/trang-thai`,
         { trangThaiMoi },
       );
       return response.data;

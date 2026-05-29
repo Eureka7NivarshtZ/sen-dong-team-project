@@ -142,37 +142,25 @@ const xemChiTietTranh = async (req, res) => {
 };
 
 const taoTranh = async (req, res) => {
-  const { danh_muc_id, tac_gia_id } = req.body;
+  const { ten_tranh, danh_muc_id, tac_gia_id, gia_ban, gia_von, so_luong_ton, mo_ta } = req.body;
 
-  if (danh_muc_id) {
-    const danhMuc = await DanhMuc.findByPk(danh_muc_id);
-
-    if (!danhMuc) {
-      return res.status(404).json({
-        success: false,
-        error: "Danh muc khong ton tai",
-      });
-    }
+  if (!ten_tranh || !danh_muc_id || !tac_gia_id) {
+    return res.status(400).json({
+      success: false,
+      error: "ten_tranh, danh_muc_id, tac_gia_id là bắt buộc",
+    });
   }
 
-  if (tac_gia_id) {
-    const tacGia = await TacGia.findByPk(tac_gia_id);
+  const tranh = await Tranh.create({
+    ten_tranh,
+    danh_muc_id,
+    tac_gia_id,   // 👈 thêm dòng này
+    gia_ban,
+    gia_von,
+    so_luong_ton,
+    mo_ta,
+  });
 
-    if (!tacGia) {
-      return res.status(404).json({
-        success: false,
-        error: "Tac gia khong ton tai",
-      });
-    }
-  }
-
-  const tranhData = {
-    ...req.body,
-    nhan_vien_tao_id: req.user.nhan_vien_id,
-    nhan_vien_cap_nhat_id: req.user.nhan_vien_id,
-  };
-
-  const tranh = await Tranh.create(tranhData);
   res.status(201).json({
     success: true,
     message: "Tao tranh thanh cong",
