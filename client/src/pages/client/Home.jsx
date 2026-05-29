@@ -102,7 +102,7 @@ function Home({ products }) {
               Khám phá bộ sưu tập &rarr;
             </button>
             <button
-              onClick={() => navigate("/about")}
+              onClick={() => navigate("/gioi-thieu")}
               style={{
                 padding: "12px 24px",
                 backgroundColor: "#a1a1a1",
