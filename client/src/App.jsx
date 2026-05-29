@@ -17,11 +17,13 @@ import Orders from "./pages/admin/Orders";
 import Paintings from "./pages/admin/Paintings";
 import Warehouse from "./pages/admin/Warehouse";
 import Employees from "./pages/admin/Employees";
-
+import Authors from "./pages/admin/Authors";
+import Categories from "./pages/admin/Categories";
 import Promotions from "./pages/admin/Promotions";
 import AnswerSupport from "./pages/admin/AnswerSupport";
 import { useEffect, useState } from "react";
 import { authService, tranhService } from "./services";
+
 
 function ProtectedAdminRoute({ children }) {
   const user = authService.getUser();
@@ -73,6 +75,8 @@ function App() {
         <Route index element={<Dashboard />} />
         <Route path="don-hang" element={<Orders />} />
         <Route path="tranh" element={<Paintings />} />
+        <Route path="tac-gia" element={<Authors />} />
+        <Route path="danh-muc" element={<Categories />} />
         <Route path="kho-hang" element={<Warehouse />} />
         <Route path="nhan-vien" element={<Employees />} />
         <Route path="khuyen-mai" element={<Promotions />} />

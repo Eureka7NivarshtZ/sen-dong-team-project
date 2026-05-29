@@ -6,7 +6,7 @@ const vanDonService = {
   taoVanDon: async (donHangId, vanDonData) => {
     try {
       const response = await apiClient.post(
-        `/admin/van-don/don-hang/${donHangId}`,
+        `/van-don/don-hang/${donHangId}`,
         vanDonData,
       );
       return response.data;
@@ -21,7 +21,7 @@ const vanDonService = {
   // Lấy tất cả vận đơn
   layTatCaVanDon: async (params = {}) => {
     try {
-      const response = await apiClient.get("/admin/van-don/", { params });
+      const response = await apiClient.get("/van-don/", { params });
       return response.data;
     } catch (error) {
       return {
@@ -34,7 +34,7 @@ const vanDonService = {
   // Lấy chi tiết vận đơn
   layChiTietVanDon: async (id) => {
     try {
-      const response = await apiClient.get(`/admin/van-don/${id}`);
+      const response = await apiClient.get(`/van-don/${id}`);
       return response.data;
     } catch (error) {
       return {
@@ -47,7 +47,7 @@ const vanDonService = {
   // Cập nhật vận đơn
   capNhatVanDon: async (id, vanDonData) => {
     try {
-      const response = await apiClient.put(`/admin/van-don/${id}`, vanDonData);
+      const response = await apiClient.put(`/van-don/${id}`, vanDonData);
       return response.data;
     } catch (error) {
       return {
@@ -61,7 +61,7 @@ const vanDonService = {
   capNhatTrangThaiVanDon: async (id, trangThaiMoi) => {
     try {
       const response = await apiClient.patch(
-        `/admin/van-don/${id}/trang-thai`,
+        `/van-don/${id}/trang-thai`,
         {
           trangThaiMoi,
         },
@@ -79,7 +79,7 @@ const vanDonService = {
   // Xóa vận đơn
   xoaVanDon: async (id) => {
     try {
-      const response = await apiClient.delete(`/admin/van-don/${id}`);
+      const response = await apiClient.delete(`/van-don/${id}`);
       return response.data;
     } catch (error) {
       return {
