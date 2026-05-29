@@ -51,7 +51,7 @@ function ProductDetail() {
       <div style={{ padding: "80px 100px", textAlign: "center" }}>
         <h2>{error || "Không tìm thấy sản phẩm"}</h2>
         <button
-          onClick={() => navigate("/bo-suu-tap")}
+          onClick={() => navigate("/tranh")} // Đồng bộ về route /collection viết thường
           style={{
             marginTop: "20px",
             padding: "12px 28px",
@@ -76,29 +76,43 @@ function ProductDetail() {
   };
 
   const handleAddToCart = async () => {
-    // Kiểm tra xem người dùng đã đăng nhập không
+    // 1. Kiểm tra xem khách hàng đã đăng nhập tài khoản chưa
     if (!authService.isAuthenticated()) {
-      alert("Vui lòng đăng nhập trước khi thêm vào giỏ hàng");
-      navigate("/auth/dang-nhap");
+      alert("Vui lòng đăng nhập trước khi thêm sản phẩm vào giỏ hàng!");
+      navigate("/login");
       return;
     }
 
     setAddingToCart(true);
     try {
-      const result = await gioHangService.themVaoGioHang(product.id, quantity);
-      if (result.success) {
-        alert(`Đã thêm x${quantity} tranh vào giỏ hàng`);
-        setQuantity(1);
+      // 2. Lấy chính xác mã định danh UUID của bức tranh (tranh_id hoặc id)
+      const validTranhId = product.tranh_id || product.id;
+
+      if (!validTranhId) {
+        alert("Không tìm thấy mã định danh hợp lệ của tác phẩm này!");
+        return;
+      }
+
+      // 3. Gọi duy nhất một hàm thêm vào giỏ. Backend của team sẽ tự động kiểm tra:
+      // - Nếu chưa có bản ghi: Tự tạo mới (create) với số lượng đã chọn.
+      // - Nếu đã có bản ghi: Tự động cộng dồn số lượng (update) và check tồn kho hợp lệ.
+      const result = await gioHangService.themVaoGioHang(validTranhId, quantity);
+      
+      if (result && (result.success || result.chi_tiet_id)) {
+        alert(`Đã thêm x${quantity} tác phẩm "${product.ten_tranh || product.ten}" vào giỏ hàng thành công!`);
+        setQuantity(1); // Đặt lại thanh số lượng giao diện về bằng 1 mặc định
       } else {
-        alert("Có lỗi xảy ra: " + result.error);
+        // Hiển thị chi tiết thông báo lỗi từ Backend nếu bị vượt quá số lượng tồn kho
+        alert("Thêm vào giỏ hàng thất bại: " + (result.error || "Số lượng tồn kho không đủ!"));
       }
     } catch (err) {
-      alert("Có lỗi xảy ra khi thêm vào giỏ hàng");
+      alert("Có lỗi xảy ra khi kết nối đến hệ thống giỏ hàng!");
       console.error("Error adding to cart:", err);
     } finally {
       setAddingToCart(false);
     }
   };
+
 
   return (
     <div
@@ -133,8 +147,8 @@ function ProductDetail() {
             }}
           >
             <img
-              src={product.image}
-              alt={product.title}
+              src={product.image || "https://via.placeholder.com/400"}
+              alt={product.ten_tranh}
               style={{
                 width: "100%",
                 height: "100%",
@@ -164,6 +178,7 @@ function ProductDetail() {
               fontWeight: "500",
               color: "#111",
               margin: "0 0 12px",
+              textAlign: "left"
             }}
           >
             {product.ten_tranh}
@@ -175,6 +190,7 @@ function ProductDetail() {
               fontSize: "22px",
               fontWeight: "700",
               marginBottom: "28px",
+              textAlign: "left"
             }}
           >
             {product.gia_ban
@@ -182,7 +198,7 @@ function ProductDetail() {
               : "Liên hệ"}
           </div>
 
-          <div style={{ marginBottom: "26px" }}>
+          <div style={{ marginBottom: "26px", textAlign: "left" }}>
             <label
               style={{
                 display: "block",
@@ -221,7 +237,7 @@ function ProductDetail() {
             </div>
           </div>
 
-          <div style={{ marginBottom: "30px" }}>
+          <div style={{ marginBottom: "30px", textAlign: "left" }}>
             <label
               style={{
                 display: "block",
@@ -262,9 +278,10 @@ function ProductDetail() {
               lineHeight: "1.7",
               maxWidth: "520px",
               marginBottom: "30px",
+              textAlign: "left"
             }}
           >
-            {product.mo_ta || "Không có mô tả"}
+            {product.mo_ta || "Không có mô tả chi tiết cho tác phẩm này."}
           </p>
 
           <button
@@ -298,16 +315,17 @@ function ProductDetail() {
               fontSize: "14px",
               color: "#333",
               lineHeight: "1.9",
+              textAlign: "left"
             }}
           >
             <div>
-              <strong>Tác giả:</strong> {product.tac_gia?.ho_ten || "N/A"}
+              <strong>Tác giả:</strong> {product.tacGia?.ho_ten || product.tac_gia?.ho_ten || "N/A"}
             </div>
             <div>
-              <strong>Danh mục:</strong> {product.danh_muc?.ten || "N/A"}
+              <strong>Danh mục:</strong> {product.danhMuc?.ten || product.danh_muc?.ten || "N/A"}
             </div>
             <div>
-              <strong>Số lượng tồn:</strong> {product.so_luong_ton || 0}
+              <strong>Số lượng tồn:</strong> {product.so_luong_ton || 0} tấm
             </div>
           </div>
         </div>
