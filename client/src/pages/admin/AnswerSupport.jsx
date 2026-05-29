@@ -3,14 +3,7 @@ import Topbar from "../../components/admin/Topbar";
 
 function AnswerSupport() {
   // Dữ liệu mảng Ticket lấy từ database xưởng tranh (Năm 2026)
-  const [tickets, setTickets] = useState({
-    don_hang_id: "",
-    tieu_de: "",
-    noi_dung: "",
-    loai: "khac",
-    muc_do: "binh_thuong",
-  });
-
+  const [tickets, setTickets] = useState([]);
   const [activeTicket, setActiveTicket] = useState(null);
   const [replyText, setReplyText] = useState("");
   const [filterStatus, setFilterStatus] = useState("Tất cả");

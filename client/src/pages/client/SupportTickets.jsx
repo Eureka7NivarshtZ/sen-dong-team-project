@@ -4,10 +4,11 @@ import { hoTroService } from "../../services";
 function SupportTickets() {
   const [tickets, setTickets] = useState([]);
   const [formData, setFormData] = useState({
+    don_hang_id: "",
     tieu_de: "",
     noi_dung: "",
-    loai: "",
-    muc_do: "",
+    loai: "khac",
+    muc_do: "binh_thuong",
   });
   const [activeTicket, setActiveTicket] = useState(null);
 
@@ -33,11 +34,21 @@ function SupportTickets() {
 
   const handleCreateTicket = async (e) => {
     e.preventDefault();
+
+    const payload = {
+      ...formData,
+      don_hang_id:
+        formData.don_hang_id === "" || formData.don_hang_id == null
+          ? null
+          : Number(formData.don_hang_id),
+    };
+
     try {
-      const result = await hoTroService.taoYeuCauHoTro(formData);
+      const result = await hoTroService.taoYeuCauHoTro(payload);
       if (result.success) {
         alert("Tạo yêu cầu hỗ trợ thành công!");
         setFormData({
+          don_hang_id: "",
           tieu_de: "",
           noi_dung: "",
           loai: "khac",
@@ -45,7 +56,7 @@ function SupportTickets() {
         });
         fetchTickets();
       } else {
-        alert("Có lỗi: " + result.error);
+        alert("Có lỗi: " + result.message);
       }
     } catch (error) {
       alert("Lỗi khi gửi yêu cầu: " + error.message);

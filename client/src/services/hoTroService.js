@@ -8,11 +8,10 @@ const hoTroService = {
     } catch (error) {
       return {
         success: false,
-        message: error.response?.data?.error || "Tao yeu cau ho tro that bai",
+        error: error.response?.data?.error || "Tao yeu cau ho tro that bai",
       };
     }
   },
-
   xemYeuCauHoTroCuaToi: async () => {
     try {
       const result = await apiClient.get("/ho-tro/cua-toi");

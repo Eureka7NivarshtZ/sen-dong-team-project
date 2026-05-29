@@ -14,7 +14,6 @@ const taoYeuCauHoTro = async (req, res) => {
     noi_dung,
     loai = "khac",
     muc_do = "binh_thuong",
-    trang_thai = "moi",
   } = req.body;
 
   if (!khach_hang_id) {
@@ -48,6 +47,7 @@ const taoYeuCauHoTro = async (req, res) => {
     noi_dung,
     loai,
     muc_do,
+    trang_thai: "moi",
   });
 
   await PhanHoiHoTro.create({
