@@ -14,15 +14,14 @@ const taoYeuCauHoTro = async (req, res) => {
     noi_dung,
     loai = "khac",
     muc_do = "binh_thuong",
+    trang_thai = "moi",
   } = req.body;
 
   if (!khach_hang_id) {
-    return res
-      .status(403)
-      .json({
-        success: false,
-        error: "Chi khach hang moi duoc tao yeu cau ho tro",
-      });
+    return res.status(403).json({
+      success: false,
+      error: "Chi khach hang moi duoc tao yeu cau ho tro",
+    });
   }
 
   if (!tieu_de || !noi_dung) {
@@ -49,7 +48,6 @@ const taoYeuCauHoTro = async (req, res) => {
     noi_dung,
     loai,
     muc_do,
-    trang_thai: "moi",
   });
 
   await PhanHoiHoTro.create({

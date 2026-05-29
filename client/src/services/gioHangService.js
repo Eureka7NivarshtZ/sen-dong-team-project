@@ -6,8 +6,8 @@ const gioHangService = {
     return res.data;
   },
 
-  themVaoGioHang: async () => {
-    const res = await apiClient.post("/gio-hang/them");
+  themVaoGioHang: async (tranh_id, so_luong = 1) => {
+    const res = await apiClient.post("/gio-hang/them", { tranh_id, so_luong });
     return res.data;
   },
 

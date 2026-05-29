@@ -10,6 +10,7 @@ import adminService from "./adminService";
 import vanDonService from "./vanDonService";
 import hoaDonService from "./hoaDonService";
 import thanhToanService from "./thanhToanService";
+import hoTroService from "./hoTroService";
 
 export {
   apiClient,
@@ -23,6 +24,7 @@ export {
   vanDonService,
   hoaDonService,
   thanhToanService,
+  hoTroService,
 };
 
 // Default export - tất cả services
@@ -38,4 +40,5 @@ export default {
   vanDonService,
   hoaDonService,
   thanhToanService,
+  hoTroService,
 };
