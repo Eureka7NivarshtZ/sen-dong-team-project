@@ -23,7 +23,7 @@ router.use(yeuCauDangNhap);
 router.post("/", yeuCauKhachHang, taoYeuCauHoTro);
 router.get("/cua-toi", yeuCauKhachHang, xemYeuCauHoTroCuaToi);
 router.get("/chi-tiet/:id", yeuCauKhachHang, xemChiTietYeuCauHoTro);
-router.post("/phan-hoi/:id", yeuCauKhachHang, khachHangPhanHoiHoTro);
+router.post("/:id/phan-hoi", yeuCauKhachHang, khachHangPhanHoiHoTro);
 
 // ========== NHÂN VIÊN: Quản lý tất cả yêu cầu hỗ trợ ==========
 router.use(yeuCauNhanVien);
