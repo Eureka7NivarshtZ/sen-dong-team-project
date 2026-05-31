@@ -27,10 +27,11 @@ const gioHangService = {
     }
   },
 
-  // 3. Cập nhật số lượng của một tác phẩm trong giỏ
+  // 3. Cập nhật số lượng (Đã sửa theo đúng route: router.put("/:id"))
   capNhatSoLuong: async (id, so_luong) => {
     try {
-      const response = await apiClient.put(`/gio-hang/cap-nhat/${id}`, { so_luong });
+      // Đường dẫn trực tiếp không qua sub-url rác
+      const response = await apiClient.put(`/gio-hang/${id}`, { so_luong });
       return response.data;
     } catch (error) {
       return {
@@ -40,10 +41,11 @@ const gioHangService = {
     }
   },
 
-  // 4. Xóa một tác phẩm ra khỏi giỏ hàng
+  // 4. Xóa một tác phẩm ra khỏi giỏ (Đã sửa theo đúng route: router.delete("/:id"))
   xoaKhoiGioHang: async (id) => {
     try {
-      const response = await apiClient.delete(`/gio-hang/xoa/${id}`);
+      // Đường dẫn trực tiếp trùng khớp với Backend
+      const response = await apiClient.delete(`/gio-hang/${id}`);
       return response.data;
     } catch (error) {
       return {
@@ -54,5 +56,4 @@ const gioHangService = {
   }
 };
 
-// 🛠️ ĐẢM BẢO ĐÃ EXPORT ĐÚNG ĐỐI TƯỢNG GIOHANGSERVICE
 export default gioHangService;
