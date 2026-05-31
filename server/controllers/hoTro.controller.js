@@ -17,12 +17,10 @@ const taoYeuCauHoTro = async (req, res) => {
   } = req.body;
 
   if (!khach_hang_id) {
-    return res
-      .status(403)
-      .json({
-        success: false,
-        error: "Chi khach hang moi duoc tao yeu cau ho tro",
-      });
+    return res.status(403).json({
+      success: false,
+      error: "Chi khach hang moi duoc tao yeu cau ho tro",
+    });
   }
 
   if (!tieu_de || !noi_dung) {

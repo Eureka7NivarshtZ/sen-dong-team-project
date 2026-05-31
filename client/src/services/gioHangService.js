@@ -1,30 +1,58 @@
 import apiClient from "./apiClient";
 
 const gioHangService = {
+  // 1. Lấy tất cả sản phẩm trong giỏ hàng
   xemGioHang: async () => {
-    const res = await apiClient.get("/gio-hang");
-    return res.data;
+    try {
+      const response = await apiClient.get("/gio-hang");
+      return response.data;
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.error || "Lấy thông tin giỏ hàng thất bại",
+      };
+    }
   },
 
-  themVaoGioHang: async () => {
-    const res = await apiClient.post("/gio-hang/them");
-    return res.data;
+  // 2. Thêm sản phẩm vào giỏ hàng
+  themVaoGioHang: async (tranh_id, so_luong) => {
+    try {
+      const response = await apiClient.post("/gio-hang/them", { tranh_id, so_luong });
+      return response.data;
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.error || "Thêm sản phẩm vào giỏ thất bại",
+      };
+    }
   },
 
-  capNhatSoLuong: async (id, data) => {
-    const res = await apiClient.put(`/gio-hang/${id}`, data);
-    return res.data;
+  // 3. Cập nhật số lượng của một tác phẩm trong giỏ
+  capNhatSoLuong: async (id, so_luong) => {
+    try {
+      const response = await apiClient.put(`/gio-hang/cap-nhat/${id}`, { so_luong });
+      return response.data;
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.error || "Cập nhật số lượng thất bại",
+      };
+    }
   },
 
-  xoaMotGioHang: async (id) => {
-    const res = await apiClient.delete(`/gio-hang/${id}`);
-    return res.data;
-  },
-
-  xoaTatCaGioHang: async () => {
-    const res = await apiClient.delete("/gio-hang");
-    return res.data;
-  },
+  // 4. Xóa một tác phẩm ra khỏi giỏ hàng
+  xoaKhoiGioHang: async (id) => {
+    try {
+      const response = await apiClient.delete(`/gio-hang/xoa/${id}`);
+      return response.data;
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.error || "Xóa sản phẩm thất bại",
+      };
+    }
+  }
 };
 
+// 🛠️ ĐẢM BẢO ĐÃ EXPORT ĐÚNG ĐỐI TƯỢNG GIOHANGSERVICE
 export default gioHangService;

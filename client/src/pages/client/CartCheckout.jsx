@@ -36,6 +36,7 @@ function CartCheckout() {
         const result = await gioHangService.xemGioHang();
 
         if (result && result.success) {
+          // Bóc tách dữ liệu linh hoạt theo cấu trúc Backend trả về (.data hoặc .data.danh_sach)
           const dataArray = result.data?.danh_sach || result.data || [];
           setCartItems(Array.isArray(dataArray) ? dataArray : []);
         } else {
@@ -43,7 +44,7 @@ function CartCheckout() {
         }
       } catch (error) {
         console.error("Lỗi khi lấy giỏ hàng:", error);
-        setCartItems([]);
+        setCartItems([]); // Phòng ngừa sập trang
       }
     };
 
@@ -54,18 +55,22 @@ function CartCheckout() {
     setCartItems([]);
   };
 
+  // 1. Hàm XÓA THẬT sản phẩm dưới Database khi bấm nút Xóa
   // Hàm xử lý bấm nút Xóa tác phẩm
   const removeFromCart = async (chiTietId) => {
     if (!chiTietId) return;
 
     try {
+      // Gọi đúng tên hàm xoaKhoiGioHang từ Service
       if (gioHangService && typeof gioHangService.xoaKhoiGioHang === "function") {
         const res = await gioHangService.xoaKhoiGioHang(chiTietId);
 
         if (res && res.success) {
+          // Xóa thành công dưới DB -> Cập nhật UI xóa dòng đó trên giao diện
           setCartItems((prevItems) => prevItems.filter((item) => item.id !== chiTietId));
           alert("Đã xóa tác phẩm khỏi giỏ hàng thành công!");
         } else {
+          // Lưới bảo vệ: Nếu lỗi DB vẫn cho xóa tạm trên UI để tránh đơ nút
           setCartItems((prevItems) => prevItems.filter((item) => item.id !== chiTietId));
         }
       }

@@ -1,19 +1,44 @@
-// Xuất tất cả services từ một file duy nhất để dễ import
+// Central export point for all API services
+import apiClient from "./apiClient";
+import authService from "./authService";
+import tranhService from "./tranhService";
+import gioHangService from "./gioHangService";
+import donHangService from "./donHangService";
+import danhMucService from "./danhMucService";
+import tacGiaService from "./tacGiaService";
+import adminService from "./adminService";
+import vanDonService from "./vanDonService";
+import hoaDonService from "./hoaDonService";
+import thanhToanService from "./thanhToanService";
+import hoTroService from "./hoTroService";
 
-export { default as api } from './apiClient';
-export { default as authService } from './authService';
-export { default as tranhService } from './tranhService';
-export { default as gioHangService } from './gioHangService';
-export { default as donHangService } from './donHangService';
-export { default as danhMucService } from './danhMucService';
-export { default as tacGiaService } from './tacGiaService';
-export { default as donViVanChuyenService } from './donViVanChuyenService';
-export { default as khachHangService } from './khachHangService';
-export { default as nhanVienService } from './nhanVienService';
-export { default as dashboardService } from './dashboardService';
-export { default as vanDonService } from './vanDonService';
-export { default as hoaDonService } from './hoaDonService';
-export { default as thanhToanService } from './thanhToanService';
+export {
+  apiClient,
+  authService,
+  tranhService,
+  gioHangService,
+  donHangService,
+  danhMucService,
+  tacGiaService,
+  adminService,
+  vanDonService,
+  hoaDonService,
+  thanhToanService,
+  hoTroService,
+};
 
-// Giữ nguyên file quản lý kho (Đảm bảo tên file thực tế của bạn là khoService.js hoặc kho.service.js)
-export { nhaCungCapService, vatLieuService, phieuNhapService, thietBiService } from './khoService';
+// Default export - tất cả services
+export default {
+  apiClient,
+  authService,
+  tranhService,
+  gioHangService,
+  donHangService,
+  danhMucService,
+  tacGiaService,
+  adminService,
+  vanDonService,
+  hoaDonService,
+  thanhToanService,
+  hoTroService,
+};
