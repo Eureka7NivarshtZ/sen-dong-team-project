@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { gioHangService } from "../../services";
+// 🛠️ ĐÃ KẾT NỐI: Import thêm donHangService để kích hoạt tạo đơn hàng thật
+import { gioHangService, donHangService } from "../../services";
 
 function CartCheckout() {
   const navigate = useNavigate();
 
-  // Quản lý giỏ hàng trực tiếp trong trang này, không dùng CartContext nữa
+  // Quản lý giỏ hàng trực tiếp trong trang này
   const [cartItems, setCartItems] = useState([]);
+
+  // Quản lý trạng thái xử lý khi bấm nút Đặt hàng (Tránh bấm đúp gửi trùng đơn)
+  const [isOrdering, setIsOrdering] = useState(false);
 
   // Quản lý các bước: 1: Giỏ hàng, 2: Thông tin đặt hàng, 3: Vận chuyển, 4: Thanh toán, 5: Thành công
   const [step, setStep] = useState(1);
@@ -99,6 +103,66 @@ function CartCheckout() {
     }
   };
 
+  // 🛠️ ĐÃ THÊM: Hàm kiểm tra validate thông tin nhập vào ở Bước 2 trước khi cho đi tiếp
+  const handleValidateStep2 = () => {
+    if (!shippingInfo.name.trim()) {
+      alert("Vui lòng nhập họ và tên người nhận tranh!");
+      return;
+    }
+    if (!shippingInfo.phone.trim()) {
+      alert("Vui lòng nhập số điện thoại liên hệ giao hàng!");
+      return;
+    }
+    if (!shippingInfo.address.trim()) {
+      alert("Vui lòng điền địa chỉ nhận tranh chi tiết!");
+      return;
+    }
+    setStep(3); // Thỏa mãn điều kiện thì mới chuyển sang bước 3 Vận chuyển
+  };
+
+  // 🛠️ ĐÃ KẾT NỐI API CHÍNH XÁC: Hàm kích hoạt nạp đơn hàng lên Cơ sở dữ liệu Backend
+  const handlePlaceOrder = async () => {
+    // Phòng hờ kiểm tra lại thông tin khách hàng một lần nữa
+    if (!shippingInfo.name.trim() || !shippingInfo.phone.trim() || !shippingInfo.address.trim()) {
+      alert("Vui lòng quay lại Bước 2 và điền đầy đủ các thông tin bắt buộc (*)");
+      setStep(2);
+      return;
+    }
+
+    setIsOrdering(true);
+    try {
+      // Đóng gói Payload theo cấu trúc dữ liệu chuẩn của API Controller
+      const donHangPayload = {
+        ten_nguoi_nhan: shippingInfo.name,
+        sdt_nguoi_nhan: shippingInfo.phone,
+        dia_chi_giao: shippingInfo.address,
+        ghi_chu: shippingInfo.note,
+        phuong_thuc_van_chuyen: shippingInfo.method,
+        phuong_thuc_thanh_toan: shippingInfo.payment,
+        ma_giam_gia: appliedCoupon ? appliedCoupon.code : null,
+        giam_gia: discountAmount,
+        phi_van_chuyen: shippingFee,
+        tong_tien: total
+      };
+
+      // Gọi API taoDonHang từ file donHangService.js
+      const result = await donHangService.taoDonHang(donHangPayload);
+
+      if (result && result.success) {
+        // Đặt hàng thành công vĩnh viễn -> Làm sạch giỏ hàng UI và đẩy sang màn hình Bước 5 chúc mừng
+        clearCart();
+        setStep(5);
+      } else {
+        alert("Đặt hàng thất bại: " + (result.error || "Hệ thống từ chối xử lý dữ liệu đơn hàng."));
+      }
+    } catch (error) {
+      console.error("Lỗi sụp luồng xử lý đặt hàng API:", error);
+      alert("Có lỗi kết nối xảy ra trong quá trình đặt hàng. Vui lòng thử lại!");
+    } finally {
+      setIsOrdering(false);
+    }
+  };
+
   const availableCoupons = [
     { code: "SUMMER20", value: "20%", minSpend: 1000000, label: "Giảm 20% mùa hè" },
     { code: "ART100K", value: "100000", minSpend: 700000, label: "Giảm trực tiếp 100.000 đ" },
@@ -111,9 +175,7 @@ function CartCheckout() {
     return parseInt(priceStr.replace(/[^0-9]/g, ""), 10);
   };
 
-  // 🛠️ ĐÃ SỬA: Tính tổng tiền hàng dựa trên mảng cartItems trần đã chuẩn hóa ở trên
   const subtotal = (cartItems || []).reduce((sum, item) => {
-    // Đọc linh hoạt giá từ object tranh của backend (.tranh.gia_ban hoặc .price hoặc .thanh_tien)
     const itemPrice = item.tranh?.gia_ban || item.price || item.thanh_tien || 0;
     const itemQty = item.so_luong || item.quantity || 1;
     return sum + parsePrice(itemPrice) * itemQty;
@@ -228,10 +290,8 @@ function CartCheckout() {
             </div>
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "1.4fr 0.6fr", gap: "60px" }}>
-              {/* Cột bên trái hiển thị danh sách sản phẩm tranh vẽ */}
               <div>
                 {Array.isArray(cartItems) && cartItems.map((item) => {
-                  // Bóc tách an toàn các dữ liệu để hiển thị lên UI giao diện
                   const title = item.tranh?.ten_tranh || item.title || "Tác phẩm nghệ thuật";
                   const image = item.image || item.tranh?.hinhAnhChinh?.duongDan || "https://via.placeholder.com/90";
                   const currentQty = item.so_luong || item.quantity || 1;
@@ -256,10 +316,8 @@ function CartCheckout() {
                         </div>
                       </div>
 
-                      {/* 🛠️ ĐÂY CHÍNH LÀ ĐOẠN CODE NÚT BẤM BẠN HỎI - ĐÃ ĐẶT VÀO VỊ TRÍ CHUẨN XỊN */}
                       <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "12px", border: "1px solid #ddd", padding: "4px 12px", borderRadius: "4px" }}>
-                          {/* Nút giảm số lượng: Lấy item.so_luong trừ 1 */}
                           <button 
                             style={{ border: "none", background: "none", cursor: "pointer", fontSize: "16px" }} 
                             onClick={() => updateQuantity(item.id, (item.so_luong || item.quantity) - 1)}
@@ -269,7 +327,6 @@ function CartCheckout() {
                           
                           <span style={{ fontSize: "14px" }}>{item.so_luong || item.quantity}</span>
                           
-                          {/* Nút tăng số lượng: Lấy item.so_luong cộng 1 */}
                           <button 
                             style={{ border: "none", background: "none", cursor: "pointer", fontSize: "16px" }} 
                             onClick={() => updateQuantity(item.id, (item.so_luong || item.quantity) + 1)}
@@ -278,7 +335,6 @@ function CartCheckout() {
                           </button>
                         </div>
                         
-                        {/* Nút Xóa: Truyền item.id chính xác lên */}
                         <button 
                           onClick={() => removeFromCart(item.id)} 
                           style={{ border: "none", background: "none", color: "#e74c3c", cursor: "pointer", fontSize: "14px", fontWeight: "500", padding: "5px" }}
@@ -286,14 +342,11 @@ function CartCheckout() {
                           Xóa
                         </button>
                       </div>
-                      {/* 🛠️ KẾT THÚC ĐOẠN CỤM NÚT ĐIỀU HƯỚNG */}
-
                     </div>
                   );
                 })}
               </div>
 
-              {/* Khối tóm tắt tính tiền đơn hàng bên phải */}
               <div style={{ border: "1px solid #f0f0f0", padding: "25px", borderRadius: "8px", height: "fit-content", backgroundColor: "#fafafa" }}>
                 <h3 style={{ margin: "0 0 20px 0", fontSize: "18px", borderBottom: "1px solid #eee", paddingBottom: "10px" }}>Tóm tắt đơn hàng</h3>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "20px" }}>
@@ -326,7 +379,8 @@ function CartCheckout() {
               <textarea placeholder="Ghi chú đơn hàng..." rows="3" value={shippingInfo.note} onChange={(e) => setShippingInfo({ ...shippingInfo, note: e.target.value })} style={{ ...inputStyle, resize: "none" }} />
               <div style={{ display: "flex", justifyContent: "space-between", marginTop: "20px" }}>
                 <button onClick={() => setStep(1)} style={{ padding: "10px 20px", background: "none", border: "1px solid #ccc", borderRadius: "4px", cursor: "pointer" }}>Quay lại</button>
-                <button onClick={() => setStep(3)} style={{ padding: "12px 25px", backgroundColor: "#1c3f3a", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold" }}>Tiếp tục vận chuyển</button>
+                {/* 🛠️ ĐÃ SỬA: Thay onClick trực tiếp thành hàm handleValidateStep2 để check lỗi trống trường */}
+                <button onClick={handleValidateStep2} style={{ padding: "12px 25px", backgroundColor: "#1c3f3a", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold" }}>Tiếp tục vận chuyển</button>
               </div>
             </div>
 
@@ -412,8 +466,24 @@ function CartCheckout() {
               </div>
 
               <div style={{ display: "flex", justifyContent: "space-between", marginTop: "20px" }}>
-                <button onClick={() => setStep(3)} style={{ padding: "10px 20px", background: "none", border: "1px solid #ccc", borderRadius: "4px", cursor: "pointer" }}>Quay lại</button>
-                <button onClick={() => setStep(5)} style={{ padding: "12px 30px", backgroundColor: "#2e7d32", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold", fontSize: "15px" }}>Đặt hàng ngay</button>
+                <button onClick={() => setStep(3)} disabled={isOrdering} style={{ padding: "10px 20px", background: "none", border: "1px solid #ccc", borderRadius: "4px", cursor: isOrdering ? "not-allowed" : "pointer" }}>Quay lại</button>
+                {/* 🛠 * ĐÃ SỬA: Thay nút setStep(5) ảo cũ bằng hàm handlePlaceOrder gửi dữ liệu thật xuống Backend */}
+                <button 
+                  onClick={handlePlaceOrder} 
+                  disabled={isOrdering}
+                  style={{ 
+                    padding: "12px 30px", 
+                    backgroundColor: isOrdering ? "#999" : "#2e7d32", 
+                    color: "#fff", 
+                    border: "none", 
+                    borderRadius: "4px", 
+                    cursor: isOrdering ? "not-allowed" : "pointer", 
+                    fontWeight: "bold", 
+                    fontSize: "15px" 
+                  }}
+                >
+                  {isOrdering ? "Đang xử lý đơn hàng..." : "Đặt hàng ngay"}
+                </button>
               </div>
             </div>
 
