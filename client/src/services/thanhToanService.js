@@ -33,10 +33,9 @@ const thanhToanService = {
   // Tạo thanh toán
   taoThanhToan: async (thanhToanData) => {
     try {
-      const response = await apiClient.post(
-        "/thanh-toan/",
-        thanhToanData,
-      );
+      console.log("Dữ liệu gửi tạo thanh toán:", thanhToanData);
+      
+      const response = await apiClient.post("/thanh-toan/", thanhToanData);
       return response.data;
     } catch (error) {
       return {
@@ -49,10 +48,9 @@ const thanhToanService = {
   // Cập nhật trạng thái thanh toán
   capNhatTrangThaiThanhToan: async (id, trangThaiMoi) => {
     try {
-      const response = await apiClient.patch(
-        `/thanh-toan/${id}/trang-thai`,
-        { trangThaiMoi },
-      );
+      const response = await apiClient.put(`/thanh-toan/${id}/trang-thai`, {
+        trangThaiMoi,
+      });
       return response.data;
     } catch (error) {
       return {
