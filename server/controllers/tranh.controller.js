@@ -7,6 +7,9 @@ const {
   KhoHang,
   sequelize,
   DanhGia,
+  DonHangChiTiet,
+  KhuyenMaiTranh,
+  GioHangChiTiet,
 } = require("../models");
 
 const xemTatCaTranh = async (req, res) => {
@@ -222,18 +225,41 @@ const xoaTranh = async (req, res) => {
   }
   const t = await sequelize.transaction();
   try {
-    await DanhGia.destroy({ where: { tranh_id: tranh }, transaction: t });
+    await DanhGia.destroy({ where: { tranh_id: tranh.id }, transaction: t });
+    await DonHangChiTiet.destroy({
+      where: { tranh_id: tranh.id },
+      transaction: t,
+    });
 
-    
-  } catch (error) {}
+    await HinhAnhTranh.destroy({
+      where: { tranh_id: tranh.id },
+      transaction: t,
+    });
+    await KhuyenMaiTranh.destroy({
+      where: { tranh_id: tranh.id },
+      transaction: t,
+    });
+    await GioHangChiTiet.destroy({
+      where: { tranh_id: tranh.id },
+      transaction: t,
+    });
 
-  await tranh.destroy();
+    await Tranh.destroy({ where: { id: tranh.id }, transaction: t });
 
-  res.json({
-    success: true,
-    message: "Xoa tranh thanh cong",
-    data: null,
-  });
+    await t.commit();
+    res.json({
+      success: true,
+      message: "Xoa tranh thanh cong",
+      data: null,
+    });
+  } catch (error) {
+    await t.rollback();
+    res.json({
+      success: false,
+      message: "Xoa tranh khong thanh cong",
+      data: null,
+    });
+  }
 };
 
 module.exports = {

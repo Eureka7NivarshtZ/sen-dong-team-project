@@ -30,12 +30,6 @@ const tranhService = {
     return response.data;
   },
 
-  // Ẩn tranh (admin) - Thay vì xóa vĩnh viễn
-  anTranh: async (id) => {
-    const response = await apiClient.put(`/tranh/${id}/an`, {});
-    return response.data;
-  },
-
   // Xóa tranh (admin)
   xoaTranh: async (id) => {
     const response = await apiClient.delete(`/tranh/${id}`);

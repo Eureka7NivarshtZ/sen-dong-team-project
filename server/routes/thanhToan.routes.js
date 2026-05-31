@@ -19,9 +19,8 @@ router.use(yeuCauDangNhap);
 router.post("/", taoThanhToan);
 router.get("/:id", layChiTietThanhToan);
 
-// ========== NHÂN VIÊN: Xem và tạo thanh toán ==========
-router.use(yeuCauNhanVien);
-router.get("/", layTatCaThanhToan);
+// ========== NHÂN VIÊN: Xem thanh toán ==========
+router.get("/", yeuCauNhanVien, layTatCaThanhToan);
 
 // ========== QUẢN LÝ / BAN HÀNG: Cập nhật trạng thái thanh toán ==========
 router.put(

@@ -5,7 +5,8 @@ const taoMaGiaoDich = () => {
 };
 
 const taoThanhToan = async (req, res) => {
-  const { hoa_don_id, so_tien, phuong_thuc } = req.body;
+  const { hoa_don_id, so_tien, phuong_thuc, trang_thai, ma_giao_dich } =
+    req.body;
 
   if (!hoa_don_id || !so_tien || !phuong_thuc) {
     return res.status(400).json({

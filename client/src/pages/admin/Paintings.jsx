@@ -1,29 +1,27 @@
 import { useEffect, useState } from "react";
 import Topbar from "../../components/admin/Topbar";
-import { danhMucService, tacGiaService, tranhService } from "../../services"; // Gọi file dịch vụ của team
+import { danhMucService, tacGiaService, tranhService } from "../../services";
 
 function Paintings() {
-  const [paintings, setPaintings] = useState([]); // 🛠️ FIX LỖI: Khai báo State lưu trữ danh sách tranh
+  const [paintings, setPaintings] = useState([]);
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Thêm state cho danh mục và tác giả
   const [danhMucList, setDanhMucList] = useState([]);
   const [tacGiaList, setTacGiaList] = useState([]);
 
   const [newPainting, setNewPainting] = useState({
-    name: "",
+    ten_tranh: "",
     danh_muc_id: "",
     tac_gia_id: "",
-    price: "",
-    stock: "",
-    image: "",
+    gia_ban: "",
+    so_luong_ton: "",
+    hinh_anh_url: "",
   });
 
-  // Load danh mục + tác giả song song khi mở modal
   const loadSelectData = async () => {
     try {
       const [dmRes, tgRes] = await Promise.all([
@@ -40,14 +38,14 @@ function Paintings() {
   const openAddModal = () => {
     setIsEditing(false);
     setNewPainting({
-      name: "",
+      ten_tranh: "",
       danh_muc_id: "",
       tac_gia_id: "",
-      price: "",
-      stock: "",
-      image: "",
+      gia_ban: "",
+      so_luong_ton: "",
+      hinh_anh_url: "",
     });
-    loadSelectData(); // 👈 gọi khi mở modal
+    loadSelectData();
     setShowModal(true);
   };
 
@@ -55,18 +53,17 @@ function Paintings() {
     setIsEditing(true);
     setEditId(item.id);
     setNewPainting({
-      name: item.name,
+      ten_tranh: item.ten_tranh,
       danh_muc_id: item.danh_muc_id || "",
       tac_gia_id: item.tac_gia_id || "",
-      price: String(item.rawPrice || "").replace(/[^0-9]/g, ""),
-      stock: item.stock,
-      image: item.image,
+      gia_ban: String(item.gia_ban || "").replace(/[^0-9]/g, ""),
+      so_luong_ton: item.so_luong_ton,
+      hinh_anh_url: item.hinh_anh_tranh?.[0]?.url || "",
     });
-    loadSelectData(); // 👈 gọi khi mở modal sửa
+    loadSelectData();
     setShowModal(true);
   };
 
-  // 1. MỞ COMMENT & LIÊN KẾT API LẤY DANH SÁCH TRANH TỪ BACKEND
   const loadPaintingsData = async () => {
     setLoading(true);
     try {
@@ -85,35 +82,33 @@ function Paintings() {
     loadPaintingsData();
   }, []);
 
-  // Xử lý bộ lọc ô Tìm kiếm nhanh
   const filteredPaintings = paintings.filter((item) =>
-    (item.name || "").toLowerCase().includes(search.toLowerCase()),
+    (item.ten_tranh || "").toLowerCase().includes(search.toLowerCase()),
   );
 
   const handleSavePainting = async () => {
     if (
-      !newPainting.name ||
+      !newPainting.ten_tranh ||
       !newPainting.danh_muc_id ||
       !newPainting.tac_gia_id ||
-      !newPainting.price
+      !newPainting.gia_ban
     ) {
       alert("Vui lòng nhập đầy đủ thông tin cần thiết!");
       return;
     }
 
     const payload = {
-      ten_tranh: newPainting.name,
-      danh_muc_id: newPainting.danh_muc_id, // ← đúng
+      ten_tranh: newPainting.ten_tranh,
+      danh_muc_id: newPainting.danh_muc_id,
       tac_gia_id: newPainting.tac_gia_id,
-      gia_ban: Number(newPainting.price),
-      gia_von: Number(newPainting.price) / 2,
-      so_luong_ton: Number(newPainting.stock),
+      gia_ban: Number(newPainting.gia_ban),
+      gia_von: Number(newPainting.gia_ban) / 2,
+      so_luong_ton: Number(newPainting.so_luong_ton),
       mo_ta: "",
     };
 
     try {
       if (isEditing) {
-        // ✅ Lỗi 2 đã sửa: alert đúng nội dung
         const result = await tranhService.capNhatTranh(editId, payload);
         if (result.success) {
           alert("Cập nhật tác phẩm thành công!");
@@ -123,7 +118,6 @@ function Paintings() {
           alert("Cập nhật thất bại: " + (result.error || "Lỗi không xác định"));
         }
       } else {
-        // ✅ Lỗi 1 đã sửa: thêm mới có logic
         const result = await tranhService.taoTranh(payload);
         if (result.success) {
           alert("Thêm tác phẩm mới thành công!");
@@ -142,7 +136,6 @@ function Paintings() {
     if (!window.confirm("Bạn có chắc chắn muốn xóa bức tranh này?")) return;
 
     try {
-      // ✅ Lỗi 3 đã sửa: gọi API thật
       const result = await tranhService.xoaTranh(id);
       if (result.success) {
         setPaintings(paintings.filter((item) => item.id !== id));
@@ -263,22 +256,30 @@ function Paintings() {
                     <td>
                       <img
                         src={
-                          item.hinhAnhChinh?.duongDan ||
+                          item.hinh_anh_tranh?.[0]?.url ||
                           "https://picsum.photos/80"
                         }
+                        alt={item.ten_tranh}
+                        style={{
+                          width: 60,
+                          height: 60,
+                          objectFit: "cover",
+                          borderRadius: 4,
+                        }}
                       />
                     </td>
-                    <td>{item.ten_tranh}</td>
-                    <td>{item.tac_gia.ho_ten}</td>
-                    <td>{item.danh_muc.ten}</td>
-                    <td>
-                      {typeof item.gia_ban === "number"
-                        ? item.gia_ban.toLocaleString("vi-VN") + " đ"
-                        : "0 đ"}
+                    <td style={{ padding: "12px" }}>{item.ten_tranh}</td>
+                    <td style={{ padding: "12px" }}>{item.tac_gia?.ho_ten}</td>
+                    <td style={{ padding: "12px" }}>{item.danh_muc?.ten}</td>
+                    <td style={{ padding: "12px" }}>
+                      {item.gia_ban.toLocaleString("vi-VN") + " đ"}
                     </td>
-                    <td>{item.so_luong_ton ?? 0} tấm</td>
+                    <td style={{ padding: "12px" }}>
+                      {item.so_luong_ton ?? 0} tấm
+                    </td>
                     <td
                       style={{
+                        padding: "12px",
                         color: item.so_luong_ton > 0 ? "#27ae60" : "#e74c3c",
                         fontWeight: "bold",
                       }}
@@ -352,19 +353,17 @@ function Paintings() {
               {isEditing ? "Cập nhật thông tin tranh" : "Thêm tranh mới"}
             </h2>
 
-            {/* Tên tranh */}
             <label style={labelStyle}>Tên tranh *</label>
             <input
               type="text"
               placeholder="Nhập tên tác phẩm"
-              value={newPainting.name}
+              value={newPainting.ten_tranh}
               onChange={(e) =>
-                setNewPainting({ ...newPainting, name: e.target.value })
+                setNewPainting({ ...newPainting, ten_tranh: e.target.value })
               }
               style={inputStyle}
             />
 
-            {/* Danh mục — SELECT từ API */}
             <label style={labelStyle}>Danh mục *</label>
             <select
               value={newPainting.danh_muc_id}
@@ -381,7 +380,6 @@ function Paintings() {
               ))}
             </select>
 
-            {/* Tác giả — SELECT từ API */}
             <label style={labelStyle}>Tác giả *</label>
             <select
               value={newPainting.tac_gia_id}
@@ -401,38 +399,35 @@ function Paintings() {
               ))}
             </select>
 
-            {/* Giá bán */}
             <label style={labelStyle}>Giá bán (VNĐ) *</label>
             <input
               type="number"
               placeholder="VD: 3600000"
-              value={newPainting.price}
+              value={newPainting.gia_ban}
               onChange={(e) =>
-                setNewPainting({ ...newPainting, price: e.target.value })
+                setNewPainting({ ...newPainting, gia_ban: e.target.value })
               }
               style={inputStyle}
             />
 
-            {/* Tồn kho */}
             <label style={labelStyle}>Số lượng tồn kho</label>
             <input
               type="number"
               placeholder="VD: 10"
-              value={newPainting.stock}
+              value={newPainting.so_luong_ton}
               onChange={(e) =>
-                setNewPainting({ ...newPainting, stock: e.target.value })
+                setNewPainting({ ...newPainting, so_luong_ton: e.target.value })
               }
               style={inputStyle}
             />
 
-            {/* Hình ảnh */}
             <label style={labelStyle}>URL hình ảnh</label>
             <input
               type="text"
               placeholder="https://..."
-              value={newPainting.image}
+              value={newPainting.hinh_anh_url}
               onChange={(e) =>
-                setNewPainting({ ...newPainting, image: e.target.value })
+                setNewPainting({ ...newPainting, hinh_anh_url: e.target.value })
               }
               style={inputStyle}
             />
