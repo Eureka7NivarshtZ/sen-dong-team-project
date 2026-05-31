@@ -1,5 +1,13 @@
 const { Op, or } = require("sequelize");
-const { Tranh, HinhAnhTranh, TacGia, DanhMuc, KhoHang } = require("../models");
+const {
+  Tranh,
+  HinhAnhTranh,
+  TacGia,
+  DanhMuc,
+  KhoHang,
+  sequelize,
+  DanhGia,
+} = require("../models");
 
 const xemTatCaTranh = async (req, res) => {
   const {
@@ -142,7 +150,15 @@ const xemChiTietTranh = async (req, res) => {
 };
 
 const taoTranh = async (req, res) => {
-  const { ten_tranh, danh_muc_id, tac_gia_id, gia_ban, gia_von, so_luong_ton, mo_ta } = req.body;
+  const {
+    ten_tranh,
+    danh_muc_id,
+    tac_gia_id,
+    gia_ban,
+    gia_von,
+    so_luong_ton,
+    mo_ta,
+  } = req.body;
 
   if (!ten_tranh || !danh_muc_id || !tac_gia_id) {
     return res.status(400).json({
@@ -154,7 +170,7 @@ const taoTranh = async (req, res) => {
   const tranh = await Tranh.create({
     ten_tranh,
     danh_muc_id,
-    tac_gia_id,   // 👈 thêm dòng này
+    tac_gia_id, // 👈 thêm dòng này
     gia_ban,
     gia_von,
     so_luong_ton,
@@ -195,44 +211,21 @@ const capNhatTranh = async (req, res) => {
   });
 };
 
-const anTranh = async (req, res) => {
-  const { id } = req.params;
-
-  const tranh = await Tranh.findByPk(id);
-
-  if (!tranh) {
-    return res.status(404).json({
-      success: false,
-      error: "Khong tim thay tranh",
-    });
-  }
-
-  const tranhData = {
-    ...req.body,
-    trang_thai: "an",
-    nhan_vien_cap_nhat_id: req.user.nhan_vien_id,
-    cap_nhat_luc: new Date(),
-  };
-
-  await tranh.update(tranhData);
-  res.json({
-    success: true,
-    message: "An tranh thanh cong",
-    data: tranh,
-  });
-};
-
 const xoaTranh = async (req, res) => {
   const { id } = req.params;
-
   const tranh = await Tranh.findByPk(id);
-
   if (!tranh) {
     return res.status(404).json({
       success: false,
       error: "Khong tim thay tranh",
     });
   }
+  const t = await sequelize.transaction();
+  try {
+    await DanhGia.destroy({ where: { tranh_id: tranh }, transaction: t });
+
+    
+  } catch (error) {}
 
   await tranh.destroy();
 
@@ -248,6 +241,5 @@ module.exports = {
   xemChiTietTranh,
   taoTranh,
   capNhatTranh,
-  anTranh,
   xoaTranh,
 };

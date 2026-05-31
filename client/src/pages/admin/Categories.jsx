@@ -19,7 +19,7 @@ function Categories() {
       if (result.success && result.data) {
         setCategories(
           result.data.map((dm) => ({
-            id: dm.danh_muc_id || dm.id,
+            id: dm.id,
             ten: dm.ten,
           })),
         );

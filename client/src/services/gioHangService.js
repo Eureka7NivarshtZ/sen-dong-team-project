@@ -30,7 +30,7 @@ const gioHangService = {
   // 3. Cập nhật số lượng của một tác phẩm trong giỏ
   capNhatSoLuong: async (id, so_luong) => {
     try {
-      const response = await apiClient.put(`/gio-hang/cap-nhat/${id}`, { so_luong });
+      const response = await apiClient.put(`/gio-hang/${id}`, { so_luong });
       return response.data;
     } catch (error) {
       return {

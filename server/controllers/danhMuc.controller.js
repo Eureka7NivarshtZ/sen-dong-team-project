@@ -51,7 +51,6 @@ const themDanhMuc = async (req, res) => {
 
 const xoaDanhMuc = async (req, res) => {
   const { id } = req.params;
-
   const danhMuc = await DanhMuc.findByPk(id);
   if (!danhMuc) {
     return res.status(404).json({
