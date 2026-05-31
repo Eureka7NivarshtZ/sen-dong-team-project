@@ -70,35 +70,12 @@ function Paintings() {
   const loadPaintingsData = async () => {
     setLoading(true);
     try {
-      if (tranhService && typeof tranhService.layTatCaTranh === "function") {
-        const result = await tranhService.layTatCaTranh();
-        if (result.success && result.data) {
-          // Ánh xạ dữ liệu trả về khớp với cấu trúc hiển thị của bảng
-          // Trong phần mappedData của loadPaintingsData, thêm 2 trường id gốc:
-          const mappedData = result.data.map((p) => ({
-            id: p.tranh_id || p.id,
-            name: p.ten_tranh || "Tác phẩm nghệ thuật",
-            category: p.danhMuc?.ten || p.loai_tranh || "—",
-            tacGia: p.tacGia?.ten || p.ten_tac_gia || "—", // 👈 thêm
-            danh_muc_id: p.danh_muc_id || p.danhMuc?.id || "", // 👈 thêm
-            tac_gia_id: p.tac_gia_id || p.tacGia?.id || "", // 👈 thêm
-            price:
-              typeof p.gia_ban === "number"
-                ? p.gia_ban.toLocaleString("vi-VN") + " đ"
-                : "0 đ",
-            stock: p.so_luong_ton || 0,
-            status: (p.so_luong_ton || 0) > 0 ? "Còn" : "Hết",
-            image: p.hinhAnhChinh?.duongDan || "https://picsum.photos/80",
-            rawPrice: p.gia_ban || 0,
-          }));
-          setPaintings(mappedData);
-        }
-      } else {
-        setPaintings(getFallbackPaintings());
+      const result = await tranhService.layTatCaTranh();
+      if (result.success && result.data) {
+        setPaintings(result.data);
       }
     } catch (err) {
-      console.error("Lỗi lấy danh sách tranh từ hệ thống API:", err);
-      setPaintings(getFallbackPaintings()); // Kích hoạt data dự phòng nếu chưa bật server
+      console.error("Lỗi lấy danh sách tranh:", err);
     } finally {
       setLoading(false);
     }
@@ -107,42 +84,6 @@ function Paintings() {
   useEffect(() => {
     loadPaintingsData();
   }, []);
-
-  // Hàm tạo dữ liệu mẫu dự phòng đồng bộ với database xưởng vẽ Sen Đông
-  function getFallbackPaintings() {
-    return [
-      {
-        id: 1,
-        name: "Đêm đầy sao",
-        category: "Sơn dầu trên vải",
-        price: "3,600,000 đ",
-        stock: 63,
-        status: "Còn",
-        image: "https://picsum.photos/80?1",
-        rawPrice: 3600000,
-      },
-      {
-        id: 2,
-        name: "Hoa diên vĩ",
-        category: "Sơn dầu trên vải",
-        price: "3,600,000 đ",
-        stock: 13,
-        status: "Còn",
-        image: "https://picsum.photos/80?2",
-        rawPrice: 3600000,
-      },
-      {
-        id: 3,
-        name: "Hoa hướng dương",
-        category: "Sơn dầu trên canvas",
-        price: "3,600,000 đ",
-        stock: 635,
-        status: "Còn",
-        image: "https://picsum.photos/80?3",
-        rawPrice: 3600000,
-      },
-    ];
-  }
 
   // Xử lý bộ lọc ô Tìm kiếm nhanh
   const filteredPaintings = paintings.filter((item) =>
@@ -305,6 +246,7 @@ function Paintings() {
                 >
                   <th style={{ padding: "12px" }}>Hình ảnh</th>
                   <th style={{ padding: "12px" }}>Tên tranh</th>
+                  <th style={{ padding: "12px" }}>Tác giả</th>
                   <th style={{ padding: "12px" }}>Loại tranh</th>
                   <th style={{ padding: "12px" }}>Giá bán</th>
                   <th style={{ padding: "12px" }}>Tồn kho</th>
@@ -318,41 +260,30 @@ function Paintings() {
                     key={item.id}
                     style={{ borderBottom: "1px solid #f0f0f0" }}
                   >
-                    <td style={{ padding: "12px" }}>
+                    <td>
                       <img
-                        src={item.image}
-                        alt=""
-                        style={{
-                          width: "50px",
-                          height: "50px",
-                          borderRadius: "6px",
-                          objectFit: "cover",
-                        }}
+                        src={
+                          item.hinhAnhChinh?.duongDan ||
+                          "https://picsum.photos/80"
+                        }
                       />
                     </td>
-                    <td style={{ padding: "12px", fontWeight: "600" }}>
-                      {item.name}
+                    <td>{item.ten_tranh}</td>
+                    <td>{item.tac_gia.ho_ten}</td>
+                    <td>{item.danh_muc.ten}</td>
+                    <td>
+                      {typeof item.gia_ban === "number"
+                        ? item.gia_ban.toLocaleString("vi-VN") + " đ"
+                        : "0 đ"}
                     </td>
-                    <td style={{ padding: "12px" }}>{item.category}</td>
+                    <td>{item.so_luong_ton ?? 0} tấm</td>
                     <td
                       style={{
-                        padding: "12px",
-                        color: "#2e7d32",
+                        color: item.so_luong_ton > 0 ? "#27ae60" : "#e74c3c",
                         fontWeight: "bold",
                       }}
                     >
-                      {item.price}
-                    </td>
-                    <td style={{ padding: "12px" }}>{item.stock} tấm</td>
-                    <td style={{ padding: "12px" }}>
-                      <span
-                        style={{
-                          color: item.status === "Còn" ? "#27ae60" : "#e74c3c",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        {item.status}
-                      </span>
+                      {item.so_luong_ton > 0 ? "Còn" : "Hết"}
                     </td>
                     <td
                       style={{ padding: "12px", display: "flex", gap: "10px" }}
@@ -444,11 +375,8 @@ function Paintings() {
             >
               <option value="">-- Chọn danh mục --</option>
               {danhMucList.map((dm) => (
-                <option
-                  key={dm.danh_muc_id || dm.id}
-                  value={dm.danh_muc_id || dm.id}
-                >
-                  {dm.ten_danh_muc || dm.ten}
+                <option key={dm.id} value={dm.id}>
+                  {dm.ten}
                 </option>
               ))}
             </select>

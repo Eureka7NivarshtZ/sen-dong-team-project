@@ -5,7 +5,6 @@ const {
   xemChiTietTranh,
   taoTranh,
   capNhatTranh,
-  anTranh,
   xoaTranh,
 } = require("../controllers/tranh.controller");
 

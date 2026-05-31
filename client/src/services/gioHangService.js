@@ -30,7 +30,6 @@ const gioHangService = {
   // 3. Cập nhật số lượng (Đã sửa theo đúng route: router.put("/:id"))
   capNhatSoLuong: async (id, so_luong) => {
     try {
-      // Đường dẫn trực tiếp không qua sub-url rác
       const response = await apiClient.put(`/gio-hang/${id}`, { so_luong });
       return response.data;
     } catch (error) {
