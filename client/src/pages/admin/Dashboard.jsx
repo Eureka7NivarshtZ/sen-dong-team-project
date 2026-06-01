@@ -12,7 +12,7 @@ function Dashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      const res = await dashboardService.layThongKeTongQuan();
+      const res = await dashboardService.layDashboardTongQuan();
       if (res && res.success) {
         setStats(res.data);
       }
@@ -27,15 +27,26 @@ function Dashboard() {
     fetchDashboardData();
   }, []);
 
-  if (loading) return <div style={{ padding: "30px" }}>Đang tải số liệu từ SQL Server...</div>;
+  if (loading)
+    return (
+      <div style={{ padding: "30px" }}>Đang tải số liệu từ SQL Server...</div>
+    );
 
   return (
     <div style={{ padding: "30px", fontFamily: "Arial" }}>
       <h2 style={{ marginBottom: "30px" }}>Tổng Quan Hệ Thống</h2>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "20px" }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(4, 1fr)",
+          gap: "20px",
+        }}
+      >
         <div style={cardStyle}>
           <h4>Tổng Doanh Thu</h4>
-          <h2 style={{ color: "#2e7d32" }}>{stats.tong_doanh_thu?.toLocaleString("vi-VN")} đ</h2>
+          <h2 style={{ color: "#2e7d32" }}>
+            {stats.tong_doanh_thu?.toLocaleString("vi-VN")} đ
+          </h2>
         </div>
         <div style={cardStyle}>
           <h4>Tổng Số Đơn Hàng</h4>
@@ -43,7 +54,9 @@ function Dashboard() {
         </div>
         <div style={cardStyle}>
           <h4>Số Lượng Khách Hàng</h4>
-          <h2 style={{ color: "#007bff" }}>{stats.tong_khach_hang} tài khoản</h2>
+          <h2 style={{ color: "#007bff" }}>
+            {stats.tong_khach_hang} tài khoản
+          </h2>
         </div>
         <div style={cardStyle}>
           <h4>Tổng Số Tác Phẩm Tranh</h4>
@@ -54,5 +67,11 @@ function Dashboard() {
   );
 }
 
-const cardStyle = { padding: "20px", border: "1px solid #ddd", borderRadius: "8px", backgroundColor: "#fafafa", textAlign: "center" };
+const cardStyle = {
+  padding: "20px",
+  border: "1px solid #ddd",
+  borderRadius: "8px",
+  backgroundColor: "#fafafa",
+  textAlign: "center",
+};
 export default Dashboard;
