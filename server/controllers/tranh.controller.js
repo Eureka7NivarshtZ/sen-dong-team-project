@@ -4,7 +4,6 @@ const {
   HinhAnhTranh,
   TacGia,
   DanhMuc,
-  KhoHang,
   sequelize,
   DanhGia,
   DonHangChiTiet,
@@ -104,10 +103,6 @@ const xemTatCaTranh = async (req, res) => {
         model: DanhMuc,
         as: "danh_muc",
       },
-      {
-        model: KhoHang,
-        as: "kho_hang",
-      },
     ],
     order,
     limit: soLuongTrang,
@@ -201,7 +196,6 @@ const capNhatTranh = async (req, res) => {
 
   const tranhData = {
     ...req.body,
-    nhan_vien_cap_nhat_id: req.user.nhan_vien_id,
     cap_nhat_luc: new Date(),
   };
 

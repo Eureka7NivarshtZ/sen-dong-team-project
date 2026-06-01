@@ -13,18 +13,19 @@ const {
   yeuCauNhanVien,
 } = require("../utils/middleware");
 
-// Chỉ yêu cầu đăng nhập cho tất cả
-router.use(yeuCauDangNhap);
+// ========== TẤT CẢ (đã đăng nhập): Tạo thanh toán ==========
+router.post("/them", yeuCauDangNhap, taoThanhToan);
 
-router.post("/", taoThanhToan);
-router.get("/:id", layChiTietThanhToan);
+// ========== TẤT CẢ (đã đăng nhập): Xem chi tiết thanh toán ==========
+router.get("/:id", yeuCauDangNhap, layChiTietThanhToan);
 
-// ========== NHÂN VIÊN: Xem thanh toán ==========
-router.get("/", yeuCauNhanVien, layTatCaThanhToan);
+// ========== NHÂN VIÊN: Xem danh sách tất cả thanh toán ==========
+router.get("/", yeuCauDangNhap, yeuCauNhanVien, layTatCaThanhToan);
 
 // ========== QUẢN LÝ / BAN HÀNG: Cập nhật trạng thái thanh toán ==========
 router.put(
   "/:id/trang-thai",
+  yeuCauDangNhap,
   kiemTraVaiTro(["quan_ly", "ban_hang"]),
   capNhatTrangThaiThanhToan,
 );

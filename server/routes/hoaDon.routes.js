@@ -1,28 +1,26 @@
 const router = require("express").Router();
-
 const {
   taoHoaDon,
   layTatCaHoaDon,
   layChiTietHoaDon,
   huyHoaDon,
 } = require("../controllers/hoaDon.controller");
-
 const {
   yeuCauDangNhap,
   kiemTraVaiTro,
   yeuCauNhanVien,
 } = require("../utils/middleware");
 
-// ========== TẤT CẢ: Xem chi tiết hóa đơn ==========
+// Khách hàng: xem chi tiết hóa đơn của mình
 router.get("/:id", yeuCauDangNhap, layChiTietHoaDon);
 
-// ========== NHÂN VIÊN: Quản lý hóa đơn ==========
-router.use(yeuCauDangNhap);
-router.use(yeuCauNhanVien);
+// Khách hàng: tạo hóa đơn sau khi đặt hàng
+router.post("/", yeuCauDangNhap, taoHoaDon);
 
-router.get("/", layTatCaHoaDon);
-router.post("/", taoHoaDon);
+// Nhân viên trở lên: xem tất cả hóa đơn
+router.get("/", yeuCauDangNhap, yeuCauNhanVien, layTatCaHoaDon);
 
-router.put("/:id/huy", kiemTraVaiTro("quan_ly"), huyHoaDon);
+// Quản lý: hủy hóa đơn
+router.put("/:id/huy", yeuCauDangNhap, kiemTraVaiTro("quan_ly"), huyHoaDon);
 
 module.exports = router;

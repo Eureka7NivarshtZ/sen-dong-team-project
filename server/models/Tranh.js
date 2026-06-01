@@ -17,10 +17,6 @@ const Tranh = sequelize.define(
       type: DataTypes.UUID,
       allowNull: true,
     },
-    kho_id: {
-      type: DataTypes.UUID,
-      allowNull: true,
-    },
     ten_tranh: {
       type: DataTypes.STRING(200),
       allowNull: false,
@@ -57,10 +53,6 @@ const Tranh = sequelize.define(
       defaultValue: "ban",
     },
     nhan_vien_tao_id: {
-      type: DataTypes.UUID,
-      allowNull: true,
-    },
-    nhan_vien_cap_nhat_id: {
       type: DataTypes.UUID,
       allowNull: true,
     },

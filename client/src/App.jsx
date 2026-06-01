@@ -10,20 +10,16 @@ import CartCheckout from "./pages/client/CartCheckout";
 import Login from "./pages/client/Login";
 import Register from "./pages/client/Register";
 import ProductDetail from "./pages/client/ProductDetail";
-import SupportTickets from "./pages/client/SupportTickets";
 // ADMIN PAGES
 import Dashboard from "./pages/admin/Dashboard";
 import Orders from "./pages/admin/Orders";
 import Paintings from "./pages/admin/Paintings";
-import Warehouse from "./pages/admin/Warehouse";
 import Employees from "./pages/admin/Employees";
 import Authors from "./pages/admin/Authors";
 import Categories from "./pages/admin/Categories";
 import Promotions from "./pages/admin/Promotions";
-import AnswerSupport from "./pages/admin/AnswerSupport";
 import { useEffect, useState } from "react";
 import { authService, tranhService } from "./services";
-
 
 function ProtectedAdminRoute({ children }) {
   const user = authService.getUser();
@@ -60,7 +56,6 @@ function App() {
         <Route path="/gio-hang" element={<CartCheckout />} />
         <Route path="/auth/dang-nhap" element={<Login />} />
         <Route path="/auth/dang-ky" element={<Register />} />
-        <Route path="/ho-tro" element={<SupportTickets />} />
       </Route>
 
       {/* ADMIN ROUTES */}
@@ -77,10 +72,8 @@ function App() {
         <Route path="tranh" element={<Paintings />} />
         <Route path="tac-gia" element={<Authors />} />
         <Route path="danh-muc" element={<Categories />} />
-        <Route path="kho-hang" element={<Warehouse />} />
         <Route path="nhan-vien" element={<Employees />} />
         <Route path="khuyen-mai" element={<Promotions />} />
-        <Route path="ho-tro" element={<AnswerSupport />} />
       </Route>
     </Routes>
   );

@@ -40,7 +40,7 @@ const taoHoaDon = async (req, res) => {
   const hoaDon = await HoaDon.create({
     don_hang_id,
     so_hoa_don: taoSoHoaDon(),
-    tong_tien_truoc_thue: donHang.thanh_tien,
+    tong_tien_truoc_thue: tongTruocThue, // ← fix
     thue_suat: 10,
     loai: "ban_hang",
     trang_thai: "da_xuat",
