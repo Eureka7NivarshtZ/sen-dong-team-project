@@ -1,40 +1,58 @@
-import React from "react";
-import Topbar from "../../components/admin/Topbar";
-import StatCard from "../../components/admin/StatCard";      
-import RevenueChart from "../../components/admin/RevenueChart";  
-import OrderTable from "../../components/admin/OrderTable";
+import React, { useState, useEffect } from "react";
+import { dashboardService } from "../../services";
 
 function Dashboard() {
+  const [stats, setStats] = useState({
+    tong_doanh_thu: 0,
+    tong_so_don: 0,
+    tong_khach_hang: 0,
+    tong_so_tranh: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  const fetchDashboardData = async () => {
+    try {
+      const res = await dashboardService.layThongKeTongQuan();
+      if (res && res.success) {
+        setStats(res.data);
+      }
+    } catch (error) {
+      console.error("Lỗi nạp thống kê:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  if (loading) return <div style={{ padding: "30px" }}>Đang tải số liệu từ SQL Server...</div>;
+
   return (
-    <div className="dashboard-content" style={{ flex: 1, backgroundColor: "#f9f9f9", minHeight: "100vh" }}>
-      <Topbar />
-
-      <div style={{ padding: "30px", textAlign: "left" }}>
-        <h1 className="dashboard-title" style={{ margin: "0 0 25px 0", fontSize: "24px", color: "#1c3f3a", fontWeight: "bold" }}>
-          Tổng quan
-        </h1>
-
-        {/* CARDS THỐNG KÊ */}
-        <div className="card-wrapper" style={{ display: "flex", gap: "20px", marginBottom: "30px", flexWrap: "wrap" }}>
-          <StatCard title="Doanh thu theo tháng" value="36,000,000 đ" subtext="↑ 8.5%" />
-          <StatCard title="Đơn hàng hôm nay" value="10293" subtext="↑ 1.3%" />
-          <StatCard title="Tranh đang bán" value="3600" subtext="↓ 4.3%" />
-          <StatCard title="Cảnh báo tồn kho" value="7" subtext="↑ 1.8%" />
+    <div style={{ padding: "30px", fontFamily: "Arial" }}>
+      <h2 style={{ marginBottom: "30px" }}>Tổng Quan Hệ Thống</h2>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "20px" }}>
+        <div style={cardStyle}>
+          <h4>Tổng Doanh Thu</h4>
+          <h2 style={{ color: "#2e7d32" }}>{stats.tong_doanh_thu?.toLocaleString("vi-VN")} đ</h2>
         </div>
-
-        {/* BIỂU ĐỒ DOANH THU */}
-        <div style={{ marginBottom: "30px" }}>
-          <RevenueChart />
+        <div style={cardStyle}>
+          <h4>Tổng Số Đơn Hàng</h4>
+          <h2 style={{ color: "#1c3f3a" }}>{stats.tong_so_don} đơn</h2>
         </div>
-
-        {/* BẢNG ĐƠN HÀNG GẦN ĐÂY */}
-        <div style={{ marginBottom: "30px" }}>
-          <OrderTable />
+        <div style={cardStyle}>
+          <h4>Số Lượng Khách Hàng</h4>
+          <h2 style={{ color: "#007bff" }}>{stats.tong_khach_hang} tài khoản</h2>
         </div>
-
+        <div style={cardStyle}>
+          <h4>Tổng Số Tác Phẩm Tranh</h4>
+          <h2 style={{ color: "#e67e22" }}>{stats.tong_so_tranh} bức</h2>
+        </div>
       </div>
     </div>
   );
 }
 
+const cardStyle = { padding: "20px", border: "1px solid #ddd", borderRadius: "8px", backgroundColor: "#fafafa", textAlign: "center" };
 export default Dashboard;
