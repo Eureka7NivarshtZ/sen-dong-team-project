@@ -1,4 +1,4 @@
-const { Op, or } = require("sequelize");
+const { Op } = require("sequelize");
 const {
   Tranh,
   HinhAnhTranh,
@@ -69,11 +69,11 @@ const xemTatCaTranh = async (req, res) => {
   let order = [["tao_luc", "DESC"]];
 
   if (sort === "gia_tang") {
-    order = [["gia_ban"], ["ASC"]];
+    order = [["gia_ban", "ASC"]];
   }
 
   if (sort === "gia_giam") {
-    order = [["gia_ban"], ["DESC"]];
+    order = [["gia_ban", "DESC"]];
   }
 
   if (sort === "ten_az") {
@@ -173,7 +173,7 @@ const taoTranh = async (req, res) => {
   const tranh = await Tranh.create({
     ten_tranh,
     danh_muc_id,
-    tac_gia_id, // 👈 thêm dòng này
+    tac_gia_id,
     gia_ban,
     gia_von,
     so_luong_ton,

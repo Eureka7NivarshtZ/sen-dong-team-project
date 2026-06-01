@@ -4,26 +4,54 @@ import apiClient from "./apiClient";
 const danhMucService = {
   // Lấy tất cả danh mục
   layTatCaDanhMuc: async () => {
-    const response = await apiClient.get("/danh-muc");
-    return response.data;
+    try {
+      const response = await apiClient.get("/danh-muc");
+      return response.data;
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.error || "Lấy danh sách danh mục thất bại",
+      };
+    }
   },
 
   // Tạo danh mục mới (admin)
   themDanhMuc: async (danhMucData) => {
-    const response = await apiClient.post("/danh-muc", danhMucData);
-    return response.data;
+    try {
+      const response = await apiClient.post("/danh-muc", danhMucData);
+      return response.data;
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.error || "Thêm danh mục thất bại",
+      };
+    }
   },
 
   // Cập nhật danh mục (admin)
   capNhatDanhMuc: async (id, danhMucData) => {
-    const response = await apiClient.put(`/danh-muc/${id}`, danhMucData);
-    return response.data;
+    try {
+      const response = await apiClient.put(`/danh-muc/${id}`, danhMucData);
+      return response.data;
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.error || "Cập nhật danh mục thất bại",
+      };
+    }
   },
 
   // Xóa danh mục (admin)
   xoaDanhMuc: async (id) => {
-    const response = await apiClient.delete(`/danh-muc/${id}`);
-    return response.data;
+    try {
+      const response = await apiClient.delete(`/danh-muc/${id}`);
+      return response.data;
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.error || "Xóa danh mục thất bại",
+      };
+    }
   },
 };
 
