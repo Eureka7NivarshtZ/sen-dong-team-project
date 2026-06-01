@@ -79,7 +79,7 @@ function ProductDetail() {
     // 1. Kiểm tra xem khách hàng đã đăng nhập tài khoản chưa
     if (!authService.isAuthenticated()) {
       alert("Vui lòng đăng nhập trước khi thêm sản phẩm vào giỏ hàng!");
-      navigate("/login");
+      navigate("/auth/dang-nhap");
       return;
     }
 

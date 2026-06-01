@@ -30,11 +30,7 @@ router.put("/:id", kiemTraVaiTro("quan_ly"), capNhatNhanVien);
 
 router.patch("/:id/khoa-mo", kiemTraVaiTro("quan_ly"), khoaMoNhanVien);
 
-router.patch(
-  "/:id/doi-mat-khau",
-  kiemTraVaiTro("quan_ly"),
-  doiMatKhauNhanVien,
-);
+router.patch("/:id/doi-mat-khau", kiemTraVaiTro("quan_ly"), doiMatKhauNhanVien);
 
 router.delete("/:id", kiemTraVaiTro("quan_ly"), xoaNhanVien);
 

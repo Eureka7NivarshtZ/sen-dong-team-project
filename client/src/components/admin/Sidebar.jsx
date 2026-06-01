@@ -37,7 +37,7 @@ function Sidebar() {
     <div className="sidebar" style={{ width: "260px", backgroundColor: "#1c3f3a", color: "#ffffff", minHeight: "100vh", padding: "30px 20px", boxSizing: "border-box", display: "flex", flexDirection: "column", justifyContent: "space-between", position: "sticky", top: 0, height: "100vh" }}>
       <div>
         {/* LOGO - Bấm vào quay về trang chủ Client */}
-        <div className="logo" style={{ marginBottom: "35px", cursor: "pointer" }} onClick={() => navigate("/")}>
+        <div className="logo" style={{ marginBottom: "35px", cursor: "pointer" }} onClick={() => navigate("/admin")}>
           <h2 style={{ margin: 0, fontSize: "24px", fontWeight: "bold", letterSpacing: "1px" }}>SEN ĐÔNG</h2>
           <p style={{ margin: "5px 0 0 0", fontSize: "12px", color: "#a3b8b5" }}>Art Studio Admin</p>
         </div>

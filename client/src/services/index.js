@@ -6,11 +6,12 @@ import gioHangService from "./gioHangService";
 import donHangService from "./donHangService";
 import danhMucService from "./danhMucService";
 import tacGiaService from "./tacGiaService";
-import adminService from "./adminService";
+import dashboardService from "./dashboardService";
 import vanDonService from "./vanDonService";
 import hoaDonService from "./hoaDonService";
 import thanhToanService from "./thanhToanService";
 import hoTroService from "./hoTroService";
+import nhanVienService from "./nhanVienService";
 
 export {
   apiClient,
@@ -20,11 +21,12 @@ export {
   donHangService,
   danhMucService,
   tacGiaService,
-  adminService,
+  dashboardService,
   vanDonService,
   hoaDonService,
   thanhToanService,
   hoTroService,
+  nhanVienService,
 };
 
 // Default export - tất cả services
@@ -36,9 +38,10 @@ export default {
   donHangService,
   danhMucService,
   tacGiaService,
-  adminService,
+  dashboardService,
   vanDonService,
   hoaDonService,
   thanhToanService,
   hoTroService,
+  nhanVienService,
 };
