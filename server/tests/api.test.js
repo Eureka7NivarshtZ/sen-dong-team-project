@@ -176,7 +176,7 @@ describe('🚀 CHUỖI KIỂM THỬ TOÀN DIỆN BACKEND API XƯỞNG TRANH', ()
 
     it('4.2 Khách hàng kiểm tra và xem giỏ hàng hiện tại', async () => {
       const res = await request(BASE_URL)
-        .get('/gio-hang')
+        .get('/a')
         .set('Authorization', `Bearer ${customerToken}`);
 
       expect(res.statusCode).toBe(200);
