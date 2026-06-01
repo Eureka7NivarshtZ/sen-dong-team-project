@@ -15,7 +15,7 @@ const { Op } = require("sequelize");
 
 // Khách hàng
 const taoDonHang = async (req, res) => {
-  const { dia_chi_giao, don_vi_van_chuyen_id, ghi_chu } = req.body;
+  const { dia_chi_giao, don_vi_van_chuyen_id, khuyen_mai_id, ghi_chu } = req.body;
   const khachHangId = req.user.khach_hang_id;
 
   if (!khachHangId) {
@@ -112,6 +112,7 @@ const taoDonHang = async (req, res) => {
         khach_hang_id: khachHangId,
         nhan_vien_id: null,
         don_vi_van_chuyen_id: donViVanChuyenId,
+        khuyen_mai_id: khuyen_mai_id || null,
         ma_don_hang: maDonHang,
         dia_chi_giao,
         tong_tien_hang: tongTienHang,

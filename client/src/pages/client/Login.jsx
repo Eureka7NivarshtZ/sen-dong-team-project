@@ -225,7 +225,7 @@ function Login() {
             href="#"
             onClick={(e) => {
               e.preventDefault();
-              navigate("/auth/dang-ky-khach-hang");
+              navigate("/auth/dang-ky");
             }}
             style={{
               color: "#2f80ed",

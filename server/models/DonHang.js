@@ -21,6 +21,10 @@ const DonHang = sequelize.define(
       type: DataTypes.UUID,
       allowNull: true,
     },
+    khuyen_mai_id: {
+      type: DataTypes.UUID,
+      allowNull: true,
+    },
     ma_don_hang: {
       type: DataTypes.STRING(50),
       allowNull: false,

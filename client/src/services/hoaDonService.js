@@ -31,7 +31,7 @@ const hoaDonService = {
   // Tạo hóa đơn
   taoHoaDon: async (hoaDonData) => {
     try {
-      const response = await apiClient.post("/hoa-don/", hoaDonData);
+      const response = await apiClient.post("/hoa-don/them", hoaDonData);
       return response.data;
     } catch (error) {
       return {

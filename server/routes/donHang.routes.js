@@ -20,7 +20,7 @@ const {
 router.use(yeuCauDangNhap);
 
 // ========== KHÁCH HÀNG: Quản lý đơn hàng của riêng mình ==========
-router.post("/", yeuCauKhachHang, taoDonHang);
+router.post("/them", yeuCauKhachHang, taoDonHang);
 router.get("/cua-toi", yeuCauKhachHang, xemDonCuaToi);
 router.get("/chi-tiet/:id", yeuCauKhachHang, xemChiTietDonCuaToi);
 router.put("/huy/:id", yeuCauKhachHang, huyDonCuaToi);

@@ -8,18 +8,14 @@ const Tranh = require("./Tranh.js");
 const HinhAnhTranh = require("./HinhAnhTranh");
 const TacGia = require("./TacGia.js");
 const DanhMuc = require("./DanhMuc.js");
-const KhoHang = require("./KhoHang.js");
 const DanhGia = require("./DanhGia.js");
 
 const KhuyenMai = require("./KhuyenMai.js");
 const KhuyenMaiDanhMuc = require("./KhuyenMaiDanhMuc.js");
 const KhuyenMaiTranh = require("./KhuyenMaiTranh.js");
 const LichSuSuDungKhuyenMai = require("./LichSuSuDungKhuyenMai.js");
-const LichSuTrangThaiDonHang = require("./LichSuTrangThaiDonHang.js");
 
 const ThongBao = require("./ThongBao.js");
-const PhanHoiHoTro = require("./PhanHoiHoTro.js");
-const YeuCauHoTro = require("./YeuCauHoTro.js");
 
 const GioHang = require("./GioHang.js");
 const GioHangChiTiet = require("./GioHangChiTiet.js");
@@ -27,16 +23,9 @@ const GioHangChiTiet = require("./GioHangChiTiet.js");
 const DonViVanChuyen = require("./DonViVanChuyen.js");
 const DonHang = require("./DonHang.js");
 const DonHangChiTiet = require("./DonHangChiTiet.js");
-const VanDon = require("./VanDon.js");
 
 const HoaDon = require("./HoaDon.js");
 const ThanhToan = require("./ThanhToan.js");
-
-const NhaCungCap = require("./NhaCungCap.js");
-const VatLieu = require("./VatLieu.js");
-const PhieuNhapVatLieu = require("./PhieuNhapVatLieu.js");
-const ChiTietPhieuNhap = require("./ChiTietPhieuNhap.js");
-const ThietBi = require("./ThietBi.js");
 
 // Quan he tai khoan
 TaiKhoan.hasOne(NhanVien, {
@@ -88,16 +77,6 @@ DanhMuc.hasMany(Tranh, {
 Tranh.belongsTo(DanhMuc, {
   foreignKey: "danh_muc_id",
   as: "danh_muc",
-});
-
-KhoHang.hasMany(Tranh, {
-  foreignKey: "kho_id",
-  as: "tranh",
-});
-
-Tranh.belongsTo(KhoHang, {
-  foreignKey: "kho_id",
-  as: "kho_hang",
 });
 
 // Đánh giá
@@ -214,26 +193,6 @@ DonHang.belongsTo(DonViVanChuyen, {
   as: "don_vi_van_chuyen",
 });
 
-DonHang.hasOne(VanDon, {
-  foreignKey: "don_hang_id",
-  as: "van_don",
-});
-
-VanDon.belongsTo(DonHang, {
-  foreignKey: "don_hang_id",
-  as: "don_hang",
-});
-
-DonViVanChuyen.hasMany(VanDon, {
-  foreignKey: "don_vi_id",
-  as: "van_don",
-});
-
-VanDon.belongsTo(DonViVanChuyen, {
-  foreignKey: "don_vi_id",
-  as: "don_vi_van_chuyen",
-});
-
 // Hoa don - Thanh toan
 DonHang.hasMany(HoaDon, {
   foreignKey: "don_hang_id",
@@ -260,73 +219,13 @@ ThanhToan.belongsTo(HoaDon, {
   as: "hoa_don",
 });
 
-// Kho & Vật tư
-NhaCungCap.hasMany(VatLieu, {
-  foreignKey: "nha_cung_cap_id",
-  as: "vat_lieu",
-});
-
-VatLieu.belongsTo(NhaCungCap, {
-  foreignKey: "nha_cung_cap_id",
-  as: "nha_cung_cap",
-});
-
-NhaCungCap.hasMany(ThietBi, {
-  foreignKey: "nha_cung_cap_id",
-  as: "thiet_bi",
-});
-
-ThietBi.belongsTo(NhaCungCap, {
-  foreignKey: "nha_cung_cap_id",
-  as: "nha_cung_cap",
-});
-
-NhaCungCap.hasMany(PhieuNhapVatLieu, {
-  foreignKey: "nha_cung_cap_id",
-  as: "phieu_nhap",
-});
-
-PhieuNhapVatLieu.belongsTo(NhaCungCap, {
-  foreignKey: "nha_cung_cap_id",
-  as: "nha_cung_cap",
-});
-
-NhanVien.hasMany(PhieuNhapVatLieu, {
-  foreignKey: "nhan_vien_id",
-  as: "phieu_nhap_vat_lieu",
-});
-
-PhieuNhapVatLieu.belongsTo(NhanVien, {
-  foreignKey: "nhan_vien_id",
-  as: "nhan_vien",
-});
-
-PhieuNhapVatLieu.hasMany(ChiTietPhieuNhap, {
-  foreignKey: "phieu_id",
-  as: "chi_tiet",
-});
-
-ChiTietPhieuNhap.belongsTo(PhieuNhapVatLieu, {
-  foreignKey: "phieu_id",
-  as: "phieu_nhap",
-});
-
-VatLieu.hasMany(ChiTietPhieuNhap, {
-  foreignKey: "vat_lieu_id",
-  as: "chi_tiet_phieu_nhap",
-});
-
-ChiTietPhieuNhap.belongsTo(VatLieu, {
-  foreignKey: "vat_lieu_id",
-  as: "vat_lieu",
-});
-
 KhuyenMai.belongsToMany(Tranh, {
   through: KhuyenMaiTranh,
   foreignKey: "khuyen_mai_id",
   otherKey: "tranh_id",
   as: "tranh_ap_dung",
 });
+
 Tranh.belongsToMany(KhuyenMai, {
   through: KhuyenMaiTranh,
   foreignKey: "tranh_id",
@@ -340,6 +239,7 @@ KhuyenMai.belongsToMany(DanhMuc, {
   otherKey: "danh_muc_id",
   as: "danh_muc_ap_dung",
 });
+
 DanhMuc.belongsToMany(KhuyenMai, {
   through: KhuyenMaiDanhMuc,
   foreignKey: "danh_muc_id",
@@ -351,55 +251,48 @@ KhuyenMai.hasMany(LichSuSuDungKhuyenMai, {
   foreignKey: "khuyen_mai_id",
   as: "lich_su_su_dung",
 });
+
 LichSuSuDungKhuyenMai.belongsTo(KhuyenMai, {
   foreignKey: "khuyen_mai_id",
   as: "khuyen_mai",
 });
 
-YeuCauHoTro.belongsTo(KhachHang, {
+KhachHang.hasMany(LichSuSuDungKhuyenMai, {
+  foreignKey: "khach_hang_id",
+  as: "lich_su_su_dung_khuyen_mai",
+});
+
+LichSuSuDungKhuyenMai.belongsTo(KhachHang, {
   foreignKey: "khach_hang_id",
   as: "khach_hang",
 });
-YeuCauHoTro.belongsTo(DonHang, { foreignKey: "don_hang_id", as: "don_hang" });
-YeuCauHoTro.belongsTo(NhanVien, {
-  foreignKey: "nhan_vien_phu_trach_id",
-  as: "nhan_vien_phu_trach",
-});
-YeuCauHoTro.hasMany(PhanHoiHoTro, {
-  foreignKey: "yeu_cau_ho_tro_id",
-  as: "phan_hoi",
+
+DonHang.hasMany(LichSuSuDungKhuyenMai, {
+  foreignKey: "don_hang_id",
+  as: "lich_su_su_dung_khuyen_mai",
 });
 
-PhanHoiHoTro.belongsTo(YeuCauHoTro, {
-  foreignKey: "yeu_cau_ho_tro_id",
-  as: "yeu_cau_ho_tro",
-});
-PhanHoiHoTro.belongsTo(KhachHang, {
-  foreignKey: "khach_hang_id",
-  as: "khach_hang",
-});
-PhanHoiHoTro.belongsTo(NhanVien, {
-  foreignKey: "nhan_vien_id",
-  as: "nhan_vien",
-});
-
-LichSuTrangThaiDonHang.belongsTo(DonHang, {
+LichSuSuDungKhuyenMai.belongsTo(DonHang, {
   foreignKey: "don_hang_id",
   as: "don_hang",
 });
-LichSuTrangThaiDonHang.belongsTo(NhanVien, {
-  foreignKey: "nhan_vien_id",
-  as: "nhan_vien",
+
+// KhuyenMai - DonHang
+KhuyenMai.hasMany(DonHang, {
+  foreignKey: "khuyen_mai_id",
+  as: "don_hang",
 });
-DonHang.hasMany(LichSuTrangThaiDonHang, {
-  foreignKey: "don_hang_id",
-  as: "lich_su_trang_thai",
+
+DonHang.belongsTo(KhuyenMai, {
+  foreignKey: "khuyen_mai_id",
+  as: "khuyen_mai",
 });
 
 ThongBao.belongsTo(KhachHang, {
   foreignKey: "khach_hang_id",
   as: "khach_hang",
 });
+
 ThongBao.belongsTo(NhanVien, { foreignKey: "nhan_vien_id", as: "nhan_vien" });
 
 module.exports = {
@@ -411,27 +304,17 @@ module.exports = {
   HinhAnhTranh,
   TacGia,
   DanhMuc,
-  KhoHang,
   GioHang,
   GioHangChiTiet,
   DonHang,
   DonHangChiTiet,
-  VanDon,
   DonViVanChuyen,
   HoaDon,
   ThanhToan,
-  NhaCungCap,
-  VatLieu,
-  PhieuNhapVatLieu,
-  ChiTietPhieuNhap,
-  ThietBi,
   DanhGia,
   KhuyenMai,
   KhuyenMaiDanhMuc,
   KhuyenMaiTranh,
   LichSuSuDungKhuyenMai,
-  LichSuTrangThaiDonHang,
-  PhanHoiHoTro,
   ThongBao,
-  YeuCauHoTro,
 };

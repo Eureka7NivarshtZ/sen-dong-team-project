@@ -34,8 +34,8 @@ const thanhToanService = {
   taoThanhToan: async (thanhToanData) => {
     try {
       console.log("Dữ liệu gửi tạo thanh toán:", thanhToanData);
-      
-      const response = await apiClient.post("/thanh-toan/", thanhToanData);
+
+      const response = await apiClient.post("/thanh-toan/them", thanhToanData);
       return response.data;
     } catch (error) {
       return {

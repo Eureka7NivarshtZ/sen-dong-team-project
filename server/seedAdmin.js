@@ -5,7 +5,7 @@ const seedAdmin = async () => {
   try {
     await sequelize.authenticate();
 
-    const email = "admin@example.com";
+    const email = "admin@gmail.com";
     const matKhau = "123456";
 
     const taiKhoanTonTai = await TaiKhoan.findOne({
@@ -27,7 +27,7 @@ const seedAdmin = async () => {
           loai: "nhan_vien",
           kich_hoat: true,
         },
-        { transaction: t }
+        { transaction: t },
       );
 
       const nhanVien = await NhanVien.create(
@@ -40,7 +40,7 @@ const seedAdmin = async () => {
           vai_tro: "quan_ly",
           hoat_dong: true,
         },
-        { transaction: t }
+        { transaction: t },
       );
 
       return { taiKhoan, nhanVien };

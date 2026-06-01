@@ -38,7 +38,7 @@ const authService = {
     diaChi = "",
   ) => {
     try {
-      const response = await apiClient.post("/auth/dang-ky-khach-hang", {
+      const response = await apiClient.post("/auth/dang-ky", {
         ho_ten: ten,
         email,
         mat_khau: matKhau,

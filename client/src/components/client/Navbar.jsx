@@ -126,10 +126,6 @@ const Navbar = () => {
             <Button sx={navButtonStyle} component={Link} to="/tranh">
               Bộ sưu tập
             </Button>
-
-            <Button sx={navButtonStyle} component={Link} to="/ho-tro">
-              Hỗ trợ
-            </Button>
           </Box>
 
           {/* Icon bên phải */}
