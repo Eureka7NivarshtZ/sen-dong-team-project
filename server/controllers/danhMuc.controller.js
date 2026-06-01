@@ -1,4 +1,10 @@
-const { DanhMuc } = require("../models");
+const {
+  DanhMuc,
+  sequelize,
+  DanhGia,
+  KhuyenMaiDanhMuc,
+  Tranh,
+} = require("../models");
 
 const xemTatCaDanhMuc = async (req, res) => {
   const danhMuc = await DanhMuc.findAll({
@@ -59,13 +65,41 @@ const xoaDanhMuc = async (req, res) => {
     });
   }
 
-  await danhMuc.destroy();
+  const soTranh = await Tranh.count({ where: { danh_muc_id: id } });
+  if (soTranh > 0) {
+    return res.status(400).json({
+      success: false,
+      error: `Danh mục còn ${soTranh} tranh, vui lòng chuyển tranh sang danh mục khác trước`,
+    });
+  }
 
-  res.json({
-    success: true,
-    message: "Xoa danh muc thanh cong",
-    data: null,
-  });
+  try {
+    await sequelize.transaction(async (t) => {
+      await DanhMuc.update(
+        { cha_id: null },
+        { where: { cha_id: id }, transaction: t },
+      );
+
+      await KhuyenMaiDanhMuc.destroy({
+        where: { danh_muc_id: id },
+        transaction: t,
+      });
+
+      await danhMuc.destroy({ transaction: t });
+    });
+
+    res.json({
+      success: true,
+      message: "Xoa danh muc thanh cong",
+      data: null,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Xoa danh muc khong thanh cong",
+      error: error.message,
+    });
+  }
 };
 
 const capNhatDanhMuc = async (req, res) => {

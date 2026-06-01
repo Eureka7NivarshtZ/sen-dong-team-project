@@ -1,4 +1,12 @@
-const { TacGia } = require("../models");
+const {
+  TacGia,
+  Tranh,
+  sequelize,
+  HinhAnhTranh,
+  DonHangChiTiet,
+  GioHangChiTiet,
+  DanhGia,
+} = require("../models");
 
 const xemTatCaTacGia = async (req, res) => {
   const tacGia = await TacGia.findAll({
@@ -57,9 +65,7 @@ const themTacGia = async (req, res) => {
 
 const xoaTacGia = async (req, res) => {
   const { id } = req.params;
-
   const tacGia = await TacGia.findByPk(id);
-
   if (!tacGia) {
     return res.status(404).json({
       success: false,
@@ -67,13 +73,31 @@ const xoaTacGia = async (req, res) => {
     });
   }
 
-  await tacGia.destroy();
+  const soTranh = await Tranh.count({ where: { tac_gia_id: id } });
+  if (soTranh > 0) {
+    return res.status(400).json({
+      success: false,
+      error: `Tác giả còn ${soTranh} tranh, vui lòng chuyển tranh sang danh mục khác trước`,
+    });
+  }
 
-  res.json({
-    success: true,
-    message: "Xoa tac gia thanh cong",
-    data: null,
-  });
+  try {
+    await sequelize.transaction(async (t) => {
+      await tacGia.destroy({ transaction: t });
+
+      res.json({
+        success: true,
+        message: "Xoa tac gia thanh cong",
+        data: null,
+      });
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Xoa danh muc khong thanh cong",
+      error: error.message,
+    });
+  }
 };
 
 const capNhatTacGia = async (req, res) => {
