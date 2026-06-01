@@ -1,7 +1,6 @@
 import apiClient from "./apiClient";
 
 const dashboardService = {
-  // Lấy tổng quan số liệu (Tổng doanh thu, tổng đơn, tổng số tranh đã bán)
   layThongKeTongQuan: async () => {
     try {
       const response = await apiClient.get("/admin/dashboard/tong-quan");
@@ -11,10 +10,10 @@ const dashboardService = {
     }
   },
 
-  // Lấy dữ liệu doanh thu theo tháng/ngày để vẽ biểu đồ
-  layBaoCaoDoanhThu: async (thang, nam) => {
+  layBaoCaoDoanhThu: async (params = {}) => {
     try {
-      const response = await apiClient.get("/admin/dashboard/doanh-thu", { params: { thang, nam } });
+      // params có thể truyền { tu_ngay, den_ngay } hoặc { thang, nam } tùy Backend của bạn
+      const response = await apiClient.get("/admin/dashboard/doanh-thu", { params });
       return response.data;
     } catch (error) {
       return { success: false, error: error.response?.data?.error || "Lấy báo cáo doanh thu thất bại" };
