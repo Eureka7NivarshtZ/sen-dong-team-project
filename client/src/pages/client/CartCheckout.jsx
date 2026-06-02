@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-// 🛠️ ĐÃ KẾT NỐI: Import thêm donHangService để kích hoạt tạo đơn hàng thật
 import {
   gioHangService,
   donHangService,
   khuyenMaiService,
-  hoaDonService,
-  thanhToanService,
+  donViVanChuyenService,
 } from "../../services";
 
 function CartCheckout() {
@@ -27,6 +25,30 @@ function CartCheckout() {
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState(null); // { id, code, gia_tri, gia_tri_phan_tram }
   const [couponError, setCouponError] = useState("");
+
+  const [shippingMethods, setShippingMethods] = useState([]);
+
+  useEffect(() => {
+    const fetchShippingMethods = async () => {
+      try {
+        const res = await donViVanChuyenService.layDanhSach();
+        if (res?.success && Array.isArray(res.data)) {
+          setShippingMethods(res.data);
+          // Tự động chọn phương thức đầu tiên làm mặc định
+          if (res.data.length > 0) {
+            setShippingInfo((prev) => ({
+              ...prev,
+              method: res.data[0].id,
+              phi_van_chuyen: res.data[0].phi_co_ban,
+            }));
+          }
+        }
+      } catch (err) {
+        console.error("Lỗi lấy đơn vị vận chuyển:", err);
+      }
+    };
+    fetchShippingMethods();
+  }, []);
 
   useEffect(() => {
     const layTatCaGioHang = async () => {
@@ -134,24 +156,26 @@ function CartCheckout() {
     setStep(3); // Thỏa mãn điều kiện thì mới chuyển sang bước 3 Vận chuyển
   };
 
-  // 🛠️ ĐÃ KẾT NỐI API CHÍNH XÁC: Hàm kích hoạt nạp đơn hàng lên Cơ sở dữ liệu Backend
   const handlePlaceOrder = async () => {
-    // Phòng hờ kiểm tra lại thông tin khách hàng một lần nữa
     if (
       !shippingInfo.name.trim() ||
       !shippingInfo.phone.trim() ||
       !shippingInfo.address.trim()
     ) {
-      alert(
-        "Vui lòng quay lại Bước 2 và điền đầy đủ các thông tin bắt buộc (*)",
-      );
+      alert("Vui lòng quay lại Bước 2 và điền đầy đủ thông tin bắt buộc (*)");
       setStep(2);
       return;
     }
 
+    if (!cartItems || cartItems.length === 0) {
+      alert("Giỏ hàng đang trống, không thể đặt hàng!");
+      setStep(1);
+      return;
+    }
+
     setIsOrdering(true);
+
     try {
-      // Đóng gói Payload theo cấu trúc dữ liệu chuẩn của API Controller
       const donHangPayload = {
         ten_nguoi_nhan: shippingInfo.name,
         sdt_nguoi_nhan: shippingInfo.phone,
@@ -159,49 +183,23 @@ function CartCheckout() {
         ghi_chu: shippingInfo.note,
         phuong_thuc_van_chuyen: shippingInfo.method,
         phuong_thuc_thanh_toan: shippingInfo.payment,
-        khuyen_mai_id: appliedCoupon ? appliedCoupon.id : null,
-        giam_gia: discountAmount,
-        phi_van_chuyen: shippingFee,
-        tong_tien: total,
+        khuyen_mai_id: appliedCoupon?.khuyen_mai?.id || null,
+        don_vi_van_chuyen_id: shippingInfo.method, // method giờ lưu UUID
       };
 
-      // Gọi API taoDonHang từ file donHangService.js
-      const resultDonHang = await donHangService.taoDonHang(donHangPayload);
+      const result = await donHangService.taoDonHang(donHangPayload);
 
-      if (resultDonHang && resultDonHang.success) {
-        const donHangId = resultDonHang.data?.id;
-
-        // 🛠️ Tạo hóa đơn cho đơn hàng vừa tạo
-        if (donHangId) {
-          const resultHoaDon = await hoaDonService.taoHoaDon({
-            don_hang_id: donHangId,
-          });
-
-          if (resultHoaDon && resultHoaDon.success) {
-            const hoaDonId = resultHoaDon.data?.id;
-
-            // 🛠️ Tạo bản ghi thanh toán
-            if (hoaDonId) {
-              await thanhToanService.taoThanhToan({
-                hoa_don_id: hoaDonId,
-                so_tien: total,
-                phuong_thuc: shippingInfo.payment === "cod" ? "tien_mat" : "chuyen_khoan",
-              });
-            }
-          }
-        }
-
-        // Đặt hàng thành công vĩnh viễn -> Làm sạch giỏ hàng UI và đẩy sang màn hình Bước 5 chúc mừng
+      if (result && result.success) {
         clearCart();
         setStep(5);
       } else {
         alert(
           "Đặt hàng thất bại: " +
-            (resultDonHang.error || "Hệ thống từ chối xử lý dữ liệu đơn hàng."),
+            (result?.error || "Hệ thống từ chối xử lý dữ liệu đơn hàng."),
         );
       }
     } catch (error) {
-      console.error("Lỗi sụp luồng xử lý đặt hàng API:", error);
+      console.error("Lỗi đặt hàng:", error);
       alert(
         "Có lỗi kết nối xảy ra trong quá trình đặt hàng. Vui lòng thử lại!",
       );
@@ -210,32 +208,20 @@ function CartCheckout() {
     }
   };
 
-  // Deprecated: Hardcoded coupons - now fetched from API via khuyenMaiService
-  // const availableCoupons = [
-  //   {
-  //     code: "SUMMER20",
-  //     value: "20%",
-  //     minSpend: 1000000,
-  //     label: "Giảm 20% mùa hè",
-  //   },
-  //   {
-  //     code: "ART100K",
-  //     value: "100000",
-  //     minSpend: 700000,
-  //     label: "Giảm trực tiếp 100.000 đ",
-  //   },
-  //   {
-  //     code: "VIP15",
-  //     value: "15%",
-  //     minSpend: 2000000,
-  //     label: "Ưu đãi khách VIP giảm 15%",
-  //   },
-  // ];
+  const parsePrice = (value) => {
+    if (value === null || value === undefined || value === "") return 0;
 
-  const parsePrice = (priceStr) => {
-    if (!priceStr) return 0;
-    if (typeof priceStr === "number") return priceStr;
-    return parseInt(priceStr.replace(/[^0-9]/g, ""), 10);
+    if (typeof value === "number") return value;
+
+    const text = String(value).trim();
+
+    // Trường hợp từ DB trả về decimal string: "1200000.00"
+    if (/^\d+(\.\d+)?$/.test(text)) {
+      return Number(text);
+    }
+
+    // Trường hợp hiển thị kiểu Việt Nam: "1.200.000 đ"
+    return Number(text.replace(/[^\d]/g, "")) || 0;
   };
 
   const subtotal = (cartItems || []).reduce((sum, item) => {
@@ -248,19 +234,25 @@ function CartCheckout() {
     e.preventDefault();
     setCouponError("");
 
-    if (!couponCode.trim()) {
+    const ma = couponCode.trim().toUpperCase();
+
+    if (!ma) {
       setCouponError("Vui lòng nhập mã giảm giá!");
       return;
     }
 
-    try {
-      const result = await khuyenMaiService.kiemTraMaGiamGia(couponCode.trim());
+    if (subtotal <= 0) {
+      setCouponError("Giỏ hàng chưa có giá trị để áp dụng mã giảm giá!");
+      return;
+    }
 
-      if (result && result.success && result.data) {
-        // API trả về thông tin khuyến mãi bao gồm ID, code, gia_tri, gia_tri_phan_tram, v.v.
+    try {
+      const result = await khuyenMaiService.kiemTraMaGiamGia(ma, subtotal);
+
+      if (result?.success && result.data) {
         setAppliedCoupon(result.data);
         setCouponError("");
-        alert(`Áp dụng mã ${couponCode.trim()} thành công!`);
+        alert(`Áp dụng mã ${ma} thành công!`);
       } else {
         setCouponError(
           result?.error || "Mã giảm giá không tồn tại hoặc đã hết hạn!",
@@ -277,23 +269,18 @@ function CartCheckout() {
   const calculateDiscount = () => {
     if (!appliedCoupon) return 0;
 
-    // Nếu API trả về gia_tri_phan_tram (phần trăm) hoặc gia_tri (giá trị cố định)
-    if (appliedCoupon.gia_tri_phan_tram) {
-      return (subtotal * appliedCoupon.gia_tri_phan_tram) / 100;
-    }
-
-    if (appliedCoupon.gia_tri) {
-      return parseInt(appliedCoupon.gia_tri, 10);
-    }
-
-    return 0;
+    return parsePrice(appliedCoupon.so_tien_giam);
   };
 
   const discountAmount = calculateDiscount();
-  const shippingFee = shippingInfo.method === "express" ? 50000 : 30000;
+  const shippingFee = parsePrice(shippingInfo.phi_van_chuyen);
   const total = subtotal - discountAmount + (step >= 3 ? shippingFee : 0);
 
-  const formatPrice = (num) => num.toLocaleString("vi-VN") + " đ";
+  const formatPrice = (num) => {
+    const value = Number(num || 0);
+
+    return value.toLocaleString("vi-VN") + " đ";
+  };
 
   const stepsTitle = [
     { id: 1, label: "Giỏ hàng" },
@@ -484,9 +471,7 @@ function CartCheckout() {
                               fontSize: "15px",
                             }}
                           >
-                            {typeof priceToDisplay === "number"
-                              ? formatPrice(priceToDisplay)
-                              : priceToDisplay}
+                            {formatPrice(parsePrice(priceToDisplay))}
                           </div>
                         </div>
 
@@ -715,8 +700,10 @@ function CartCheckout() {
               {Array.isArray(cartItems) &&
                 cartItems.map((i) => {
                   const title = i.tranh?.ten_tranh || i.title || "Tác phẩm";
-                  const price = i.tranh?.gia_ban || i.price || 0;
-                  const qty = i.so_luong || i.quantity || 1;
+                  const price = parsePrice(
+                    i.tranh?.gia_ban || i.price || i.thanh_tien || 0,
+                  );
+                  const qty = Number(i.so_luong || i.quantity || 1);
                   return (
                     <div
                       key={i.id}
@@ -762,54 +749,50 @@ function CartCheckout() {
             <div
               style={{ display: "flex", flexDirection: "column", gap: "15px" }}
             >
-              <div
-                onClick={() =>
-                  setShippingInfo({ ...shippingInfo, method: "standard" })
-                }
-                style={{
-                  ...methodBoxStyle,
-                  borderColor:
-                    shippingInfo.method === "standard" ? "#1c3f3a" : "#eee",
-                }}
-              >
-                <input
-                  type="radio"
-                  checked={shippingInfo.method === "standard"}
-                  readOnly
-                />
-                <div style={{ flex: 1, textAlign: "left" }}>
-                  <h4>Giao hàng Tiêu Chuẩn</h4>
-                  <p style={{ margin: 0, fontSize: "13px", color: "#666" }}>
-                    Nhận tranh sau 3-5 ngày làm việc
-                  </p>
-                </div>
-                <strong>30.000 đ</strong>
-              </div>
+              {shippingMethods.length === 0 ? (
+                <p style={{ color: "#888" }}>
+                  Đang tải phương thức vận chuyển...
+                </p>
+              ) : (
+                shippingMethods.map((m) => (
+                  <div
+                    key={m.id}
+                    onClick={() =>
+                      setShippingInfo({
+                        ...shippingInfo,
+                        method: m.id,
+                        phi_van_chuyen: Number(m.phi_co_ban),
+                      })
+                    }
+                    style={{
+                      ...methodBoxStyle,
+                      borderColor:
+                        shippingInfo.method === m.id ? "#1c3f3a" : "#eee",
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      checked={shippingInfo.method === m.id}
+                      readOnly
+                    />
+                    <div style={{ flex: 1, textAlign: "left" }}>
+                      <h4 style={{ margin: 0 }}>{m.ten}</h4>
+                      {m.mo_ta && (
+                        <p
+                          style={{ margin: 0, fontSize: "13px", color: "#666" }}
+                        >
+                          {m.mo_ta}
+                        </p>
+                      )}
+                    </div>
+                    <strong>
+                      {Number(m.phi_co_ban).toLocaleString("vi-VN")} đ
+                    </strong>
+                  </div>
+                ))
+              )}
 
-              <div
-                onClick={() =>
-                  setShippingInfo({ ...shippingInfo, method: "express" })
-                }
-                style={{
-                  ...methodBoxStyle,
-                  borderColor:
-                    shippingInfo.method === "express" ? "#1c3f3a" : "#eee",
-                }}
-              >
-                <input
-                  type="radio"
-                  checked={shippingInfo.method === "express"}
-                  readOnly
-                />
-                <div style={{ flex: 1, textAlign: "left" }}>
-                  <h4>Giao hàng Hỏa tốc</h4>
-                  <p style={{ margin: 0, fontSize: "13px", color: "#666" }}>
-                    Nhận tranh ngay trong ngày
-                  </p>
-                </div>
-                <strong>50.000 đ</strong>
-              </div>
-
+              {/* THÊM LẠI NÚT ĐIỀU HƯỚNG */}
               <div
                 style={{
                   display: "flex",
@@ -846,6 +829,7 @@ function CartCheckout() {
               </div>
             </div>
 
+            {/* THÊM LẠI SUMMARY BOX */}
             <div style={summaryBoxStyle}>
               <div style={summaryRowStyle}>
                 <span>Tiền hàng</span>
@@ -865,13 +849,12 @@ function CartCheckout() {
               >
                 <span>Tổng tiền</span>
                 <strong style={{ color: "#1c3f3a", fontSize: "18px" }}>
-                  {formatPrice(total)}
+                  {formatPrice(subtotal + shippingFee)}
                 </strong>
               </div>
             </div>
           </div>
         )}
-
         {/* ================= BƯỚC 4: THANH TOÁN ================= */}
         {step === 4 && (
           <div
@@ -1050,8 +1033,9 @@ function CartCheckout() {
                       margin: "6px 0 0 0",
                     }}
                   >
-                    ✓ Đang áp dụng mã: <strong>{appliedCoupon.code}</strong> (-
-                    {appliedCoupon.value})
+                    ✓ Đang áp dụng mã:{" "}
+                    <strong>{appliedCoupon.khuyen_mai?.ma}</strong> (-
+                    {formatPrice(appliedCoupon.so_tien_giam)})
                   </p>
                 )}
               </div>

@@ -2,11 +2,12 @@ import { useState, useEffect, useCallback } from "react";
 import nhanVienService from "../../services/nhanVienService";
 
 // ─── helpers ───────────────────────────────────────────────────────────────
-const VAI_TRO_LABEL = { ban_hang: "Bán hàng", kho: "Kho" };
+const VAI_TRO_LABEL = {
+  ban_hang: "Bán hàng",
+};
 
 const VAI_TRO_COLOR = {
   ban_hang: { bg: "#EAF3DE", text: "#3B6D11", dot: "#639922" },
-  kho: { bg: "#E6F1FB", text: "#185FA5", dot: "#378ADD" },
 };
 
 function getInitials(name = "") {
@@ -26,6 +27,7 @@ const AVATAR_COLORS = [
   { bg: "#FAEEDA", text: "#633806" },
   { bg: "#FAECE7", text: "#993C1D" },
 ];
+
 function avatarColor(name = "") {
   const idx = name.charCodeAt(0) % AVATAR_COLORS.length;
   return AVATAR_COLORS[idx];
@@ -45,6 +47,7 @@ const EMPTY_FORM = {
 // ─── sub-components ────────────────────────────────────────────────────────
 function Badge({ vai_tro }) {
   const c = VAI_TRO_COLOR[vai_tro] || VAI_TRO_COLOR.ban_hang;
+
   return (
     <span
       style={{
@@ -68,13 +71,14 @@ function Badge({ vai_tro }) {
           flexShrink: 0,
         }}
       />
-      {VAI_TRO_LABEL[vai_tro] || vai_tro}
+      {VAI_TRO_LABEL[vai_tro] || "Bán hàng"}
     </span>
   );
 }
 
 function Avatar({ name }) {
   const c = avatarColor(name);
+
   return (
     <div
       style={{
@@ -99,6 +103,7 @@ function Avatar({ name }) {
 
 function FieldError({ msg }) {
   if (!msg) return null;
+
   return <p style={{ fontSize: 12, color: "#A32D2D", marginTop: 4 }}>{msg}</p>;
 }
 
@@ -114,24 +119,38 @@ function AddEmployeeModal({ onClose, onSuccess }) {
 
   function validate() {
     const e = {};
-    if (!form.ho_ten.trim()) e.ho_ten = "Vui lòng nhập họ tên";
-    if (!form.email.trim()) e.email = "Vui lòng nhập email";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
+
+    if (!form.ho_ten.trim()) {
+      e.ho_ten = "Vui lòng nhập họ tên";
+    }
+
+    if (!form.email.trim()) {
+      e.email = "Vui lòng nhập email";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
       e.email = "Email không hợp lệ";
-    if (!form.mat_khau) e.mat_khau = "Vui lòng nhập mật khẩu";
-    else if (form.mat_khau.length < 8)
+    }
+
+    if (!form.mat_khau) {
+      e.mat_khau = "Vui lòng nhập mật khẩu";
+    } else if (form.mat_khau.length < 8) {
       e.mat_khau = "Mật khẩu phải có ít nhất 8 ký tự";
-    if (form.mat_khau !== form.confirm_pw)
+    }
+
+    if (form.mat_khau !== form.confirm_pw) {
       e.confirm_pw = "Mật khẩu xác nhận không khớp";
+    }
+
     return e;
   }
 
   async function handleSubmit() {
     const e = validate();
+
     if (Object.keys(e).length) {
       setErrors(e);
       return;
     }
+
     setErrors({});
     setLoading(true);
 
@@ -139,17 +158,21 @@ function AddEmployeeModal({ onClose, onSuccess }) {
       email: form.email.trim(),
       mat_khau: form.mat_khau,
       ho_ten: form.ho_ten.trim(),
-      vai_tro: form.vai_tro,
+      vai_tro: "ban_hang",
       sdt: form.sdt || undefined,
       ngay_sinh: form.ngay_sinh || undefined,
       dia_chi: form.dia_chi || undefined,
     };
 
     const res = await nhanVienService.taoNhanVien(payload);
+
     setLoading(false);
 
-    if (res && res.success) onSuccess();
-    else setErrors({ _global: res.error || "Tạo tài khoản thất bại" });
+    if (res && res.success) {
+      onSuccess();
+    } else {
+      setErrors({ _global: res?.error || "Tạo tài khoản thất bại" });
+    }
   }
 
   const inputStyle = {
@@ -164,6 +187,7 @@ function AddEmployeeModal({ onClose, onSuccess }) {
     fontFamily: "'DM Sans', sans-serif",
     transition: "border-color .15s",
   };
+
   const labelStyle = {
     fontSize: 13,
     fontWeight: 500,
@@ -199,6 +223,7 @@ function AddEmployeeModal({ onClose, onSuccess }) {
               Tạo tài khoản và hồ sơ nhân sự
             </p>
           </div>
+
           <button
             onClick={onClose}
             style={{
@@ -276,16 +301,10 @@ function AddEmployeeModal({ onClose, onSuccess }) {
             />
             <FieldError msg={errors.ho_ten} />
           </div>
+
           <div>
             <label style={labelStyle}>Vai trò *</label>
-            <select
-              style={inputStyle}
-              value={form.vai_tro}
-              onChange={set("vai_tro")}
-            >
-              <option value="ban_hang">Bán hàng</option>
-              <option value="kho">Kho</option>
-            </select>
+            <input style={inputStyle} value="Bán hàng" disabled />
           </div>
         </div>
 
@@ -327,6 +346,7 @@ function AddEmployeeModal({ onClose, onSuccess }) {
               placeholder="0901 234 567"
             />
           </div>
+
           <div>
             <label style={labelStyle}>Ngày sinh</label>
             <input
@@ -385,6 +405,7 @@ function AddEmployeeModal({ onClose, onSuccess }) {
               placeholder="Tối thiểu 8 ký tự"
             />
             <button
+              type="button"
               onClick={() => setShowPw((v) => !v)}
               style={{
                 position: "absolute",
@@ -419,6 +440,7 @@ function AddEmployeeModal({ onClose, onSuccess }) {
               placeholder="Nhập lại mật khẩu"
             />
             <button
+              type="button"
               onClick={() => setShowCPw((v) => !v)}
               style={{
                 position: "absolute",
@@ -440,10 +462,12 @@ function AddEmployeeModal({ onClose, onSuccess }) {
 
         {/* Actions */}
         <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-          <button onClick={onClose} style={btnSecondaryStyle}>
+          <button type="button" onClick={onClose} style={btnSecondaryStyle}>
             Hủy
           </button>
+
           <button
+            type="button"
             onClick={handleSubmit}
             disabled={loading}
             style={{ ...btnPrimaryStyle, opacity: loading ? 0.7 : 1 }}
@@ -467,6 +491,7 @@ const overlayStyle = {
   zIndex: 1000,
   padding: 20,
 };
+
 const modalStyle = {
   background: "var(--color-background-primary, #fff)",
   borderRadius: 14,
@@ -478,6 +503,7 @@ const modalStyle = {
   fontFamily: "'DM Sans', sans-serif",
   color: "var(--color-text-primary, #111)",
 };
+
 const btnPrimaryStyle = {
   display: "inline-flex",
   alignItems: "center",
@@ -492,6 +518,7 @@ const btnPrimaryStyle = {
   cursor: "pointer",
   fontFamily: "'DM Sans', sans-serif",
 };
+
 const btnSecondaryStyle = {
   display: "inline-flex",
   alignItems: "center",
@@ -523,8 +550,13 @@ export default function EmployeeManagement() {
 
   const fetchEmployees = useCallback(async () => {
     setLoading(true);
+
     const res = await nhanVienService.layDanhSach();
-    if (res && res.success) setEmployees(res.data || []);
+
+    if (res && res.success) {
+      setEmployees(res.data || []);
+    }
+
     setLoading(false);
   }, []);
 
@@ -536,6 +568,7 @@ export default function EmployeeManagement() {
     const res = await nhanVienService.capNhatNhanVien(emp.id, {
       hoat_dong: !emp.hoat_dong,
     });
+
     if (res && res.success) {
       showToast(
         emp.hoat_dong
@@ -544,17 +577,21 @@ export default function EmployeeManagement() {
       );
       fetchEmployees();
     } else {
-      showToast(res.error || "Thao tác thất bại", "error");
+      showToast(res?.error || "Thao tác thất bại", "error");
     }
   }
 
   const filtered = employees.filter((e) => {
     if (e.vai_tro === "quan_ly") return false;
+    if (e.vai_tro === "kho") return false;
+
     const matchSearch =
       !search ||
       e.ho_ten?.toLowerCase().includes(search.toLowerCase()) ||
       e.tai_khoan?.email?.toLowerCase().includes(search.toLowerCase());
+
     const matchRole = filterRole === "all" || e.vai_tro === filterRole;
+
     return matchSearch && matchRole;
   });
 
@@ -592,7 +629,9 @@ export default function EmployeeManagement() {
             right: 20,
             zIndex: 2000,
             background: toast.type === "error" ? "#FCEBEB" : "#E1F5EE",
-            border: `1px solid ${toast.type === "error" ? "#F09595" : "#9FE1CB"}`,
+            border: `1px solid ${
+              toast.type === "error" ? "#F09595" : "#9FE1CB"
+            }`,
             color: toast.type === "error" ? "#791F1F" : "#085041",
             borderRadius: 10,
             padding: "12px 18px",
@@ -618,6 +657,7 @@ export default function EmployeeManagement() {
           <h1 style={{ fontSize: 22, fontWeight: 600, margin: 0 }}>
             Quản lý nhân viên
           </h1>
+
           <p
             style={{
               fontSize: 14,
@@ -625,10 +665,15 @@ export default function EmployeeManagement() {
               marginTop: 4,
             }}
           >
-            {employees.filter((e) => e.vai_tro !== "quan_ly").length} nhân viên
-            trong hệ thống
+            {
+              employees.filter(
+                (e) => e.vai_tro !== "quan_ly" && e.vai_tro !== "kho",
+              ).length
+            }{" "}
+            nhân viên trong hệ thống
           </p>
         </div>
+
         <button onClick={() => setShowModal(true)} style={btnPrimaryStyle}>
           + Thêm nhân viên
         </button>
@@ -644,6 +689,7 @@ export default function EmployeeManagement() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
+
         <select
           style={inputBase}
           value={filterRole}
@@ -651,7 +697,6 @@ export default function EmployeeManagement() {
         >
           <option value="all">Tất cả vai trò</option>
           <option value="ban_hang">Bán hàng</option>
-          <option value="kho">Kho</option>
         </select>
       </div>
 
@@ -719,6 +764,7 @@ export default function EmployeeManagement() {
                 )}
               </tr>
             </thead>
+
             <tbody>
               {filtered.map((emp, idx) => (
                 <tr
@@ -736,10 +782,12 @@ export default function EmployeeManagement() {
                       style={{ display: "flex", alignItems: "center", gap: 10 }}
                     >
                       <Avatar name={emp.ho_ten} />
+
                       <div>
                         <p style={{ fontWeight: 500, marginBottom: 1 }}>
                           {emp.ho_ten}
                         </p>
+
                         <p
                           style={{
                             fontSize: 12,
@@ -751,9 +799,11 @@ export default function EmployeeManagement() {
                       </div>
                     </div>
                   </td>
+
                   <td style={{ padding: "13px 16px" }}>
                     <Badge vai_tro={emp.vai_tro} />
                   </td>
+
                   <td
                     style={{
                       padding: "13px 16px",
@@ -763,6 +813,7 @@ export default function EmployeeManagement() {
                   >
                     {emp.sdt || "—"}
                   </td>
+
                   <td style={{ padding: "13px 16px" }}>
                     <span
                       style={{
@@ -790,6 +841,7 @@ export default function EmployeeManagement() {
                       {emp.hoat_dong !== false ? "Hoạt động" : "Đã khóa"}
                     </span>
                   </td>
+
                   <td style={{ padding: "13px 16px", textAlign: "right" }}>
                     <button
                       onClick={() => handleToggleStatus(emp)}

@@ -1,24 +1,41 @@
 const { ThanhToan, HoaDon, DonHang } = require("../models");
 
-const taoMaGiaoDich = () => {
-  return `GD-${Date.now()}`;
-};
+const taoMaGiaoDich = () => `GD-${Date.now()}`;
+
+const PHUONG_THUC_HOP_LE = ["tien_mat", "chuyen_khoan", "the"];
+const TRANG_THAI_HOP_LE = [
+  "cho_thanh_toan",
+  "thanh_cong",
+  "that_bai",
+  "hoan_tien",
+];
 
 const taoThanhToan = async (req, res) => {
-  const { hoa_don_id, so_tien, phuong_thuc, trang_thai, ma_giao_dich } =
-    req.body;
+  const {
+    hoa_don_id,
+    so_tien,
+    phuong_thuc,
+    trang_thai = "cho_thanh_toan",
+  } = req.body;
 
   if (!hoa_don_id || !so_tien || !phuong_thuc) {
     return res.status(400).json({
       success: false,
-      error: "Vui long nhap hoa_don_id, so_tien va phuong_thuc",
+      error: "Vui lòng nhập hoa_don_id, so_tien và phuong_thuc",
     });
   }
 
-  if (!["tien_mat", "chuyen_khoan", "the"].includes(phuong_thuc)) {
+  if (!PHUONG_THUC_HOP_LE.includes(phuong_thuc)) {
     return res.status(400).json({
       success: false,
-      error: "Phuong thuc thanh toan khong hop le",
+      error: "Phương thức thanh toán không hợp lệ",
+    });
+  }
+
+  if (!TRANG_THAI_HOP_LE.includes(trang_thai)) {
+    return res.status(400).json({
+      success: false,
+      error: "Trạng thái thanh toán không hợp lệ",
     });
   }
 
@@ -34,14 +51,14 @@ const taoThanhToan = async (req, res) => {
   if (!hoaDon) {
     return res.status(404).json({
       success: false,
-      error: "Khong tim thay hoa don",
+      error: "Không tìm thấy hóa đơn",
     });
   }
 
   if (hoaDon.trang_thai === "da_huy") {
     return res.status(400).json({
       success: false,
-      error: "Khong the thanh toan hoa don da huy",
+      error: "Không thể thanh toán hóa đơn đã hủy",
     });
   }
 
@@ -58,7 +75,14 @@ const taoThanhToan = async (req, res) => {
   if (daThanhToan >= soTienCanThanhToan) {
     return res.status(400).json({
       success: false,
-      error: "Hoa don nay da duoc thanh toan du",
+      error: "Hóa đơn này đã được thanh toán đủ",
+    });
+  }
+
+  if (Number(so_tien) <= 0) {
+    return res.status(400).json({
+      success: false,
+      error: "Số tiền thanh toán phải lớn hơn 0",
     });
   }
 
@@ -66,11 +90,11 @@ const taoThanhToan = async (req, res) => {
     hoa_don_id,
     so_tien,
     phuong_thuc,
-    trang_thai: "thanh_cong",
+    trang_thai,
     ma_giao_dich: taoMaGiaoDich(),
   });
 
-  if (hoaDon.don_hang) {
+  if (trang_thai === "thanh_cong" && hoaDon.don_hang) {
     await hoaDon.don_hang.update({
       trang_thai: "dang_chuan_bi",
     });
@@ -78,7 +102,7 @@ const taoThanhToan = async (req, res) => {
 
   res.status(201).json({
     success: true,
-    message: "Tao thanh toan thanh cong",
+    message: "Tạo thanh toán thành công",
     data: thanhToan,
   });
 };
@@ -96,7 +120,7 @@ const layTatCaThanhToan = async (req, res) => {
 
   res.json({
     success: true,
-    message: "Lay danh sach thanh toan thanh cong",
+    message: "Lấy danh sách thanh toán thành công",
     data: danhSachThanhToan,
   });
 };
@@ -116,13 +140,13 @@ const layChiTietThanhToan = async (req, res) => {
   if (!thanhToan) {
     return res.status(404).json({
       success: false,
-      error: "Khong tim thay thanh toan",
+      error: "Không tìm thấy thanh toán",
     });
   }
 
   res.json({
     success: true,
-    message: "Lay chi tiet thanh toan thanh cong",
+    message: "Lấy chi tiết thanh toán thành công",
     data: thanhToan,
   });
 };
@@ -131,19 +155,32 @@ const capNhatTrangThaiThanhToan = async (req, res) => {
   const { id } = req.params;
   const { trang_thai } = req.body;
 
-  if (!["thanh_cong", "that_bai", "hoan_tien"].includes(trang_thai)) {
+  if (!TRANG_THAI_HOP_LE.includes(trang_thai)) {
     return res.status(400).json({
       success: false,
-      error: "Trang thai thanh toan khong hop le",
+      error: "Trạng thái thanh toán không hợp lệ",
     });
   }
 
-  const thanhToan = await ThanhToan.findByPk(id);
+  const thanhToan = await ThanhToan.findByPk(id, {
+    include: [
+      {
+        model: HoaDon,
+        as: "hoa_don",
+        include: [
+          {
+            model: DonHang,
+            as: "don_hang",
+          },
+        ],
+      },
+    ],
+  });
 
   if (!thanhToan) {
     return res.status(404).json({
       success: false,
-      error: "Khong tim thay thanh toan",
+      error: "Không tìm thấy thanh toán",
     });
   }
 
@@ -151,9 +188,19 @@ const capNhatTrangThaiThanhToan = async (req, res) => {
     trang_thai,
   });
 
+  if (
+    trang_thai === "thanh_cong" &&
+    thanhToan.hoa_don &&
+    thanhToan.hoa_don.don_hang
+  ) {
+    await thanhToan.hoa_don.don_hang.update({
+      trang_thai: "dang_chuan_bi",
+    });
+  }
+
   res.json({
     success: true,
-    message: "Cap nhat trang thai thanh toan thanh cong",
+    message: "Cập nhật trạng thái thanh toán thành công",
     data: thanhToan,
   });
 };

@@ -20,6 +20,7 @@ import Categories from "./pages/admin/Categories";
 import Promotions from "./pages/admin/Promotions";
 import { useEffect, useState } from "react";
 import { authService, tranhService } from "./services";
+import Shipping from "./pages/admin/Shipping";
 
 function ProtectedAdminRoute({ children }) {
   const user = authService.getUser();
@@ -71,6 +72,7 @@ function App() {
         <Route path="don-hang" element={<Orders />} />
         <Route path="tranh" element={<Paintings />} />
         <Route path="tac-gia" element={<Authors />} />
+        <Route path="don-vi-van-chuyen" element={<Shipping />} />
         <Route path="danh-muc" element={<Categories />} />
         <Route path="nhan-vien" element={<Employees />} />
         <Route path="khuyen-mai" element={<Promotions />} />
