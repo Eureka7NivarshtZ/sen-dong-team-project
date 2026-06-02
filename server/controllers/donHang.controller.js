@@ -10,6 +10,8 @@ const {
   sequelize,
   GioHang,
   GioHangChiTiet,
+  KhuyenMai,
+  LichSuSuDungKhuyenMai,
 } = require("../models");
 
 const { Op } = require("sequelize");
@@ -22,6 +24,75 @@ const mapPhuongThucThanhToan = (value) => {
   if (value === "bank") return "chuyen_khoan";
   if (value === "card") return "the";
   return "tien_mat";
+};
+
+const tinhSoTienGiam = (khuyenMai, tongTien) => {
+  const giaTriGiam = Number(khuyenMai.gia_tri_giam || 0);
+  const giamToiDa =
+    khuyenMai.giam_toi_da !== null && khuyenMai.giam_toi_da !== undefined
+      ? Number(khuyenMai.giam_toi_da)
+      : null;
+
+  let soTienGiam = 0;
+
+  if (khuyenMai.loai_giam === "phan_tram") {
+    soTienGiam = (Number(tongTien) * giaTriGiam) / 100;
+
+    if (giamToiDa !== null) {
+      soTienGiam = Math.min(soTienGiam, giamToiDa);
+    }
+  }
+
+  if (khuyenMai.loai_giam === "so_tien") {
+    soTienGiam = giaTriGiam;
+  }
+
+  return Math.min(soTienGiam, Number(tongTien));
+};
+
+const kiemTraKhuyenMaiHopLe = async (
+  khuyenMai,
+  khachHangId,
+  tongTien,
+  transaction,
+) => {
+  const hienTai = new Date();
+
+  if (!khuyenMai) return "Mã khuyến mãi không tồn tại";
+
+  if (khuyenMai.trang_thai !== "hoat_dong") {
+    return "Mã khuyến mãi không hoạt động";
+  }
+
+  if (khuyenMai.ngay_bat_dau && new Date(khuyenMai.ngay_bat_dau) > hienTai) {
+    return "Mã khuyến mãi chưa bắt đầu";
+  }
+
+  if (khuyenMai.ngay_ket_thuc && new Date(khuyenMai.ngay_ket_thuc) < hienTai) {
+    return "Mã khuyến mãi đã hết hạn";
+  }
+
+  if (Number(tongTien) < Number(khuyenMai.don_toi_thieu || 0)) {
+    return "Đơn hàng chưa đạt giá trị tối thiểu";
+  }
+
+  if (khuyenMai.so_luong !== null && khuyenMai.so_luong !== undefined) {
+    if (Number(khuyenMai.so_luong_da_dung || 0) >= Number(khuyenMai.so_luong)) {
+      return "Mã khuyến mãi đã hết lượt sử dụng";
+    }
+  }
+
+  const daDung = await LichSuSuDungKhuyenMai.findOne({
+    where: {
+      khuyen_mai_id: khuyenMai.id,
+      khach_hang_id: khachHangId,
+    },
+    transaction,
+  });
+
+  if (daDung) return "Bạn đã sử dụng mã khuyến mãi này";
+
+  return null;
 };
 
 // ================= KHÁCH HÀNG: TẠO ĐƠN HÀNG =================
@@ -117,19 +188,40 @@ const taoDonHang = async (req, res) => {
         phiVanChuyen = Number(donViVanChuyen.phi_co_ban || 0);
         donViVanChuyenId = donViVanChuyen.id;
       } else {
-        // Nếu FE chưa chọn đơn vị vận chuyển, dùng phí mặc định.
         phiVanChuyen = 30000;
       }
 
-      const giamGia = 0;
-      const tongThanhToan = tongTienHang + phiVanChuyen - giamGia;
+      let giamGia = 0;
+      let khuyenMaiHopLeId = null;
+
+      if (khuyen_mai_id) {
+        const khuyenMai = await KhuyenMai.findByPk(khuyen_mai_id, {
+          transaction: t,
+        });
+
+        const loiKhuyenMai = await kiemTraKhuyenMaiHopLe(
+          khuyenMai,
+          khachHangId,
+          tongTienHang,
+          t,
+        );
+
+        if (loiKhuyenMai) {
+          throw new Error(loiKhuyenMai);
+        }
+
+        giamGia = tinhSoTienGiam(khuyenMai, tongTienHang);
+        khuyenMaiHopLeId = khuyenMai.id;
+      }
+
+      const tongThanhToan = Math.max(tongTienHang + phiVanChuyen - giamGia, 0);
 
       const donHang = await DonHang.create(
         {
           khach_hang_id: khachHangId,
           nhan_vien_id: null,
           don_vi_van_chuyen_id: donViVanChuyenId,
-          khuyen_mai_id: khuyen_mai_id || null,
+          khuyen_mai_id: khuyenMaiHopLeId,
           ma_don_hang: taoMaDonHang(),
           dia_chi_giao,
           tong_tien_hang: tongTienHang,
@@ -152,6 +244,24 @@ const taoDonHang = async (req, res) => {
       await DonHangChiTiet.bulkCreate(duLieuChiTietDonHang, {
         transaction: t,
       });
+
+      if (khuyenMaiHopLeId) {
+        await LichSuSuDungKhuyenMai.create(
+          {
+            khuyen_mai_id: khuyenMaiHopLeId,
+            khach_hang_id: khachHangId,
+            don_hang_id: donHang.id,
+            so_tien_giam: giamGia,
+          },
+          { transaction: t },
+        );
+
+        await KhuyenMai.increment("so_luong_da_dung", {
+          by: 1,
+          where: { id: khuyenMaiHopLeId },
+          transaction: t,
+        });
+      }
 
       for (const item of chiTietGioHang) {
         const tranh = item.tranh;

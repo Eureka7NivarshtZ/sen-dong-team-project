@@ -183,7 +183,7 @@ function CartCheckout() {
         ghi_chu: shippingInfo.note,
         phuong_thuc_van_chuyen: shippingInfo.method,
         phuong_thuc_thanh_toan: shippingInfo.payment,
-        khuyen_mai_id: appliedCoupon ? appliedCoupon.id : null,
+        khuyen_mai_id: appliedCoupon?.khuyen_mai?.id || null,
         don_vi_van_chuyen_id: shippingInfo.method, // method giờ lưu UUID
       };
 
@@ -234,19 +234,25 @@ function CartCheckout() {
     e.preventDefault();
     setCouponError("");
 
-    if (!couponCode.trim()) {
+    const ma = couponCode.trim().toUpperCase();
+
+    if (!ma) {
       setCouponError("Vui lòng nhập mã giảm giá!");
       return;
     }
 
-    try {
-      const result = await khuyenMaiService.kiemTraMaGiamGia(couponCode.trim());
+    if (subtotal <= 0) {
+      setCouponError("Giỏ hàng chưa có giá trị để áp dụng mã giảm giá!");
+      return;
+    }
 
-      if (result && result.success && result.data) {
-        // API trả về thông tin khuyến mãi bao gồm ID, code, gia_tri, gia_tri_phan_tram, v.v.
+    try {
+      const result = await khuyenMaiService.kiemTraMaGiamGia(ma, subtotal);
+
+      if (result?.success && result.data) {
         setAppliedCoupon(result.data);
         setCouponError("");
-        alert(`Áp dụng mã ${couponCode.trim()} thành công!`);
+        alert(`Áp dụng mã ${ma} thành công!`);
       } else {
         setCouponError(
           result?.error || "Mã giảm giá không tồn tại hoặc đã hết hạn!",
@@ -263,20 +269,11 @@ function CartCheckout() {
   const calculateDiscount = () => {
     if (!appliedCoupon) return 0;
 
-    // Nếu API trả về gia_tri_phan_tram (phần trăm) hoặc gia_tri (giá trị cố định)
-    if (appliedCoupon.gia_tri_phan_tram) {
-      return (subtotal * appliedCoupon.gia_tri_phan_tram) / 100;
-    }
-
-    if (appliedCoupon.gia_tri) {
-      return parseInt(appliedCoupon.gia_tri, 10);
-    }
-
-    return 0;
+    return parsePrice(appliedCoupon.so_tien_giam);
   };
 
   const discountAmount = calculateDiscount();
-  const shippingFee = shippingInfo.phi_van_chuyen ?? 0;
+  const shippingFee = parsePrice(shippingInfo.phi_van_chuyen);
   const total = subtotal - discountAmount + (step >= 3 ? shippingFee : 0);
 
   const formatPrice = (num) => {
@@ -703,8 +700,10 @@ function CartCheckout() {
               {Array.isArray(cartItems) &&
                 cartItems.map((i) => {
                   const title = i.tranh?.ten_tranh || i.title || "Tác phẩm";
-                  const price = i.tranh?.gia_ban || i.price || 0;
-                  const qty = i.so_luong || i.quantity || 1;
+                  const price = parsePrice(
+                    i.tranh?.gia_ban || i.price || i.thanh_tien || 0,
+                  );
+                  const qty = Number(i.so_luong || i.quantity || 1);
                   return (
                     <div
                       key={i.id}
@@ -838,7 +837,7 @@ function CartCheckout() {
               </div>
               <div style={summaryRowStyle}>
                 <span>Phí vận chuyển</span>
-                <span>{formatPrice(shippingInfo.phi_van_chuyen ?? 0)}</span>
+                <span>{formatPrice(shippingFee)}</span>
               </div>
               <div
                 style={{
@@ -850,7 +849,7 @@ function CartCheckout() {
               >
                 <span>Tổng tiền</span>
                 <strong style={{ color: "#1c3f3a", fontSize: "18px" }}>
-                  {formatPrice(subtotal + (shippingInfo.phi_van_chuyen ?? 0))}
+                  {formatPrice(subtotal + shippingFee)}
                 </strong>
               </div>
             </div>
@@ -1034,8 +1033,9 @@ function CartCheckout() {
                       margin: "6px 0 0 0",
                     }}
                   >
-                    ✓ Đang áp dụng mã: <strong>{appliedCoupon.code}</strong> (-
-                    {appliedCoupon.value})
+                    ✓ Đang áp dụng mã:{" "}
+                    <strong>{appliedCoupon.khuyen_mai?.ma}</strong> (-
+                    {formatPrice(appliedCoupon.so_tien_giam)})
                   </p>
                 )}
               </div>

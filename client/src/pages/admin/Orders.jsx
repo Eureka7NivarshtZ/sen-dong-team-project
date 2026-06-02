@@ -42,8 +42,23 @@ const STATUS_STYLE = {
   },
 };
 
+function parseMoney(value) {
+  if (value === null || value === undefined || value === "") return 0;
+  if (typeof value === "number") return value;
+
+  const text = String(value).trim();
+
+  // VD: "1200000.00"
+  if (/^\d+(\.\d+)?$/.test(text)) {
+    return Number(text);
+  }
+
+  // VD: "1.200.000 đ"
+  return Number(text.replace(/[^\d]/g, "")) || 0;
+}
+
 function formatCurrency(value) {
-  const number = Number(value || 0);
+  const number = parseMoney(value);
 
   return number.toLocaleString("vi-VN", {
     style: "currency",
@@ -71,12 +86,35 @@ function getCustomerName(order) {
   );
 }
 
-function getOrderTotal(order) {
+function getOrderDiscount(order) {
   return (
-    Number(order?.tong_tien_hang || 0) +
-    Number(order?.phi_van_chuyen || 0) -
-    Number(order?.giam_gia || 0)
+    parseMoney(order?.giam_gia) ||
+    parseMoney(order?.so_tien_giam) ||
+    parseMoney(order?.tien_giam) ||
+    parseMoney(order?.giam_gia_khuyen_mai) ||
+    parseMoney(order?.khuyen_mai?.so_tien_giam) ||
+    parseMoney(order?.khuyenMai?.so_tien_giam) ||
+    parseMoney(order?.khuyen_mai?.gia_tri_giam) ||
+    parseMoney(order?.KhuyenMai?.so_tien_giam) ||
+    0
   );
+}
+
+function getOrderTotal(order) {
+  // Nếu backend đã trả tổng cuối cùng sau giảm giá thì ưu tiên dùng
+  if (order?.tong_thanh_toan !== undefined && order?.tong_thanh_toan !== null) {
+    return parseMoney(order.tong_thanh_toan);
+  }
+
+  if (order?.tong_tien !== undefined && order?.tong_tien !== null) {
+    return parseMoney(order.tong_tien);
+  }
+
+  const tongTienHang = parseMoney(order?.tong_tien_hang);
+  const phiVanChuyen = parseMoney(order?.phi_van_chuyen);
+  const giamGia = getOrderDiscount(order);
+
+  return Math.max(tongTienHang + phiVanChuyen - giamGia, 0);
 }
 
 function Orders() {
@@ -101,8 +139,7 @@ function Orders() {
       tongDon: total,
       choXacNhan: orders.filter((item) => item.trang_thai === "cho_xac_nhan")
         .length,
-      dangGiao: orders.filter((item) => item.trang_thai === "dang_giao")
-        .length,
+      dangGiao: orders.filter((item) => item.trang_thai === "dang_giao").length,
       hoanThanh: orders.filter((item) => item.trang_thai === "hoan_thanh")
         .length,
     };
@@ -175,7 +212,10 @@ function Orders() {
 
     setActionLoading(true);
 
-    const result = await donHangService.capNhatTrangThaiDon(order.id, nextStatus);
+    const result = await donHangService.capNhatTrangThaiDon(
+      order.id,
+      nextStatus,
+    );
 
     if (result.success) {
       alert("Cập nhật trạng thái thành công");
@@ -473,7 +513,7 @@ function Orders() {
                             <option key={item.value} value={item.value}>
                               {item.label}
                             </option>
-                          )
+                          ),
                         )}
                       </select>
                     </td>
@@ -492,7 +532,7 @@ function Orders() {
                           disabled={
                             actionLoading ||
                             !["cho_xac_nhan", "dang_chuan_bi"].includes(
-                              order.trang_thai
+                              order.trang_thai,
                             )
                           }
                           style={{
@@ -624,7 +664,7 @@ function Orders() {
                   <InfoBox
                     label="Ngày đặt"
                     value={formatDate(
-                      selectedOrder.ngay_dat || selectedOrder.createdAt
+                      selectedOrder.ngay_dat || selectedOrder.createdAt,
                     )}
                   />
                   <InfoBox
@@ -690,8 +730,8 @@ function Orders() {
                           </td>
                           <td style={tdStyle}>
                             {formatCurrency(
-                              Number(item.so_luong || 0) *
-                                Number(item.don_gia || 0)
+                              parseMoney(item.so_luong) *
+                                parseMoney(item.don_gia),
                             )}
                           </td>
                         </tr>
@@ -699,6 +739,55 @@ function Orders() {
                     )}
                   </tbody>
                 </table>
+
+                <div
+                  style={{
+                    marginTop: "18px",
+                    backgroundColor: "#f8fafc",
+                    border: "1px solid #eaecf0",
+                    borderRadius: "10px",
+                    padding: "14px",
+                  }}
+                >
+                  <div style={summaryLineStyle}>
+                    <span>Tiền hàng</span>
+                    <strong>
+                      {formatCurrency(selectedOrder.tong_tien_hang)}
+                    </strong>
+                  </div>
+
+                  <div style={summaryLineStyle}>
+                    <span>Phí vận chuyển</span>
+                    <strong>
+                      {formatCurrency(selectedOrder.phi_van_chuyen)}
+                    </strong>
+                  </div>
+
+                  {getOrderDiscount(selectedOrder) > 0 && (
+                    <div style={summaryLineStyle}>
+                      <span>Voucher giảm</span>
+                      <strong style={{ color: "#cf1322" }}>
+                        -{formatCurrency(getOrderDiscount(selectedOrder))}
+                      </strong>
+                    </div>
+                  )}
+
+                  <div
+                    style={{
+                      ...summaryLineStyle,
+                      borderTop: "1px solid #eaecf0",
+                      paddingTop: "10px",
+                      marginTop: "10px",
+                      color: "#2e7d32",
+                      fontSize: "16px",
+                    }}
+                  >
+                    <span>Tổng thanh toán</span>
+                    <strong>
+                      {formatCurrency(getOrderTotal(selectedOrder))}
+                    </strong>
+                  </div>
+                </div>
 
                 {selectedOrder.ghi_chu && (
                   <div style={{ marginTop: "18px" }}>
@@ -813,6 +902,12 @@ const paginationButtonStyle = {
   border: "1px solid #d0d5dd",
   backgroundColor: "#fff",
   cursor: "pointer",
+};
+
+const summaryLineStyle = {
+  display: "flex",
+  justifyContent: "space-between",
+  marginBottom: "8px",
 };
 
 export default Orders;

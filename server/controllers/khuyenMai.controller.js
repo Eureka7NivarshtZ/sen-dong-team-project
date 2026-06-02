@@ -218,15 +218,22 @@ const kiemTraMaKhuyenMai = async (req, res) => {
   const { ma, tong_tien } = req.body;
   const khach_hang_id = req.user.khach_hang_id;
 
-  if (!ma || !tong_tien) {
-    return res
-      .status(400)
-      .json({ success: false, error: "Vui long nhap ma va tong_tien" });
+  if (
+    !ma ||
+    tong_tien === undefined ||
+    tong_tien === null ||
+    Number(tong_tien) <= 0
+  ) {
+    return res.status(400).json({
+      success: false,
+      error: "Vui lòng nhập mã và tổng tiền hợp lệ",
+    });
   }
 
   const khuyenMai = await KhuyenMai.findOne({
     where: { ma: ma.toUpperCase() },
   });
+
   const loi = await kiemTraKhuyenMaiHopLe(
     khuyenMai,
     khach_hang_id,
@@ -241,7 +248,7 @@ const kiemTraMaKhuyenMai = async (req, res) => {
 
   res.json({
     success: true,
-    message: "Ma khuyen mai hop le",
+    message: "Mã khuyến mãi hợp lệ",
     data: {
       khuyen_mai: khuyenMai,
       so_tien_giam: soTienGiam,
