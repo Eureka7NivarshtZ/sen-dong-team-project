@@ -11,6 +11,7 @@ import hoaDonService from "./hoaDonService";
 import thanhToanService from "./thanhToanService";
 import nhanVienService from "./nhanVienService";
 import khuyenMaiService from "./khuyenMaiService";
+import donViVanChuyenService from "./donViVanChuyenService";
 
 export {
   apiClient,
@@ -25,6 +26,7 @@ export {
   thanhToanService,
   nhanVienService,
   khuyenMaiService,
+  donViVanChuyenService,
 };
 
 // Default export - tất cả services
@@ -41,4 +43,5 @@ export default {
   thanhToanService,
   nhanVienService,
   khuyenMaiService,
+  donViVanChuyenService,
 };

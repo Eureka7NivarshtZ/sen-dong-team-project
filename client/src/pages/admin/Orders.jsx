@@ -1,159 +1,818 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Topbar from "../../components/admin/Topbar";
+import donHangService from "../../services/donHangService";
+
+const TRANG_THAI_OPTIONS = [
+  { value: "", label: "Tất cả trạng thái" },
+  { value: "cho_xac_nhan", label: "Chờ xác nhận" },
+  { value: "dang_chuan_bi", label: "Đang chuẩn bị" },
+  { value: "dang_giao", label: "Đang giao" },
+  { value: "hoan_thanh", label: "Hoàn thành" },
+  { value: "huy", label: "Đã hủy" },
+];
+
+const STATUS_LABEL = {
+  cho_xac_nhan: "Chờ xác nhận",
+  dang_chuan_bi: "Đang chuẩn bị",
+  dang_giao: "Đang giao",
+  hoan_thanh: "Hoàn thành",
+  huy: "Đã hủy",
+};
+
+const STATUS_STYLE = {
+  cho_xac_nhan: {
+    backgroundColor: "#fff7e6",
+    color: "#d48806",
+  },
+  dang_chuan_bi: {
+    backgroundColor: "#e6f4ff",
+    color: "#1677ff",
+  },
+  dang_giao: {
+    backgroundColor: "#f0f5ff",
+    color: "#2f54eb",
+  },
+  hoan_thanh: {
+    backgroundColor: "#f6ffed",
+    color: "#389e0d",
+  },
+  huy: {
+    backgroundColor: "#fff1f0",
+    color: "#cf1322",
+  },
+};
+
+function formatCurrency(value) {
+  const number = Number(value || 0);
+
+  return number.toLocaleString("vi-VN", {
+    style: "currency",
+    currency: "VND",
+  });
+}
+
+function formatDate(value) {
+  if (!value) return "-";
+
+  return new Date(value).toLocaleDateString("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
+
+function getCustomerName(order) {
+  return (
+    order?.khach_hang?.ho_ten ||
+    order?.khach_hang?.ten_khach_hang ||
+    order?.khach_hang?.tai_khoan?.ho_ten ||
+    order?.khach_hang?.email ||
+    "Khách hàng"
+  );
+}
+
+function getOrderTotal(order) {
+  return (
+    Number(order?.tong_tien_hang || 0) +
+    Number(order?.phi_van_chuyen || 0) -
+    Number(order?.giam_gia || 0)
+  );
+}
 
 function Orders() {
+  const [orders, setOrders] = useState([]);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+
   const [search, setSearch] = useState("");
-  const [showModal, setShowModal] = useState(false);
-  const [isEditing, setIsEditing] = useState(false); // Xác định đang Thêm hay Sửa
-  const [editId, setEditId] = useState(null);
+  const [filterStatus, setFilterStatus] = useState("");
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [total, setTotal] = useState(0);
 
-  const [newCustomer, setNewCustomer] = useState("");
-  const [newAddress, setNewAddress] = useState("");
-  const [newTotal, setNewTotal] = useState("");
-  const [filterStatus, setFilterStatus] = useState("Tất cả");
+  const [loading, setLoading] = useState(false);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const [orders, setOrders] = useState([
-    { id: "00001", customer: "Christine Brooks", address: "089 Kutch Green Apt. 448", date: "14 Feb 2026", total: "4,200,000 đ", status: "Hoàn thành" },
-    { id: "00002", customer: "Rosie Pearson", address: "979 Immanuel Ferry Suite 526", date: "14 Feb 2026", total: "12,500,000 đ", status: "Đang xử lý" },
-    { id: "00003", customer: "Darrell Caldwell", address: "8587 Frida Ports", date: "14 Feb 2026", total: "3,800,000 đ", status: "Đã hủy" }
-  ]);
+  const totalPages = Math.max(1, Math.ceil(total / limit));
 
-  // Bấm nút Tạo đơn mới
-  const openAddModal = () => {
-    setIsEditing(false);
-    setNewCustomer("");
-    setNewAddress("");
-    setNewTotal("");
-    setShowModal(true);
+  const stats = useMemo(() => {
+    return {
+      tongDon: total,
+      choXacNhan: orders.filter((item) => item.trang_thai === "cho_xac_nhan")
+        .length,
+      dangGiao: orders.filter((item) => item.trang_thai === "dang_giao")
+        .length,
+      hoanThanh: orders.filter((item) => item.trang_thai === "hoan_thanh")
+        .length,
+    };
+  }, [orders, total]);
+
+  const fetchOrders = async () => {
+    setLoading(true);
+    setError("");
+
+    const params = {
+      page,
+      limit,
+    };
+
+    if (filterStatus) {
+      params.trang_thai = filterStatus;
+    }
+
+    if (search.trim()) {
+      params.search = search.trim();
+    }
+
+    const result = await donHangService.xemTatCaDonHang(params);
+
+    if (result.success) {
+      setOrders(result.data || []);
+      setTotal(result.total || 0);
+    } else {
+      setOrders([]);
+      setTotal(0);
+      setError(result.error || "Không thể tải danh sách đơn hàng");
+    }
+
+    setLoading(false);
   };
 
-  // Bấm nút Sửa - Điền sẵn dữ liệu cũ vào các ô Input
-  const openEditModal = (item) => {
-    setIsEditing(true);
-    setEditId(item.id);
-    setNewCustomer(item.customer);
-    setNewAddress(item.address);
-    setNewTotal(item.total.replace(/ đ/g, "")); // Bỏ chữ đ để nhập số
-    setShowModal(true);
+  useEffect(() => {
+    fetchOrders();
+  }, [page, filterStatus]);
+
+  const handleSearchSubmit = (event) => {
+    event.preventDefault();
+    setPage(1);
+    fetchOrders();
   };
 
-  // Xử lý khi bấm nút Lưu trong Modal
-  const handleSaveOrder = () => {
-    if (!newCustomer || !newAddress || !newTotal) {
-      alert("Vui lòng nhập đầy đủ thông tin!");
+  const handleViewDetail = async (id) => {
+    setDetailLoading(true);
+    setSelectedOrder(null);
+
+    const result = await donHangService.xemChiTietDonBatKy(id);
+
+    if (result.success) {
+      setSelectedOrder(result.data);
+    } else {
+      alert(result.error || "Không thể xem chi tiết đơn hàng");
+    }
+
+    setDetailLoading(false);
+  };
+
+  const handleChangeStatus = async (order, nextStatus) => {
+    if (!nextStatus || nextStatus === order.trang_thai) return;
+
+    const confirmMessage = `Cập nhật đơn ${
+      order.ma_don_hang || order.id
+    } sang trạng thái "${STATUS_LABEL[nextStatus]}"?`;
+
+    if (!window.confirm(confirmMessage)) return;
+
+    setActionLoading(true);
+
+    const result = await donHangService.capNhatTrangThaiDon(order.id, nextStatus);
+
+    if (result.success) {
+      alert("Cập nhật trạng thái thành công");
+      fetchOrders();
+
+      if (selectedOrder?.id === order.id) {
+        handleViewDetail(order.id);
+      }
+    } else {
+      alert(result.error || "Cập nhật trạng thái thất bại");
+    }
+
+    setActionLoading(false);
+  };
+
+  const handleCancelOrder = async (order) => {
+    if (!["cho_xac_nhan", "dang_chuan_bi"].includes(order.trang_thai)) {
+      alert("Chỉ có thể hủy đơn ở trạng thái Chờ xác nhận hoặc Đang chuẩn bị");
       return;
     }
 
-    if (isEditing) {
-      // Logic Cập nhật thông tin đơn hàng cũ
-      const updatedOrders = orders.map((o) =>
-        o.id === editId ? { ...o, customer: newCustomer, address: newAddress, total: newTotal + " đ" } : o
-      );
-      setOrders(updatedOrders);
-      alert("Cập nhật đơn hàng thành công!");
+    if (!window.confirm(`Bạn có chắc muốn hủy đơn ${order.ma_don_hang}?`)) {
+      return;
+    }
+
+    setActionLoading(true);
+
+    const result = await donHangService.huyDonBatKy(order.id);
+
+    if (result.success) {
+      alert("Hủy đơn hàng thành công");
+      fetchOrders();
+
+      if (selectedOrder?.id === order.id) {
+        setSelectedOrder(null);
+      }
     } else {
-      // Logic Thêm đơn hàng mới
-      const newOrder = {
-        id: String(orders.length + 1).padStart(5, "0"),
-        customer: newCustomer,
-        address: newAddress,
-        date: "14 Feb 2026",
-        total: newTotal + " đ",
-        status: "Đang xử lý",
-      };
-      setOrders([...orders, newOrder]);
-      alert("Tạo đơn hàng mới thành công!");
+      alert(result.error || "Hủy đơn hàng thất bại");
     }
 
-    setShowModal(false);
+    setActionLoading(false);
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa đơn này?")) {
-      setOrders(orders.filter((item) => item.id !== id));
-    }
-  };
-
-  const filteredOrders = orders.filter((item) => {
-    const matchSearch = item.customer.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = filterStatus === "Tất cả" || item.status === filterStatus;
-    return matchSearch && matchStatus;
-  });
+  const detailItems =
+    selectedOrder?.don_hang_chi_tiet ||
+    selectedOrder?.chi_tiet ||
+    selectedOrder?.DonHangChiTiets ||
+    [];
 
   return (
-    <div className="dashboard-content" style={{ flex: 1, backgroundColor: "#f9f9f9", minHeight: "100vh" }}>
-        <Topbar />
-        
-        <div style={{ padding: "30px", textAlign: "left" }}>
-          <div className="order-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "25px" }}>
-            <h1 style={{ color: "#1c3f3a", margin: 0, fontSize: "24px", fontWeight: "bold" }}>Đơn hàng</h1>
-            <div className="header-right" style={{ display: "flex", gap: "15px" }}>
-              <input type="text" placeholder="Tìm khách hàng..." value={search} onChange={(e) => setSearch(e.target.value)} className="search-input" style={{ padding: "8px 15px", borderRadius: "6px", border: "1px solid #ccc" }} />
-              <select className="filter-select" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} style={{ padding: "8px 15px", borderRadius: "6px", border: "1px solid #ccc" }}>
-                <option>Tất cả</option>
-                <option>Hoàn thành</option>
-                <option>Đang xử lý</option>
-                <option>Đã hủy</option>
-              </select>
-              <button className="save-btn" onClick={openAddModal} style={{ padding: "10px 20px", backgroundColor: "#1c3f3a", color: "#fff", border: "none", borderRadius: "6px", fontWeight: "bold", cursor: "pointer" }}>
-                + Tạo đơn
+    <div
+      className="dashboard-content"
+      style={{
+        flex: 1,
+        backgroundColor: "#f6f7f8",
+        minHeight: "100vh",
+      }}
+    >
+      <Topbar />
+
+      <div style={{ padding: "30px", textAlign: "left" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            gap: "20px",
+            alignItems: "center",
+            marginBottom: "24px",
+          }}
+        >
+          <div>
+            <h1
+              style={{
+                color: "#1c3f3a",
+                margin: 0,
+                fontSize: "26px",
+                fontWeight: "bold",
+              }}
+            >
+              Quản lý đơn hàng
+            </h1>
+            <p style={{ margin: "6px 0 0", color: "#667085" }}>
+              Theo dõi, xác nhận, cập nhật trạng thái và hủy đơn hàng.
+            </p>
+          </div>
+
+          <button
+            onClick={fetchOrders}
+            disabled={loading}
+            style={{
+              padding: "10px 18px",
+              borderRadius: "8px",
+              border: "none",
+              backgroundColor: "#1c3f3a",
+              color: "#fff",
+              fontWeight: 700,
+              cursor: "pointer",
+            }}
+          >
+            {loading ? "Đang tải..." : "Làm mới"}
+          </button>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+            gap: "16px",
+            marginBottom: "24px",
+          }}
+        >
+          <StatCard title="Tổng đơn" value={stats.tongDon} />
+          <StatCard title="Chờ xác nhận" value={stats.choXacNhan} />
+          <StatCard title="Đang giao" value={stats.dangGiao} />
+          <StatCard title="Hoàn thành" value={stats.hoanThanh} />
+        </div>
+
+        <form
+          onSubmit={handleSearchSubmit}
+          style={{
+            backgroundColor: "#fff",
+            padding: "18px",
+            borderRadius: "12px",
+            boxShadow: "0 4px 14px rgba(0,0,0,0.05)",
+            marginBottom: "20px",
+            display: "flex",
+            gap: "12px",
+            alignItems: "center",
+          }}
+        >
+          <input
+            type="text"
+            placeholder="Tìm theo mã đơn, tên khách hàng..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{
+              flex: 1,
+              padding: "11px 14px",
+              borderRadius: "8px",
+              border: "1px solid #d0d5dd",
+              outline: "none",
+            }}
+          />
+
+          <select
+            value={filterStatus}
+            onChange={(e) => {
+              setFilterStatus(e.target.value);
+              setPage(1);
+            }}
+            style={{
+              padding: "11px 14px",
+              borderRadius: "8px",
+              border: "1px solid #d0d5dd",
+              minWidth: "190px",
+            }}
+          >
+            {TRANG_THAI_OPTIONS.map((item) => (
+              <option key={item.value} value={item.value}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+
+          <button
+            type="submit"
+            style={{
+              padding: "11px 18px",
+              borderRadius: "8px",
+              border: "none",
+              backgroundColor: "#1c3f3a",
+              color: "#fff",
+              fontWeight: 700,
+              cursor: "pointer",
+            }}
+          >
+            Tìm kiếm
+          </button>
+        </form>
+
+        {error && (
+          <div
+            style={{
+              backgroundColor: "#fff1f0",
+              color: "#cf1322",
+              padding: "12px 14px",
+              borderRadius: "8px",
+              marginBottom: "16px",
+            }}
+          >
+            {error}
+          </div>
+        )}
+
+        <div
+          style={{
+            backgroundColor: "#fff",
+            padding: "20px",
+            borderRadius: "12px",
+            boxShadow: "0 4px 14px rgba(0,0,0,0.05)",
+            overflowX: "auto",
+          }}
+        >
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr
+                style={{
+                  borderBottom: "1px solid #eaecf0",
+                  color: "#475467",
+                  textAlign: "left",
+                }}
+              >
+                <th style={thStyle}>Mã đơn</th>
+                <th style={thStyle}>Khách hàng</th>
+                <th style={thStyle}>Địa chỉ</th>
+                <th style={thStyle}>Ngày đặt</th>
+                <th style={thStyle}>Tổng tiền</th>
+                <th style={thStyle}>Trạng thái</th>
+                <th style={thStyle}>Cập nhật</th>
+                <th style={thStyle}>Hành động</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan="8" style={emptyStyle}>
+                    Đang tải đơn hàng...
+                  </td>
+                </tr>
+              ) : orders.length === 0 ? (
+                <tr>
+                  <td colSpan="8" style={emptyStyle}>
+                    Không có đơn hàng nào.
+                  </td>
+                </tr>
+              ) : (
+                orders.map((order) => (
+                  <tr
+                    key={order.id}
+                    style={{
+                      borderBottom: "1px solid #f2f4f7",
+                    }}
+                  >
+                    <td style={tdStyle}>
+                      <strong>{order.ma_don_hang || `DH-${order.id}`}</strong>
+                    </td>
+
+                    <td style={tdStyle}>{getCustomerName(order)}</td>
+
+                    <td
+                      style={{
+                        ...tdStyle,
+                        maxWidth: "260px",
+                        color: "#667085",
+                      }}
+                    >
+                      {order.dia_chi_giao || "-"}
+                    </td>
+
+                    <td style={tdStyle}>
+                      {formatDate(order.ngay_dat || order.createdAt)}
+                    </td>
+
+                    <td
+                      style={{
+                        ...tdStyle,
+                        color: "#2e7d32",
+                        fontWeight: 700,
+                      }}
+                    >
+                      {formatCurrency(getOrderTotal(order))}
+                    </td>
+
+                    <td style={tdStyle}>
+                      <StatusBadge status={order.trang_thai} />
+                    </td>
+
+                    <td style={tdStyle}>
+                      <select
+                        value={order.trang_thai}
+                        disabled={actionLoading || order.trang_thai === "huy"}
+                        onChange={(e) =>
+                          handleChangeStatus(order, e.target.value)
+                        }
+                        style={{
+                          padding: "8px 10px",
+                          borderRadius: "8px",
+                          border: "1px solid #d0d5dd",
+                          cursor: "pointer",
+                        }}
+                      >
+                        {TRANG_THAI_OPTIONS.filter((item) => item.value).map(
+                          (item) => (
+                            <option key={item.value} value={item.value}>
+                              {item.label}
+                            </option>
+                          )
+                        )}
+                      </select>
+                    </td>
+
+                    <td style={tdStyle}>
+                      <div style={{ display: "flex", gap: "8px" }}>
+                        <button
+                          onClick={() => handleViewDetail(order.id)}
+                          style={buttonOutlineStyle}
+                        >
+                          Chi tiết
+                        </button>
+
+                        <button
+                          onClick={() => handleCancelOrder(order)}
+                          disabled={
+                            actionLoading ||
+                            !["cho_xac_nhan", "dang_chuan_bi"].includes(
+                              order.trang_thai
+                            )
+                          }
+                          style={{
+                            ...buttonDangerStyle,
+                            opacity: ![
+                              "cho_xac_nhan",
+                              "dang_chuan_bi",
+                            ].includes(order.trang_thai)
+                              ? 0.5
+                              : 1,
+                          }}
+                        >
+                          Hủy
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginTop: "18px",
+            }}
+          >
+            <span style={{ color: "#667085" }}>
+              Trang {page} / {totalPages} — Tổng {total} đơn
+            </span>
+
+            <div style={{ display: "flex", gap: "8px" }}>
+              <button
+                disabled={page <= 1}
+                onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                style={paginationButtonStyle}
+              >
+                Trước
+              </button>
+
+              <button
+                disabled={page >= totalPages}
+                onClick={() =>
+                  setPage((prev) => Math.min(totalPages, prev + 1))
+                }
+                style={paginationButtonStyle}
+              >
+                Sau
               </button>
             </div>
           </div>
+        </div>
+      </div>
 
-          <div className="table-box" style={{ backgroundColor: "#ffffff", padding: "20px", borderRadius: "10px", boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}>
-            <table className="order-table" style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr style={{ borderBottom: "2px solid #f0f0f0", color: "#555", textAlign: "left" }}>
-                  <th style={{ padding: "12px" }}>Mã đơn</th>
-                  <th style={{ padding: "12px" }}>Khách hàng</th>
-                  <th style={{ padding: "12px" }}>Địa chỉ</th>
-                  <th style={{ padding: "12px" }}>Ngày đặt</th>
-                  <th style={{ padding: "12px" }}>Thành tiền</th>
-                  <th style={{ padding: "12px" }}>Trạng thái</th>
-                  <th style={{ padding: "12px" }}>Hành động</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredOrders.map((item) => (
-                  <tr key={item.id} style={{ borderBottom: "1px solid #f0f0f0" }}>
-                    <td style={{ padding: "12px" }}>{item.id}</td>
-                    <td style={{ padding: "12px", fontWeight: "600" }}>{item.customer}</td>
-                    <td style={{ padding: "12px" }}>{item.address}</td>
-                    <td style={{ padding: "12px" }}>{item.date}</td>
-                    <td style={{ padding: "12px", color: "#2e7d32", fontWeight: "bold" }}>{item.total}</td>
-                    <td style={{ padding: "12px" }}>
-                      <span style={{ padding: "4px 8px", borderRadius: "4px", fontSize: "12px", fontWeight: "bold", backgroundColor: item.status === "Hoàn thành" ? "#e8f5e9" : item.status === "Đang xử lý" ? "#fff3e0" : "#fff0f0", color: item.status === "Hoàn thành" ? "#2e7d32" : item.status === "Đang xử lý" ? "#f57c00" : "#ff4d4f" }}>
-                        {item.status}
-                      </span>
-                    </td>
-                    <td style={{ padding: "12px", display: "flex", gap: "8px" }}>
-                      <button className="edit-btn" onClick={() => openEditModal(item)} style={{ padding: "6px 12px", backgroundColor: "#f39c12", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer" }}>Sửa</button>
-                      <button className="delete-btn" onClick={() => handleDelete(item.id)} style={{ padding: "6px 12px", backgroundColor: "#ff4d4f", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer" }}>Xóa</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-    </div>
+      {(selectedOrder || detailLoading) && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0,0,0,0.45)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 2000,
+            padding: "20px",
+          }}
+        >
+          <div
+            style={{
+              width: "760px",
+              maxHeight: "90vh",
+              overflowY: "auto",
+              backgroundColor: "#fff",
+              borderRadius: "14px",
+              padding: "24px",
+            }}
+          >
+            {detailLoading ? (
+              <p>Đang tải chi tiết đơn hàng...</p>
+            ) : (
+              <>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: "16px",
+                    alignItems: "flex-start",
+                    marginBottom: "18px",
+                  }}
+                >
+                  <div>
+                    <h2 style={{ margin: 0, color: "#1c3f3a" }}>
+                      Chi tiết đơn hàng
+                    </h2>
+                    <p style={{ margin: "6px 0 0", color: "#667085" }}>
+                      {selectedOrder.ma_don_hang || `DH-${selectedOrder.id}`}
+                    </p>
+                  </div>
 
-      {showModal && (
-        <div className="modal-overlay" style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", backgroundColor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000 }}>
-          <div className="modal" style={{ backgroundColor: "#fff", padding: "30px", borderRadius: "10px", width: "400px" }}>
-            <h2 style={{ margin: "0 0 20px 0", color: "#1c3f3a" }}>{isEditing ? "Cập nhật đơn hàng" : "Tạo đơn hàng"}</h2>
-            <input type="text" placeholder="Tên khách hàng" value={newCustomer} onChange={(e) => setNewCustomer(e.target.value)} style={{ width: "100%", padding: "10px", marginBottom: "15px", borderRadius: "6px", border: "1px solid #ccc", boxSizing: "border-box" }} />
-            <input type="text" placeholder="Địa chỉ" value={newAddress} onChange={(e) => setNewAddress(e.target.value)} style={{ width: "100%", padding: "10px", marginBottom: "15px", borderRadius: "6px", border: "1px solid #ccc", boxSizing: "border-box" }} />
-            <input type="text" placeholder="Thành tiền (đ)" value={newTotal} onChange={(e) => setNewTotal(e.target.value)} style={{ width: "100%", padding: "10px", marginBottom: "20px", borderRadius: "6px", border: "1px solid #ccc", boxSizing: "border-box" }} />
-            <div className="modal-buttons" style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
-              <button className="cancel-btn" onClick={() => setShowModal(false)} style={{ padding: "8px 16px", backgroundColor: "#aaa", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer" }}>Hủy</button>
-              <button className="save-btn" onClick={handleSaveOrder} style={{ padding: "8px 16px", backgroundColor: "#1c3f3a", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer" }}>Lưu</button>
-            </div>
+                  <button
+                    onClick={() => setSelectedOrder(null)}
+                    style={{
+                      border: "none",
+                      backgroundColor: "#f2f4f7",
+                      borderRadius: "8px",
+                      padding: "8px 12px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Đóng
+                  </button>
+                </div>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "12px",
+                    marginBottom: "18px",
+                  }}
+                >
+                  <InfoBox
+                    label="Khách hàng"
+                    value={getCustomerName(selectedOrder)}
+                  />
+                  <InfoBox
+                    label="Ngày đặt"
+                    value={formatDate(
+                      selectedOrder.ngay_dat || selectedOrder.createdAt
+                    )}
+                  />
+                  <InfoBox
+                    label="Địa chỉ giao"
+                    value={selectedOrder.dia_chi_giao || "-"}
+                  />
+                  <InfoBox
+                    label="Đơn vị vận chuyển"
+                    value={
+                      selectedOrder?.don_vi_van_chuyen?.ten_don_vi ||
+                      selectedOrder?.don_vi_van_chuyen?.ten ||
+                      "-"
+                    }
+                  />
+                  <InfoBox
+                    label="Trạng thái"
+                    value={STATUS_LABEL[selectedOrder.trang_thai] || "-"}
+                  />
+                  <InfoBox
+                    label="Tổng tiền"
+                    value={formatCurrency(getOrderTotal(selectedOrder))}
+                  />
+                </div>
+
+                <h3 style={{ color: "#1c3f3a", marginBottom: "12px" }}>
+                  Sản phẩm trong đơn
+                </h3>
+
+                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                  <thead>
+                    <tr
+                      style={{
+                        borderBottom: "1px solid #eaecf0",
+                        textAlign: "left",
+                      }}
+                    >
+                      <th style={thStyle}>Tranh</th>
+                      <th style={thStyle}>Số lượng</th>
+                      <th style={thStyle}>Đơn giá</th>
+                      <th style={thStyle}>Thành tiền</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {detailItems.length === 0 ? (
+                      <tr>
+                        <td colSpan="4" style={emptyStyle}>
+                          Chưa có dữ liệu chi tiết sản phẩm.
+                        </td>
+                      </tr>
+                    ) : (
+                      detailItems.map((item) => (
+                        <tr
+                          key={item.id}
+                          style={{ borderBottom: "1px solid #f2f4f7" }}
+                        >
+                          <td style={tdStyle}>
+                            {item?.tranh?.ten_tranh || "Tranh"}
+                          </td>
+                          <td style={tdStyle}>{item.so_luong}</td>
+                          <td style={tdStyle}>
+                            {formatCurrency(item.don_gia)}
+                          </td>
+                          <td style={tdStyle}>
+                            {formatCurrency(
+                              Number(item.so_luong || 0) *
+                                Number(item.don_gia || 0)
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+
+                {selectedOrder.ghi_chu && (
+                  <div style={{ marginTop: "18px" }}>
+                    <strong>Ghi chú:</strong>
+                    <p style={{ color: "#667085" }}>{selectedOrder.ghi_chu}</p>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </div>
       )}
     </div>
   );
 }
+
+function StatCard({ title, value }) {
+  return (
+    <div
+      style={{
+        backgroundColor: "#fff",
+        padding: "18px",
+        borderRadius: "12px",
+        boxShadow: "0 4px 14px rgba(0,0,0,0.05)",
+      }}
+    >
+      <p style={{ margin: 0, color: "#667085" }}>{title}</p>
+      <h2 style={{ margin: "8px 0 0", color: "#1c3f3a" }}>{value}</h2>
+    </div>
+  );
+}
+
+function StatusBadge({ status }) {
+  const style = STATUS_STYLE[status] || {
+    backgroundColor: "#f2f4f7",
+    color: "#344054",
+  };
+
+  return (
+    <span
+      style={{
+        padding: "5px 10px",
+        borderRadius: "999px",
+        fontSize: "12px",
+        fontWeight: 700,
+        ...style,
+      }}
+    >
+      {STATUS_LABEL[status] || status || "Không rõ"}
+    </span>
+  );
+}
+
+function InfoBox({ label, value }) {
+  return (
+    <div
+      style={{
+        backgroundColor: "#f8fafc",
+        border: "1px solid #eaecf0",
+        borderRadius: "10px",
+        padding: "12px",
+      }}
+    >
+      <p style={{ margin: 0, color: "#667085", fontSize: "13px" }}>{label}</p>
+      <strong style={{ display: "block", marginTop: "6px", color: "#1c3f3a" }}>
+        {value}
+      </strong>
+    </div>
+  );
+}
+
+const thStyle = {
+  padding: "12px",
+  fontSize: "13px",
+  fontWeight: 700,
+};
+
+const tdStyle = {
+  padding: "12px",
+  verticalAlign: "middle",
+};
+
+const emptyStyle = {
+  padding: "28px",
+  textAlign: "center",
+  color: "#667085",
+};
+
+const buttonOutlineStyle = {
+  padding: "8px 12px",
+  borderRadius: "8px",
+  border: "1px solid #1c3f3a",
+  backgroundColor: "#fff",
+  color: "#1c3f3a",
+  fontWeight: 700,
+  cursor: "pointer",
+};
+
+const buttonDangerStyle = {
+  padding: "8px 12px",
+  borderRadius: "8px",
+  border: "none",
+  backgroundColor: "#ff4d4f",
+  color: "#fff",
+  fontWeight: 700,
+  cursor: "pointer",
+};
+
+const paginationButtonStyle = {
+  padding: "8px 14px",
+  borderRadius: "8px",
+  border: "1px solid #d0d5dd",
+  backgroundColor: "#fff",
+  cursor: "pointer",
+};
 
 export default Orders;

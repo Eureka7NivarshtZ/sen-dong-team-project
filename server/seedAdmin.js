@@ -5,8 +5,8 @@ const seedAdmin = async () => {
   try {
     await sequelize.authenticate();
 
-    const email = "admin@gmail.com";
-    const matKhau = "123456";
+    const email = "admin@example.com";
+    const matKhau = "12345678";
 
     const taiKhoanTonTai = await TaiKhoan.findOne({
       where: { email },
