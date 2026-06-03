@@ -156,6 +156,7 @@ const taoTranh = async (req, res) => {
     gia_von,
     so_luong_ton,
     mo_ta,
+    hinh_anh_url, // 🌟 ĐÃ NHẬN: Đọc URL hình ảnh từ Admin gửi lên
   } = req.body;
 
   if (!ten_tranh || !danh_muc_id || !tac_gia_id) {
@@ -175,6 +176,16 @@ const taoTranh = async (req, res) => {
     mo_ta,
   });
 
+  // 🌟 ĐÃ THÊM: Nếu Admin có điền link hình, tự động tạo luôn bản ghi chạy sang bảng HinhAnhTranh
+  if (hinh_anh_url) {
+    await HinhAnhTranh.create({
+      tranh_id: tranh.id,
+      url: hinh_anh_url,
+      la_chinh: true,
+      thu_tu: 0,
+    });
+  }
+
   res.status(201).json({
     success: true,
     message: "Tao tranh thanh cong",
@@ -184,6 +195,7 @@ const taoTranh = async (req, res) => {
 
 const capNhatTranh = async (req, res) => {
   const { id } = req.params;
+  const { hinh_anh_url } = req.body;
 
   const tranh = await Tranh.findByPk(id);
 
@@ -200,6 +212,24 @@ const capNhatTranh = async (req, res) => {
   };
 
   await tranh.update(tranhData);
+
+  // 🌟 ĐÃ THÊM: Cập nhật hoặc chèn mới ảnh chính khi sửa tranh
+  if (hinh_anh_url) {
+    const anhChinh = await HinhAnhTranh.findOne({
+      where: { tranh_id: id, la_chinh: true }
+    });
+
+    if (anhChinh) {
+      await anhChinh.update({ url: hinh_anh_url });
+    } else {
+      await HinhAnhTranh.create({
+        tranh_id: id,
+        url: hinh_anh_url,
+        la_chinh: true,
+        thu_tu: 0
+      });
+    }
+  }
 
   res.json({
     success: true,

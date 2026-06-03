@@ -17,6 +17,8 @@ const hoaDonRoutes = require("./routes/hoaDon.routes");
 const khachHangRoutes = require("./routes/khachHang.routes");
 const nhanVienRoutes = require("./routes/nhanVien.routes");
 const thanhToanRoutes = require("./routes/thanhToan.routes");
+const chamSocKhachHangRoutes = require("./routes/chamSocKhachHang.routes");
+const adminChamSocRoutes = require("./routes/adminChamSoc.routes");
 
 const app = express();
 
@@ -38,6 +40,8 @@ app.use("/api/hoa-don", hoaDonRoutes);
 app.use("/api/khach-hang", khachHangRoutes);
 app.use("/api/nhan-vien", nhanVienRoutes);
 app.use("/api/thanh-toan", thanhToanRoutes);
+app.use("/api/cham-soc-khach-hang", chamSocKhachHangRoutes);
+app.use("/api/admin/cham-soc", adminChamSocRoutes);
 
 app.use(middleware.xuLyLoi);
 

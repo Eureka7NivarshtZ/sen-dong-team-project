@@ -10,6 +10,8 @@ import CartCheckout from "./pages/client/CartCheckout";
 import Login from "./pages/client/Login";
 import Register from "./pages/client/Register";
 import ProductDetail from "./pages/client/ProductDetail";
+import CustomerSupport from "./pages/client/CustomerSupport";
+
 // ADMIN PAGES
 import Dashboard from "./pages/admin/Dashboard";
 import Orders from "./pages/admin/Orders";
@@ -21,7 +23,7 @@ import Promotions from "./pages/admin/Promotions";
 import { useEffect, useState } from "react";
 import { authService, tranhService } from "./services";
 import Shipping from "./pages/admin/Shipping";
-
+import CustomerCare from "./pages/admin/CustomerCare";
 function ProtectedAdminRoute({ children }) {
   const user = authService.getUser();
   const isAdmin =
@@ -54,6 +56,7 @@ function App() {
         <Route path="/gioi-thieu" element={<About />} />
         <Route path="/tranh" element={<Collection products={products} />} />
         <Route path="/tranh/:id" element={<ProductDetail />} />
+        <Route path="/ho-tro" element={<CustomerSupport />} />
         <Route path="/gio-hang" element={<CartCheckout />} />
         <Route path="/auth/dang-nhap" element={<Login />} />
         <Route path="/auth/dang-ky" element={<Register />} />
@@ -76,6 +79,7 @@ function App() {
         <Route path="danh-muc" element={<Categories />} />
         <Route path="nhan-vien" element={<Employees />} />
         <Route path="khuyen-mai" element={<Promotions />} />
+        <Route path="cham-soc-khach-hang" element={<CustomerCare />} />
       </Route>
     </Routes>
   );
