@@ -240,50 +240,46 @@ const capNhatTranh = async (req, res) => {
 
 const xoaTranh = async (req, res) => {
   const { id } = req.params;
+
   const tranh = await Tranh.findByPk(id);
+
   if (!tranh) {
     return res.status(404).json({
       success: false,
-      error: "Khong tim thay tranh",
+      error: "Không tìm thấy tranh",
     });
   }
-  const t = await sequelize.transaction();
-  try {
-    await DanhGia.destroy({ where: { tranh_id: tranh.id }, transaction: t });
-    await DonHangChiTiet.destroy({
-      where: { tranh_id: tranh.id },
-      transaction: t,
+
+  const daPhatSinhDon = await DonHangChiTiet.count({
+    where: { tranh_id: id },
+  });
+
+  if (daPhatSinhDon > 0) {
+    await tranh.update({
+      trang_thai: "an",
+      cap_nhat_luc: new Date(),
     });
 
-    await HinhAnhTranh.destroy({
-      where: { tranh_id: tranh.id },
-      transaction: t,
-    });
-    await KhuyenMaiTranh.destroy({
-      where: { tranh_id: tranh.id },
-      transaction: t,
-    });
-    await GioHangChiTiet.destroy({
-      where: { tranh_id: tranh.id },
-      transaction: t,
-    });
-
-    await Tranh.destroy({ where: { id: tranh.id }, transaction: t });
-
-    await t.commit();
-    res.json({
+    return res.json({
       success: true,
-      message: "Xoa tranh thanh cong",
-      data: null,
-    });
-  } catch (error) {
-    await t.rollback();
-    res.json({
-      success: false,
-      message: "Xoa tranh khong thanh cong",
-      data: null,
+      message:
+        "Tranh đã phát sinh đơn hàng nên hệ thống chỉ ẩn tranh, không xóa lịch sử",
+      data: tranh,
     });
   }
+
+  await sequelize.transaction(async (t) => {
+    await HinhAnhTranh.destroy({ where: { tranh_id: id }, transaction: t });
+    await KhuyenMaiTranh.destroy({ where: { tranh_id: id }, transaction: t });
+    await GioHangChiTiet.destroy({ where: { tranh_id: id }, transaction: t });
+    await tranh.destroy({ transaction: t });
+  });
+
+  res.json({
+    success: true,
+    message: "Xóa tranh thành công",
+    data: null,
+  });
 };
 
 module.exports = {

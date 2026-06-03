@@ -414,44 +414,46 @@ const xemChiTietDonCuaToi = async (req, res) => {
 // ================= KHÁCH HÀNG: HỦY ĐƠN CỦA TÔI =================
 const huyDonCuaToi = async (req, res) => {
   const { id } = req.params;
-  const khachHangId = req.user.khach_hang_id;
+  const khachHangId = req.user?.khach_hang_id;
 
-  const donHang = await DonHang.findOne({
-    where: { id, khach_hang_id: khachHangId },
-  });
-
-  if (!donHang) {
-    return res.status(404).json({
+  if (!khachHangId) {
+    return res.status(401).json({
       success: false,
-      error: "Không tìm thấy đơn hàng",
+      error: "Token không hợp lệ hoặc không phải khách hàng",
     });
   }
 
-  if (!["cho_xac_nhan", "dang_chuan_bi"].includes(donHang.trang_thai)) {
-    return res.status(400).json({
-      success: false,
-      error: "Không thể hủy đơn hàng ở trạng thái này",
+  try {
+    const ketQua = await sequelize.transaction(async (t) => {
+      const donHang = await DonHang.findOne({
+        where: { id, khach_hang_id: khachHangId },
+        transaction: t,
+        lock: t.LOCK.UPDATE,
+      });
+
+      if (!donHang) {
+        throw taoLoi("Không tìm thấy đơn hàng", 404);
+      }
+
+      await huyDonNoiBo({
+        donHang,
+        transaction: t,
+      });
+
+      return DonHang.findByPk(donHang.id, {
+        include: taoDuLieuIncludeDonHang(),
+        transaction: t,
+      });
     });
+
+    res.json({
+      success: true,
+      message: "Hủy đơn hàng thành công",
+      data: ketQua,
+    });
+  } catch (error) {
+    return xuLyLoi(res, error, "Hủy đơn hàng thất bại");
   }
-
-  await sequelize.transaction(async (t) => {
-    await donHang.update({ trang_thai: "huy" }, { transaction: t });
-
-    const hoaDon = await HoaDon.findOne({
-      where: { don_hang_id: donHang.id },
-      transaction: t,
-    });
-
-    if (hoaDon) {
-      await hoaDon.update({ trang_thai: "da_huy" }, { transaction: t });
-    }
-  });
-
-  res.json({
-    success: true,
-    message: "Hủy đơn hàng thành công",
-    data: donHang,
-  });
 };
 
 // ================= NHÂN VIÊN: XEM TẤT CẢ ĐƠN =================
