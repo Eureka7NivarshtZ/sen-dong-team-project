@@ -15,7 +15,6 @@ function Collection({ products }) {
 
   const getCategories = () => {
     const cats = new Set(products.map((p) => p.danh_muc?.ten).filter(Boolean));
-
     return ["Tất cả", ...Array.from(cats)];
   };
 
@@ -40,7 +39,6 @@ function Collection({ products }) {
       setFilteredProducts(products);
     } else {
       const filtered = products.filter((p) => p.danh_muc?.ten === category);
-
       setFilteredProducts(filtered);
     }
   };
@@ -142,52 +140,48 @@ function Collection({ products }) {
         </aside>
 
         <main style={{ minWidth: 0 }}>
-          {
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-                gap: "30px",
-              }}
-            >
-              {filteredProducts.length > 0 ? (
-                filteredProducts.map((product) => {
-                  const hinhAnhChinh =
-                    product.hinh_anh?.find((h) => h.la_chinh) ||
-                    product.hinh_anh?.[0];
-                  return (
-                    <ProductCard_TrangChu
-                      key={product.id}
-                      image={
-                        hinhAnhChinh?.url ||
-                        "https://via.placeholder.com/300x300"
-                      }
-                      title={product.ten_tranh}
-                      category={product.danh_muc?.ten || "Danh mục"}
-                      price={
-                        product.gia_ban
-                          ? `${Number(product.gia_ban).toLocaleString()}đ`
-                          : "0đ"
-                      }
-                      onOpenDetail={() =>
-                        navigate(`/tranh/${product.id}`)
-                      }
-                    />
-                  );
-                })
-              ) : (
-                <div
-                  style={{
-                    gridColumn: "1 / -1",
-                    textAlign: "center",
-                    padding: "40px",
-                  }}
-                >
-                  <p>Không tìm thấy sản phẩm nào</p>
-                </div>
-              )}
-            </div>
-          }
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+              gap: "30px",
+            }}
+          >
+            {filteredProducts.length > 0 ? (
+              filteredProducts.map((product) => {
+                const hinhAnhChinh =
+                  product.hinh_annh?.find((h) => h.la_chinh) ||
+                  product.hinh_anh?.[0];
+                return (
+                  <ProductCard_TrangChu
+                    key={product.id}
+                    image={
+                      hinhAnhChinh?.url ||
+                      "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'><rect width='100%' height='100%' fill='%23f5f5f5'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='14' fill='%23b3b3b3'>Sen Dong Art Gallery</text></svg>"
+                    }
+                    title={product.ten_tranh}
+                    category={product.danh_muc?.ten || "Danh mục"}
+                    price={
+                      product.gia_ban
+                        ? `${Number(product.gia_ban).toLocaleString()}đ`
+                        : "0đ"
+                    }
+                    onOpenDetail={() => navigate(`/tranh/${product.id}`)}
+                  />
+                );
+              })
+            ) : (
+              <div
+                style={{
+                  gridColumn: "1 / -1",
+                  textAlign: "center",
+                  padding: "40px",
+                }}
+              >
+                <p>Không tìm thấy sản phẩm nào</p>
+              </div>
+            )}
+          </div>
         </main>
       </div>
     </div>

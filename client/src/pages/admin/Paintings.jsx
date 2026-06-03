@@ -58,7 +58,7 @@ function Paintings() {
       tac_gia_id: item.tac_gia_id || "",
       gia_ban: String(item.gia_ban || "").replace(/[^0-9]/g, ""),
       so_luong_ton: item.so_luong_ton,
-      hinh_anh_url: item.hinh_anh_tranh?.[0]?.url || "",
+      hinh_anh_url: item.hinh_anh?.[0]?.url || "",
     });
     loadSelectData();
     setShowModal(true);
@@ -104,7 +104,8 @@ function Paintings() {
       gia_ban: Number(newPainting.gia_ban),
       gia_von: Number(newPainting.gia_ban) / 2,
       so_luong_ton: Number(newPainting.so_luong_ton),
-      mo_ta: "",
+      mo_ta: "Tác phẩm nghệ thuật cao cấp vẽ tay độc bản từ Sen Đông Art Studio.",
+      hinh_anh_url: newPainting.hinh_anh_url,
     };
 
     try {
@@ -255,11 +256,12 @@ function Paintings() {
                   >
                     <td>
                       <img
-                        src={
-                          item.hinh_anh_tranh?.[0]?.url ||
-                          "https://picsum.photos/80"
-                        }
+                        src={item.hinh_anh?.[0]?.url || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'><rect width='100%' height='100%' fill='%23eee'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='10' fill='%23999'>No Image</text></svg>"}
                         alt={item.ten_tranh}
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'><rect width='100%' height='100%' fill='%23eee'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='10' fill='%23999'>No Image</text></svg>";
+                        }}
                         style={{
                           width: 60,
                           height: 60,
@@ -390,10 +392,7 @@ function Paintings() {
             >
               <option value="">-- Chọn tác giả --</option>
               {tacGiaList.map((tg) => (
-                <option
-                  key={tg.tac_gia_id || tg.id}
-                  value={tg.tac_gia_id || tg.id}
-                >
+                <option key={tg.id} value={tg.id}>
                   {tg.ho_ten}
                 </option>
               ))}
