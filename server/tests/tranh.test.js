@@ -9,7 +9,7 @@ describe("Tranh API (/api/tranh)", () => {
     // ⚠️ ĐỔI THÀNH TÀI KHOẢN NHÂN VIÊN CÓ THẬT TRÊN DB CỦA BẠN ĐỂ LẤY TOKEN QUYỀN LỰC
     const res = await request(app)
       .post("/api/auth/dang-nhap")
-      .send({ email: "nhanvien@example.com", mat_khau: "12345678" });
+      .send({ email: "admin@example.com", mat_khau: "12345678" });
     tokenNV = res.body.data?.token;
   });
 
