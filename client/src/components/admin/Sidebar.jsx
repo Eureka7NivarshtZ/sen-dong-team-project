@@ -146,13 +146,6 @@ function Sidebar() {
           >
             Khuyến mãi
           </button>
-          
-          <button
-            onClick={() => navigate("/admin/cham-soc-khach-hang")}
-            style={getBtnStyle("/admin/cham-soc-khach-hang")}
-          >
-            Chăm sóc khách hàng
-          </button>
         </div>
       </div>
 
