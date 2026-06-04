@@ -11,6 +11,9 @@ import Login from "./pages/client/Login";
 import Register from "./pages/client/Register";
 import ProductDetail from "./pages/client/ProductDetail";
 import Coupons from "./pages/client/Coupons";
+import Profile from "./pages/client/Profile"; // 🌟 ĐÃ THÊM
+import ProductReview from "./pages/client/ProductReview"; // 🌟 ĐÃ THÊM
+
 // ADMIN PAGES
 import Dashboard from "./pages/admin/Dashboard";
 import Orders from "./pages/admin/Orders";
@@ -25,7 +28,6 @@ import Shipping from "./pages/admin/Shipping";
 
 // 🌟 BONG BÓNG CHAT ZALO NỔI TOÀN CỤC
 function ZaloBubble() {
-  // 🔥 KHANG ƠI, SỬA ĐÚNG DÒNG NÀY: Thay số điện thoại Zalo mới của ông vào đây nhé!
   const zaloUrl = "https://zalo.me/0836666644"; 
 
   return (
@@ -99,6 +101,10 @@ function App() {
           <Route path="/auth/dang-nhap" element={<Login />} />
           <Route path="/auth/dang-ky" element={<Register />} />
           <Route path="/khuyen-mai" element={<Coupons />} />
+          
+          {/* 🌟 ĐÃ THÊM: Định tuyến trang thông tin và đánh giá chuẩn tham số biến */}
+          <Route path="/thong-tin-ca-nhan" element={<Profile />} />
+          <Route path="/danh-gia-tranh/:don_hang_id/:tranh_id" element={<ProductReview />} />
         </Route>
 
         {/* ADMIN ROUTES */}
