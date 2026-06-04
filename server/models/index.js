@@ -27,6 +27,9 @@ const DonHangChiTiet = require("./DonHangChiTiet.js");
 const HoaDon = require("./HoaDon.js");
 const ThanhToan = require("./ThanhToan.js");
 
+// 🌟 ĐÃ THÊM: Require Model Chăm sóc khách hàng mới
+const ChamSocKhachHang = require("./ChamSocKhachHang.js");
+
 // Quan he tai khoan
 TaiKhoan.hasOne(NhanVien, {
   foreignKey: "tai_khoan_id",
@@ -295,6 +298,17 @@ ThongBao.belongsTo(KhachHang, {
 
 ThongBao.belongsTo(NhanVien, { foreignKey: "nhan_vien_id", as: "nhan_vien" });
 
+// 🌟 ĐÃ THÊM: Quan he ChamSocKhachHang - KhachHang
+KhachHang.hasMany(ChamSocKhachHang, {
+  foreignKey: "khach_hang_id",
+  as: "cham_soc_khach_hang",
+});
+
+ChamSocKhachHang.belongsTo(KhachHang, {
+  foreignKey: "khach_hang_id",
+  as: "khach_hang",
+});
+
 module.exports = {
   sequelize,
   TaiKhoan,
@@ -317,4 +331,6 @@ module.exports = {
   KhuyenMaiTranh,
   LichSuSuDungKhuyenMai,
   ThongBao,
+  // 🌟 ĐÃ THÊM: Export Model ra de Controller su dung công khai
+  ChamSocKhachHang
 };

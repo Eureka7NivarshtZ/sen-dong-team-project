@@ -1,133 +1,40 @@
 import React from "react";
 
-function ProductCard_TrangChu({ image, title, category, price, onOpenDetail }) {
+function ProductCard({ image, title, category, price, onOpenDetail }) {
+  // Chuỗi mã SVG offline làm ảnh dự phòng cực an toàn
+  const svgFallback = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'><rect width='100%' height='100%' fill='%23f5f5f5'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='14' fill='%23b3b3b3'>Sen Dong Art Gallery</text></svg>";
+
   return (
-    <div
+    <div 
       onClick={onOpenDetail}
-      style={{
-        height: "390px",
-        border: "1px solid #eaeaea",
-        borderRadius: "8px",
-        overflow: "hidden",
-        boxShadow: "0 4px 10px rgba(0,0,0,0.03)",
-        backgroundColor: "#fff",
-        transition: "transform 0.2s, box-shadow 0.2s",
+      style={{ 
+        border: "1px solid #eee", 
+        borderRadius: "8px", 
+        padding: "15px", 
+        backgroundColor: "#fff", 
         cursor: "pointer",
         textAlign: "left",
-        display: "flex",
-        flexDirection: "column",
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = "translateY(-5px)";
-        e.currentTarget.style.boxShadow = "0 6px 15px rgba(0,0,0,0.08)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = "translateY(0)";
-        e.currentTarget.style.boxShadow = "0 4px 10px rgba(0,0,0,0.03)";
+        transition: "transform 0.2s"
       }}
     >
-      {/* ẢNH SẢN PHẨM */}
-      <div
-        style={{
-          width: "100%",
-          height: "200px",
-          backgroundColor: "#f9f9f9",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexShrink: 0,
-        }}
-      >
-        <img
-          src={
-            image ||
-            "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=500"
-          }
-          alt={title}
-          style={{
-            maxWidth: "100%",
-            maxHeight: "100%",
-            objectFit: "contain",
+      <div style={{ width: "100%", height: "250px", backgroundColor: "#f9f9f9", overflow: "hidden", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <img 
+          src={image || svgFallback} 
+          alt={title} 
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = svgFallback;
           }}
+          style={{ width: "100%", height: "100%", objectFit: "cover" }} 
         />
       </div>
-
-      {/* NỘI DUNG */}
-      <div
-        style={{
-          padding: "15px",
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        <span
-          style={{
-            fontSize: "12px",
-            color: "#95a5a6",
-            textTransform: "uppercase",
-            letterSpacing: "0.5px",
-            minHeight: "30px",
-            display: "block",
-          }}
-        >
-          {category}
-        </span>
-
-        <h4
-          style={{
-            margin: "5px 0 10px 0",
-            fontSize: "15px",
-            color: "#2c3e50",
-            fontWeight: "600",
-            lineHeight: "1.4",
-            minHeight: "42px",
-            maxHeight: "42px",
-            overflow: "hidden",
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-          }}
-        >
-          {title}
-        </h4>
-
-        {/* ĐẨY GIÁ + BUTTON XUỐNG DƯỚI */}
-        <div style={{ marginTop: "auto" }}>
-          <div
-            style={{
-              fontWeight: "bold",
-              color: "#faa22f",
-              fontSize: "16px",
-              padding: "8px 0 12px",
-            }}
-          >
-            {price}
-          </div>
-
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onOpenDetail?.();
-            }}
-            style={{
-              width: "100%",
-              height: "36px",
-              backgroundColor: "#111",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer",
-              fontSize: "13px",
-              fontWeight: "500",
-            }}
-          >
-            + Thêm sản phẩm
-          </button>
-        </div>
+      <div style={{ marginTop: "12px" }}>
+        <span style={{ fontSize: "12px", color: "#888", uppercase: "true" }}>{category}</span>
+        <h4 style={{ margin: "4px 0 8px 0", fontSize: "16px", fontWeight: "bold", color: "#111" }}>{title}</h4>
+        <div style={{ color: "#1c9b61", fontWeight: "bold" }}>{price}</div>
       </div>
     </div>
   );
 }
 
-export default ProductCard_TrangChu;
+export default ProductCard;

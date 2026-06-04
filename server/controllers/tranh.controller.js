@@ -156,12 +156,20 @@ const taoTranh = async (req, res) => {
     gia_von,
     so_luong_ton,
     mo_ta,
+    hinh_anh_url, // 🌟 ĐÃ NHẬN: Đọc URL hình ảnh từ Admin gửi lên
   } = req.body;
 
   if (!ten_tranh || !danh_muc_id || !tac_gia_id) {
     return res.status(400).json({
       success: false,
       error: "ten_tranh, danh_muc_id, tac_gia_id là bắt buộc",
+    });
+  }
+
+  if (so_luong_ton !== undefined && Number(so_luong_ton) < 0) {
+    return res.status(400).json({
+      success: false,
+      error: "Số lượng tồn không được nhỏ hơn 0",
     });
   }
 
@@ -175,6 +183,16 @@ const taoTranh = async (req, res) => {
     mo_ta,
   });
 
+  // 🌟 ĐÃ THÊM: Nếu Admin có điền link hình, tự động tạo luôn bản ghi chạy sang bảng HinhAnhTranh
+  if (hinh_anh_url) {
+    await HinhAnhTranh.create({
+      tranh_id: tranh.id,
+      url: hinh_anh_url,
+      la_chinh: true,
+      thu_tu: 0,
+    });
+  }
+
   res.status(201).json({
     success: true,
     message: "Tao tranh thanh cong",
@@ -184,6 +202,7 @@ const taoTranh = async (req, res) => {
 
 const capNhatTranh = async (req, res) => {
   const { id } = req.params;
+  const { hinh_anh_url } = req.body;
 
   const tranh = await Tranh.findByPk(id);
 
@@ -191,6 +210,16 @@ const capNhatTranh = async (req, res) => {
     return res.status(404).json({
       success: false,
       error: "Khong tim thay tranh",
+    });
+  }
+
+  if (
+    req.body.so_luong_ton !== undefined &&
+    Number(req.body.so_luong_ton) < 0
+  ) {
+    return res.status(400).json({
+      success: false,
+      error: "Số lượng tồn không được nhỏ hơn 0",
     });
   }
 
@@ -201,6 +230,23 @@ const capNhatTranh = async (req, res) => {
 
   await tranh.update(tranhData);
 
+  if (hinh_anh_url) {
+    const anhChinh = await HinhAnhTranh.findOne({
+      where: { tranh_id: id, la_chinh: true },
+    });
+
+    if (anhChinh) {
+      await anhChinh.update({ url: hinh_anh_url });
+    } else {
+      await HinhAnhTranh.create({
+        tranh_id: id,
+        url: hinh_anh_url,
+        la_chinh: true,
+        thu_tu: 0,
+      });
+    }
+  }
+
   res.json({
     success: true,
     message: "Cap nhat tranh thanh cong",
@@ -210,50 +256,46 @@ const capNhatTranh = async (req, res) => {
 
 const xoaTranh = async (req, res) => {
   const { id } = req.params;
+
   const tranh = await Tranh.findByPk(id);
+
   if (!tranh) {
     return res.status(404).json({
       success: false,
-      error: "Khong tim thay tranh",
+      error: "Không tìm thấy tranh",
     });
   }
-  const t = await sequelize.transaction();
-  try {
-    await DanhGia.destroy({ where: { tranh_id: tranh.id }, transaction: t });
-    await DonHangChiTiet.destroy({
-      where: { tranh_id: tranh.id },
-      transaction: t,
+
+  const daPhatSinhDon = await DonHangChiTiet.count({
+    where: { tranh_id: id },
+  });
+
+  if (daPhatSinhDon > 0) {
+    await tranh.update({
+      trang_thai: "an",
+      cap_nhat_luc: new Date(),
     });
 
-    await HinhAnhTranh.destroy({
-      where: { tranh_id: tranh.id },
-      transaction: t,
-    });
-    await KhuyenMaiTranh.destroy({
-      where: { tranh_id: tranh.id },
-      transaction: t,
-    });
-    await GioHangChiTiet.destroy({
-      where: { tranh_id: tranh.id },
-      transaction: t,
-    });
-
-    await Tranh.destroy({ where: { id: tranh.id }, transaction: t });
-
-    await t.commit();
-    res.json({
+    return res.json({
       success: true,
-      message: "Xoa tranh thanh cong",
-      data: null,
-    });
-  } catch (error) {
-    await t.rollback();
-    res.json({
-      success: false,
-      message: "Xoa tranh khong thanh cong",
-      data: null,
+      message:
+        "Tranh đã phát sinh đơn hàng nên hệ thống chỉ ẩn tranh, không xóa lịch sử",
+      data: tranh,
     });
   }
+
+  await sequelize.transaction(async (t) => {
+    await HinhAnhTranh.destroy({ where: { tranh_id: id }, transaction: t });
+    await KhuyenMaiTranh.destroy({ where: { tranh_id: id }, transaction: t });
+    await GioHangChiTiet.destroy({ where: { tranh_id: id }, transaction: t });
+    await tranh.destroy({ transaction: t });
+  });
+
+  res.json({
+    success: true,
+    message: "Xóa tranh thành công",
+    data: null,
+  });
 };
 
 module.exports = {

@@ -1,43 +1,88 @@
 import apiClient from "./apiClient";
 
 const khuyenMaiService = {
-  // Client áp dụng coupon kiểm tra giảm giá
-  kiemTraMaGiamGia: async (code) => {
+  // Khách hàng — kiểm tra mã (route: POST /khuyen-mai/kiem-tra)
+  kiemTraMaGiamGia: async (ma, tong_tien = 0) => {
     try {
-      const response = await apiClient.post("/khuyen-mai/ap-dung", { code });
+      const response = await apiClient.post("/khuyen-mai/kiem-tra", {
+        ma,
+        tong_tien,
+      });
       return response.data;
     } catch (error) {
-      return { success: false, error: error.response?.data?.error || "Mã giảm giá không hợp lệ" };
+      return {
+        success: false,
+        error: error.response?.data?.error || "Mã giảm giá không hợp lệ",
+      };
     }
   },
 
-  // Admin quản lý danh sách chương trình khuyến mãi
-  layDanhSachMa: async () => {
+  // Admin — lấy danh sách (route: GET /khuyen-mai)
+  layDanhSach: async (params = {}) => {
     try {
-      const response = await apiClient.get("/admin/khuyen-mai");
+      const response = await apiClient.get("/khuyen-mai", { params });
       return response.data;
     } catch (error) {
-      return { success: false, error: error.response?.data?.error || "Lấy danh sách mã thất bại" };
+      return {
+        success: false,
+        error:
+          error.response?.data?.error || "Lấy danh sách khuyến mãi thất bại",
+      };
     }
   },
 
-  taoMaMoi: async (data) => {
+  // Admin — xem chi tiết (route: GET /khuyen-mai/:id)
+  layChiTiet: async (id) => {
     try {
-      const response = await apiClient.post("/admin/khuyen-mai/them", data);
+      const response = await apiClient.get(`/khuyen-mai/${id}`);
       return response.data;
     } catch (error) {
-      return { success: false, error: error.response?.data?.error || "Tạo mã khuyến mãi thất bại" };
+      return {
+        success: false,
+        error:
+          error.response?.data?.error || "Lấy chi tiết khuyến mãi thất bại",
+      };
     }
   },
 
-  xoaMa: async (id) => {
+  // Admin — tạo mới (route: POST /khuyen-mai)
+  taoMoi: async (data) => {
     try {
-      const response = await apiClient.delete(`/admin/khuyen-mai/${id}`);
+      const response = await apiClient.post("/khuyen-mai", data);
       return response.data;
     } catch (error) {
-      return { success: false, error: error.response?.data?.error || "Xóa mã khuyến mãi thất bại" };
+      return {
+        success: false,
+        error: error.response?.data?.error || "Tạo khuyến mãi thất bại",
+      };
     }
-  }
+  },
+
+  // Admin — cập nhật (route: PUT /khuyen-mai/:id)
+  capNhat: async (id, data) => {
+    try {
+      const response = await apiClient.put(`/khuyen-mai/${id}`, data);
+      return response.data;
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.error || "Cập nhật khuyến mãi thất bại",
+      };
+    }
+  },
+
+  // Admin — xóa (route: DELETE /khuyen-mai/:id)
+  xoa: async (id) => {
+    try {
+      const response = await apiClient.delete(`/khuyen-mai/${id}`);
+      return response.data;
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.error || "Xóa khuyến mãi thất bại",
+      };
+    }
+  },
 };
 
 export default khuyenMaiService;

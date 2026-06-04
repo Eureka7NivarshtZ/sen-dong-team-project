@@ -35,9 +35,14 @@ const ThanhToan = sequelize.define(
     },
 
     trang_thai: {
-      type: DataTypes.ENUM("thanh_cong", "that_bai", "hoan_tien"),
+      type: DataTypes.ENUM(
+        "cho_thanh_toan",
+        "thanh_cong",
+        "that_bai",
+        "hoan_tien",
+      ),
       allowNull: false,
-      defaultValue: "thanh_cong",
+      defaultValue: "cho_thanh_toan",
     },
 
     ma_giao_dich: {

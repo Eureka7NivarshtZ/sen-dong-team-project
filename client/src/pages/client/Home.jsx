@@ -1,6 +1,4 @@
-import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { tranhService } from "../../services";
 import ProductCard_TrangChu from "../../components/client/ProductCard";
 
 // Dữ liệu mẫu hiển thị trên Trang Chủ của bạn
@@ -38,6 +36,12 @@ const mockReviews = [
 
 function Home({ products }) {
   const navigate = useNavigate();
+
+  // Chuỗi mã hiệu ứng SVG dự phòng offline chạy mượt mà không cần internet
+  const svgFallback = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'><rect width='100%' height='100%' fill='%23f5f5f5'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='14' fill='%23b3b3b3'>Sen Dong Art Gallery</text></svg>";
+
+  // Đảm bảo products luôn luôn là một mảng để phòng ngừa lỗi đơ giao diện
+  const productList = Array.isArray(products) ? products : [];
 
   return (
     <div
@@ -123,7 +127,7 @@ function Home({ products }) {
           <img
             src={
               images["../../assets/banner.png"]?.default ||
-              "https://via.placeholder.com/550x450"
+              "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='520' height='400' viewBox='0 0 520 400'><rect width='100%' height='100%' fill='%23fafafa'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='16' fill='%23ccc'>Sen Dong Banner</text></svg>"
             }
             alt="Banner Sen Đông"
             style={{
@@ -290,24 +294,28 @@ function Home({ products }) {
             gap: "25px",
           }}
         >
-          {products.length > 0 ? (
-            products.map((product) => (
-              <ProductCard_TrangChu
-                key={product.id}
-                image={
-                  product.hinhAnhChinh?.url ||
-                  "https://via.placeholder.com/300x300"
-                }
-                title={product.ten_tranh}
-                category={product.danh_muc?.ten || "Danh mục"}
-                price={
-                  product.gia_ban
-                    ? `${Number(product.gia_ban).toLocaleString()}đ`
-                    : "0đ"
-                }
-                onOpenDetail={() => navigate(`/tranh/${product.id}`)}
-              />
-            ))
+          {productList.length > 0 ? (
+            productList.map((product) => {
+              // 🌟 ĐÃ SỬA: Tìm ảnh chính la_chinh hoặc bốc phần tử đầu tiên trong mảng hinh_anh của Database
+              const hinhAnhChinh =
+                product.hinh_anh?.find((h) => h.la_chinh) ||
+                product.hinh_anh?.[0];
+
+              return (
+                <ProductCard_TrangChu
+                  key={product.id}
+                  image={hinhAnhChinh?.url || svgFallback} // Sử dụng SVG nếu tranh trống ảnh
+                  title={product.ten_tranh}
+                  category={product.danh_muc?.ten || "Danh mục"}
+                  price={
+                    product.gia_ban
+                      ? `${Number(product.gia_ban).toLocaleString()}đ`
+                      : "0đ"
+                  }
+                  onOpenDetail={() => navigate(`/tranh/${product.id}`)}
+                />
+              );
+            })
           ) : (
             <div
               style={{

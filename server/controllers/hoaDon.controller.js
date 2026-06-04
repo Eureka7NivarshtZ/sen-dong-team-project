@@ -1,16 +1,24 @@
 const { HoaDon, DonHang, ThanhToan } = require("../models");
 
-const taoSoHoaDon = () => {
-  return `HD-${Date.now()}`;
+const taoSoHoaDon = () => `HD-${Date.now()}`;
+
+const tinhTongHoaDonTuDonHang = (donHang) => {
+  return (
+    Number(donHang.tong_tien_hang || 0) +
+    Number(donHang.phi_van_chuyen || 0) -
+    Number(donHang.giam_gia || 0)
+  );
 };
 
+// API này giữ lại để admin tạo hóa đơn thủ công nếu cần.
+// Luồng đặt hàng chính đã tạo hóa đơn trong donHang.controller.js.
 const taoHoaDon = async (req, res) => {
   const { don_hang_id } = req.body;
 
   if (!don_hang_id) {
     return res.status(400).json({
       success: false,
-      error: "Vui long truyen don_hang_id",
+      error: "Vui lòng truyền don_hang_id",
     });
   }
 
@@ -19,7 +27,7 @@ const taoHoaDon = async (req, res) => {
   if (!donHang) {
     return res.status(404).json({
       success: false,
-      error: "Khong tim thay don hang",
+      error: "Không tìm thấy đơn hàng",
     });
   }
 
@@ -33,22 +41,26 @@ const taoHoaDon = async (req, res) => {
   if (hoaDonTonTai) {
     return res.status(400).json({
       success: false,
-      error: "Don hang nay da co hoa don",
+      error: "Đơn hàng này đã có hóa đơn",
     });
   }
+
+  const thueSuat = 10;
+  const tongSauThue = tinhTongHoaDonTuDonHang(donHang);
+  const tongTruocThue = Math.round(tongSauThue / (1 + thueSuat / 100));
 
   const hoaDon = await HoaDon.create({
     don_hang_id,
     so_hoa_don: taoSoHoaDon(),
-    tong_tien_truoc_thue: tongTruocThue, // ← fix
-    thue_suat: 10,
+    tong_tien_truoc_thue: tongTruocThue,
+    thue_suat: thueSuat,
     loai: "ban_hang",
     trang_thai: "da_xuat",
   });
 
   res.status(201).json({
     success: true,
-    message: "Tao hoa don thanh cong",
+    message: "Tạo hóa đơn thành công",
     data: hoaDon,
   });
 };
@@ -70,7 +82,7 @@ const layTatCaHoaDon = async (req, res) => {
 
   res.json({
     success: true,
-    message: "Lay danh sach hoa don thanh cong",
+    message: "Lấy danh sách hóa đơn thành công",
     data: danhSachHoaDon,
   });
 };
@@ -94,13 +106,13 @@ const layChiTietHoaDon = async (req, res) => {
   if (!hoaDon) {
     return res.status(404).json({
       success: false,
-      error: "Khong tim thay hoa don",
+      error: "Không tìm thấy hóa đơn",
     });
   }
 
   res.json({
     success: true,
-    message: "Lay chi tiet hoa don thanh cong",
+    message: "Lấy chi tiết hóa đơn thành công",
     data: hoaDon,
   });
 };
@@ -113,7 +125,7 @@ const huyHoaDon = async (req, res) => {
   if (!hoaDon) {
     return res.status(404).json({
       success: false,
-      error: "Khong tim thay hoa don",
+      error: "Không tìm thấy hóa đơn",
     });
   }
 
@@ -123,7 +135,7 @@ const huyHoaDon = async (req, res) => {
 
   res.json({
     success: true,
-    message: "Huy hoa don thanh cong",
+    message: "Hủy hóa đơn thành công",
     data: hoaDon,
   });
 };

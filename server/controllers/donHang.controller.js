@@ -10,188 +10,341 @@ const {
   sequelize,
   GioHang,
   GioHangChiTiet,
+  KhuyenMai,
+  LichSuSuDungKhuyenMai,
 } = require("../models");
+
 const { Op } = require("sequelize");
 
-// Khách hàng
+const taoMaDonHang = () => `DH-${Date.now()}`;
+const taoSoHoaDon = () => `HD-${Date.now()}`;
+const taoMaGiaoDich = () => `GD-${Date.now()}`;
+
+const mapPhuongThucThanhToan = (value) => {
+  if (value === "bank") return "chuyen_khoan";
+  if (value === "card") return "the";
+  return "tien_mat";
+};
+
+const tinhSoTienGiam = (khuyenMai, tongTien) => {
+  const giaTriGiam = Number(khuyenMai.gia_tri_giam || 0);
+  const giamToiDa =
+    khuyenMai.giam_toi_da !== null && khuyenMai.giam_toi_da !== undefined
+      ? Number(khuyenMai.giam_toi_da)
+      : null;
+
+  let soTienGiam = 0;
+
+  if (khuyenMai.loai_giam === "phan_tram") {
+    soTienGiam = (Number(tongTien) * giaTriGiam) / 100;
+
+    if (giamToiDa !== null) {
+      soTienGiam = Math.min(soTienGiam, giamToiDa);
+    }
+  }
+
+  if (khuyenMai.loai_giam === "so_tien") {
+    soTienGiam = giaTriGiam;
+  }
+
+  return Math.min(soTienGiam, Number(tongTien));
+};
+
+const kiemTraKhuyenMaiHopLe = async (
+  khuyenMai,
+  khachHangId,
+  tongTien,
+  transaction,
+) => {
+  const hienTai = new Date();
+
+  if (!khuyenMai) return "Mã khuyến mãi không tồn tại";
+
+  if (khuyenMai.trang_thai !== "hoat_dong") {
+    return "Mã khuyến mãi không hoạt động";
+  }
+
+  if (khuyenMai.ngay_bat_dau && new Date(khuyenMai.ngay_bat_dau) > hienTai) {
+    return "Mã khuyến mãi chưa bắt đầu";
+  }
+
+  if (khuyenMai.ngay_ket_thuc && new Date(khuyenMai.ngay_ket_thuc) < hienTai) {
+    return "Mã khuyến mãi đã hết hạn";
+  }
+
+  if (Number(tongTien) < Number(khuyenMai.don_toi_thieu || 0)) {
+    return "Đơn hàng chưa đạt giá trị tối thiểu";
+  }
+
+  if (khuyenMai.so_luong !== null && khuyenMai.so_luong !== undefined) {
+    if (Number(khuyenMai.so_luong_da_dung || 0) >= Number(khuyenMai.so_luong)) {
+      return "Mã khuyến mãi đã hết lượt sử dụng";
+    }
+  }
+
+  const daDung = await LichSuSuDungKhuyenMai.findOne({
+    where: {
+      khuyen_mai_id: khuyenMai.id,
+      khach_hang_id: khachHangId,
+    },
+    transaction,
+  });
+
+  if (daDung) return "Bạn đã sử dụng mã khuyến mãi này";
+
+  return null;
+};
+
+// ================= KHÁCH HÀNG: TẠO ĐƠN HÀNG =================
 const taoDonHang = async (req, res) => {
-  const { dia_chi_giao, don_vi_van_chuyen_id, khuyen_mai_id, ghi_chu } = req.body;
+  const {
+    dia_chi_giao,
+    don_vi_van_chuyen_id,
+    khuyen_mai_id,
+    ghi_chu,
+    phuong_thuc_thanh_toan = "cod",
+  } = req.body;
+
   const khachHangId = req.user.khach_hang_id;
 
   if (!khachHangId) {
     return res.status(401).json({
       success: false,
-      error: "Token khong hop le hoac khong phai khach hang",
+      error: "Token không hợp lệ hoặc không phải khách hàng",
     });
   }
 
   if (!dia_chi_giao) {
     return res.status(400).json({
       success: false,
-      error: "Dia chi giao la bat buoc",
+      error: "Địa chỉ giao hàng là bắt buộc",
     });
   }
 
-  const ketQua = await sequelize.transaction(async (t) => {
-    const gioHang = await GioHang.findOne({
-      where: {
-        khach_hang_id: khachHangId,
-      },
-      transaction: t,
-    });
+  try {
+    const ketQua = await sequelize.transaction(async (t) => {
+      const gioHang = await GioHang.findOne({
+        where: { khach_hang_id: khachHangId },
+        transaction: t,
+      });
 
-    if (!gioHang) {
-      throw new Error("Gio hang dang trong");
-    }
-
-    const chiTietGioHang = await GioHangChiTiet.findAll({
-      where: {
-        gio_hang_id: gioHang.id,
-      },
-      include: [
-        {
-          model: Tranh,
-          as: "tranh",
-        },
-      ],
-      transaction: t,
-    });
-
-    if (chiTietGioHang.length === 0) {
-      throw new Error("Gio hang dang trong");
-    }
-
-    let tongTienHang = 0;
-
-    for (const item of chiTietGioHang) {
-      const tranh = item.tranh;
-      const soLuongMua = Number(item.so_luong);
-
-      if (!tranh) {
-        throw new Error("Co tranh trong gio hang khong ton tai");
+      if (!gioHang) {
+        throw new Error("Giỏ hàng đang trống");
       }
 
-      if (tranh.trang_thai !== "ban") {
-        throw new Error(`Tranh "${tranh.ten_tranh}" hien khong duoc ban`);
+      const chiTietGioHang = await GioHangChiTiet.findAll({
+        where: { gio_hang_id: gioHang.id },
+        include: [
+          {
+            model: Tranh,
+            as: "tranh",
+          },
+        ],
+        transaction: t,
+      });
+
+      if (!chiTietGioHang || chiTietGioHang.length === 0) {
+        throw new Error("Giỏ hàng đang trống");
       }
 
-      if (Number(tranh.so_luong_ton) < soLuongMua) {
-        throw new Error(`Tranh "${tranh.ten_tranh}" khong du so luong ton`);
+      let tongTienHang = 0;
+
+      for (const item of chiTietGioHang) {
+        const tranh = item.tranh;
+        const soLuongMua = Number(item.so_luong || 0);
+
+        if (!tranh) {
+          throw new Error("Có tranh trong giỏ hàng không tồn tại");
+        }
+
+        if (tranh.trang_thai !== "ban") {
+          throw new Error(`Tranh "${tranh.ten_tranh}" hiện không được bán`);
+        }
+
+        if (Number(tranh.so_luong_ton || 0) < soLuongMua) {
+          throw new Error(`Tranh "${tranh.ten_tranh}" hiện đã hết hàng`);
+        }
+
+        tongTienHang += soLuongMua * Number(tranh.gia_ban || 0);
       }
 
-      tongTienHang += soLuongMua * Number(tranh.gia_ban);
-    }
+      let phiVanChuyen = 0;
+      let donViVanChuyenId = null;
 
-    let phiVanChuyen = 0;
-    let donViVanChuyenId = null;
+      if (don_vi_van_chuyen_id) {
+        const donViVanChuyen = await DonViVanChuyen.findByPk(
+          don_vi_van_chuyen_id,
+          { transaction: t },
+        );
 
-    if (don_vi_van_chuyen_id) {
-      const donViVanChuyen = await DonViVanChuyen.findByPk(
-        don_vi_van_chuyen_id,
-        {
+        if (!donViVanChuyen) {
+          throw new Error("Đơn vị vận chuyển không tồn tại");
+        }
+
+        if (!donViVanChuyen.hoat_dong) {
+          throw new Error("Đơn vị vận chuyển hiện không hoạt động");
+        }
+
+        phiVanChuyen = Number(donViVanChuyen.phi_co_ban || 0);
+        donViVanChuyenId = donViVanChuyen.id;
+      } else {
+        phiVanChuyen = 30000;
+      }
+
+      let giamGia = 0;
+      let khuyenMaiHopLeId = null;
+
+      if (khuyen_mai_id) {
+        const khuyenMai = await KhuyenMai.findByPk(khuyen_mai_id, {
           transaction: t,
+        });
+
+        const loiKhuyenMai = await kiemTraKhuyenMaiHopLe(
+          khuyenMai,
+          khachHangId,
+          tongTienHang,
+          t,
+        );
+
+        if (loiKhuyenMai) {
+          throw new Error(loiKhuyenMai);
+        }
+
+        giamGia = tinhSoTienGiam(khuyenMai, tongTienHang);
+        khuyenMaiHopLeId = khuyenMai.id;
+      }
+
+      const tongThanhToan = Math.max(tongTienHang + phiVanChuyen - giamGia, 0);
+
+      const donHang = await DonHang.create(
+        {
+          khach_hang_id: khachHangId,
+          nhan_vien_id: null,
+          don_vi_van_chuyen_id: donViVanChuyenId,
+          khuyen_mai_id: khuyenMaiHopLeId,
+          ma_don_hang: taoMaDonHang(),
+          dia_chi_giao,
+          tong_tien_hang: tongTienHang,
+          phi_van_chuyen: phiVanChuyen,
+          giam_gia: giamGia,
+          trang_thai: "cho_xac_nhan",
+          ghi_chu,
         },
+        { transaction: t },
       );
 
-      if (!donViVanChuyen) {
-        throw new Error("Don vi van chuyen khong ton tai");
-      }
-
-      if (!donViVanChuyen.hoat_dong) {
-        throw new Error("Don vi van chuyen hien khong hoat dong");
-      }
-
-      phiVanChuyen = Number(donViVanChuyen.phi_co_ban);
-      donViVanChuyenId = donViVanChuyen.id;
-    }
-
-    const maDonHang = `DH-${Date.now()}`;
-
-    const donHang = await DonHang.create(
-      {
-        khach_hang_id: khachHangId,
-        nhan_vien_id: null,
-        don_vi_van_chuyen_id: donViVanChuyenId,
-        khuyen_mai_id: khuyen_mai_id || null,
-        ma_don_hang: maDonHang,
-        dia_chi_giao,
-        tong_tien_hang: tongTienHang,
-        phi_van_chuyen: phiVanChuyen,
-        giam_gia: 0,
-        trang_thai: "cho_xac_nhan",
-        ghi_chu,
-      },
-      {
-        transaction: t,
-      },
-    );
-
-    const duLieuChiTietDonHang = chiTietGioHang.map((item) => {
-      return {
+      const duLieuChiTietDonHang = chiTietGioHang.map((item) => ({
         don_hang_id: donHang.id,
         tranh_id: item.tranh_id,
         so_luong: item.so_luong,
         don_gia: item.tranh.gia_ban,
         co_lap_khung: false,
-      };
-    });
+      }));
 
-    await DonHangChiTiet.bulkCreate(duLieuChiTietDonHang, {
-      transaction: t,
-    });
+      await DonHangChiTiet.bulkCreate(duLieuChiTietDonHang, {
+        transaction: t,
+      });
 
-    for (const item of chiTietGioHang) {
-      const tranh = item.tranh;
-      const soLuongConLai = Number(tranh.so_luong_ton) - Number(item.so_luong);
+      if (khuyenMaiHopLeId) {
+        await LichSuSuDungKhuyenMai.create(
+          {
+            khuyen_mai_id: khuyenMaiHopLeId,
+            khach_hang_id: khachHangId,
+            don_hang_id: donHang.id,
+            so_tien_giam: giamGia,
+          },
+          { transaction: t },
+        );
 
-      await tranh.update(
-        {
-          so_luong_ton: soLuongConLai,
-          trang_thai: soLuongConLai === 0 ? "het_hang" : tranh.trang_thai,
-        },
-        {
+        await KhuyenMai.increment("so_luong_da_dung", {
+          by: 1,
+          where: { id: khuyenMaiHopLeId },
           transaction: t,
+        });
+      }
+
+      for (const item of chiTietGioHang) {
+        const tranh = item.tranh;
+        const soLuongConLai =
+          Number(tranh.so_luong_ton || 0) - Number(item.so_luong || 0);
+
+        await tranh.update(
+          {
+            so_luong_ton: soLuongConLai,
+            trang_thai: soLuongConLai === 0 ? "het_hang" : tranh.trang_thai,
+          },
+          { transaction: t },
+        );
+      }
+
+      // ================= TẠO HÓA ĐƠN =================
+      const thueSuat = 10;
+      const tongTruocThue = Math.round(tongThanhToan / (1 + thueSuat / 100));
+
+      const hoaDon = await HoaDon.create(
+        {
+          don_hang_id: donHang.id,
+          so_hoa_don: taoSoHoaDon(),
+          tong_tien_truoc_thue: tongTruocThue,
+          thue_suat: thueSuat,
+          loai: "ban_hang",
+          trang_thai: "da_xuat",
         },
+        { transaction: t },
       );
-    }
 
-    await GioHangChiTiet.destroy({
-      where: {
-        gio_hang_id: gioHang.id,
-      },
-      transaction: t,
+      // ================= TẠO THANH TOÁN =================
+      await ThanhToan.create(
+        {
+          hoa_don_id: hoaDon.id,
+          so_tien: tongThanhToan,
+          phuong_thuc: mapPhuongThucThanhToan(phuong_thuc_thanh_toan),
+          trang_thai: "cho_thanh_toan",
+          ma_giao_dich: taoMaGiaoDich(),
+        },
+        { transaction: t },
+      );
+
+      // ================= XÓA GIỎ HÀNG =================
+      await GioHangChiTiet.destroy({
+        where: { gio_hang_id: gioHang.id },
+        transaction: t,
+      });
+
+      const donHangDayDu = await DonHang.findByPk(donHang.id, {
+        include: [
+          {
+            model: DonHangChiTiet,
+            as: "chi_tiet",
+            include: [{ model: Tranh, as: "tranh" }],
+          },
+          { model: DonViVanChuyen, as: "don_vi_van_chuyen" },
+          {
+            model: HoaDon,
+            as: "hoa_don",
+            include: [{ model: ThanhToan, as: "thanh_toan" }],
+          },
+        ],
+        transaction: t,
+      });
+
+      return donHangDayDu;
     });
 
-    const donHangDayDu = await DonHang.findByPk(donHang.id, {
-      include: [
-        {
-          model: DonHangChiTiet,
-          as: "chi_tiet",
-          include: [
-            {
-              model: Tranh,
-              as: "tranh",
-            },
-          ],
-        },
-        {
-          model: DonViVanChuyen,
-          as: "don_vi_van_chuyen",
-        },
-      ],
-      transaction: t,
+    return res.status(201).json({
+      success: true,
+      message: "Tạo đơn hàng thành công",
+      data: ketQua,
     });
-
-    return donHangDayDu;
-  });
-
-  return res.status(201).json({
-    success: true,
-    message: "Tao don hang thanh cong",
-    data: ketQua,
-  });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      error: error.message || "Tạo đơn hàng thất bại",
+    });
+  }
 };
 
+// ================= KHÁCH HÀNG: XEM ĐƠN CỦA TÔI =================
 const xemDonCuaToi = async (req, res) => {
   const khachHangId = req.user.khach_hang_id;
 
@@ -205,17 +358,23 @@ const xemDonCuaToi = async (req, res) => {
       },
       { model: NhanVien, as: "nhan_vien" },
       { model: DonViVanChuyen, as: "don_vi_van_chuyen" },
+      {
+        model: HoaDon,
+        as: "hoa_don",
+        include: [{ model: ThanhToan, as: "thanh_toan" }],
+      },
     ],
     order: [["ngay_dat", "DESC"]],
   });
 
   res.json({
     success: true,
-    message: "Lay don hang cua toi thanh cong",
+    message: "Lấy đơn hàng của tôi thành công",
     data: danhSach,
   });
 };
 
+// ================= KHÁCH HÀNG: CHI TIẾT ĐƠN CỦA TÔI =================
 const xemChiTietDonCuaToi = async (req, res) => {
   const { id } = req.params;
   const khachHangId = req.user.khach_hang_id;
@@ -247,51 +406,75 @@ const xemChiTietDonCuaToi = async (req, res) => {
 
   res.json({
     success: true,
-    message: "Lay chi tiet don hang thanh cong",
+    message: "Lấy chi tiết đơn hàng thành công",
     data: donHang,
   });
 };
 
+// ================= KHÁCH HÀNG: HỦY ĐƠN CỦA TÔI =================
 const huyDonCuaToi = async (req, res) => {
   const { id } = req.params;
-  const khachHangId = req.user.khach_hang_id;
+  const khachHangId = req.user?.khach_hang_id;
 
-  const donHang = await DonHang.findOne({
-    where: { id, khach_hang_id: khachHangId },
-  });
-
-  if (!donHang) {
-    return res.status(404).json({
+  if (!khachHangId) {
+    return res.status(401).json({
       success: false,
-      error: "Không tìm thấy đơn hàng",
+      error: "Token không hợp lệ hoặc không phải khách hàng",
     });
   }
 
-  if (!["cho_xac_nhan", "dang_chuan_bi"].includes(donHang.trang_thai)) {
-    return res.status(400).json({
-      success: false,
-      error: "Không thể hủy đơn hàng ở trạng thái này",
+  try {
+    const ketQua = await sequelize.transaction(async (t) => {
+      const donHang = await DonHang.findOne({
+        where: { id, khach_hang_id: khachHangId },
+        transaction: t,
+        lock: t.LOCK.UPDATE,
+      });
+
+      if (!donHang) {
+        throw taoLoi("Không tìm thấy đơn hàng", 404);
+      }
+
+      await huyDonNoiBo({
+        donHang,
+        transaction: t,
+      });
+
+      return DonHang.findByPk(donHang.id, {
+        include: taoDuLieuIncludeDonHang(),
+        transaction: t,
+      });
     });
+
+    res.json({
+      success: true,
+      message: "Hủy đơn hàng thành công",
+      data: ketQua,
+    });
+  } catch (error) {
+    return xuLyLoi(res, error, "Hủy đơn hàng thất bại");
   }
-
-  await donHang.update({ trang_thai: "huy" });
-
-  res.json({
-    success: true,
-    message: "Huy don hang thanh cong",
-    data: donHang,
-  });
 };
 
-// Quản lý
+// ================= NHÂN VIÊN: XEM TẤT CẢ ĐƠN =================
 const xemTatCaDonHang = async (req, res) => {
   const { trang_thai, search, page = 1, limit = 10 } = req.query;
 
-  let whereCondition = {};
+  const whereCondition = {};
 
   if (trang_thai) {
     whereCondition.trang_thai = trang_thai;
   }
+
+  if (search) {
+    whereCondition[Op.or] = [
+      { ma_don_hang: { [Op.like]: `%${search}%` } },
+      { dia_chi_giao: { [Op.like]: `%${search}%` } },
+    ];
+  }
+
+  const currentPage = Number(page) || 1;
+  const currentLimit = Number(limit) || 10;
 
   const danhSach = await DonHang.findAndCountAll({
     where: whereCondition,
@@ -299,22 +482,28 @@ const xemTatCaDonHang = async (req, res) => {
       { model: KhachHang, as: "khach_hang" },
       { model: NhanVien, as: "nhan_vien" },
       { model: DonViVanChuyen, as: "don_vi_van_chuyen" },
+      {
+        model: HoaDon,
+        as: "hoa_don",
+        include: [{ model: ThanhToan, as: "thanh_toan" }],
+      },
     ],
     order: [["ngay_dat", "DESC"]],
-    offset: (page - 1) * limit,
-    limit: parseInt(limit),
+    offset: (currentPage - 1) * currentLimit,
+    limit: currentLimit,
   });
 
   res.json({
     success: true,
-    message: "Lay tat ca don hang thanh cong",
+    message: "Lấy tất cả đơn hàng thành công",
     data: danhSach.rows,
     total: danhSach.count,
-    page: parseInt(page),
-    limit: parseInt(limit),
+    page: currentPage,
+    limit: currentLimit,
   });
 };
 
+// ================= NHÂN VIÊN: CHI TIẾT ĐƠN BẤT KỲ =================
 const xemChiTietDonBatKy = async (req, res) => {
   const { id } = req.params;
 
@@ -322,13 +511,17 @@ const xemChiTietDonBatKy = async (req, res) => {
     include: [
       {
         model: DonHangChiTiet,
-        as: "don_hang_chi_tiet",
+        as: "chi_tiet",
         include: [{ model: Tranh, as: "tranh" }],
       },
       { model: KhachHang, as: "khach_hang" },
       { model: NhanVien, as: "nhan_vien" },
       { model: DonViVanChuyen, as: "don_vi_van_chuyen" },
-      { model: HoaDon, as: "hoa_don" },
+      {
+        model: HoaDon,
+        as: "hoa_don",
+        include: [{ model: ThanhToan, as: "thanh_toan" }],
+      },
     ],
   });
 
@@ -341,11 +534,12 @@ const xemChiTietDonBatKy = async (req, res) => {
 
   res.json({
     success: true,
-    message: "Lay chi tiet don hang thanh cong",
+    message: "Lấy chi tiết đơn hàng thành công",
     data: donHang,
   });
 };
 
+// ================= NHÂN VIÊN: CẬP NHẬT TRẠNG THÁI ĐƠN =================
 const capNhatTrangThaiDon = async (req, res) => {
   const { id } = req.params;
   const { trang_thai } = req.body;
@@ -361,7 +555,7 @@ const capNhatTrangThaiDon = async (req, res) => {
   if (!trangThaiHopLe.includes(trang_thai)) {
     return res.status(400).json({
       success: false,
-      error: "Trang thai khong hop le",
+      error: "Trạng thái không hợp lệ",
     });
   }
 
@@ -370,22 +564,39 @@ const capNhatTrangThaiDon = async (req, res) => {
   if (!donHang) {
     return res.status(404).json({
       success: false,
-      error: "Khong tim thay don hang",
+      error: "Không tìm thấy đơn hàng",
     });
   }
 
-  await donHang.update({
-    trang_thai,
-    nhan_vien_id: req.user.nhan_vien_id,
+  await sequelize.transaction(async (t) => {
+    await donHang.update(
+      {
+        trang_thai,
+        nhan_vien_id: req.user.nhan_vien_id,
+      },
+      { transaction: t },
+    );
+
+    if (trang_thai === "huy") {
+      const hoaDon = await HoaDon.findOne({
+        where: { don_hang_id: donHang.id },
+        transaction: t,
+      });
+
+      if (hoaDon) {
+        await hoaDon.update({ trang_thai: "da_huy" }, { transaction: t });
+      }
+    }
   });
 
   res.json({
     success: true,
-    message: "Cap nhat trang thai don hang thanh cong",
+    message: "Cập nhật trạng thái đơn hàng thành công",
     data: donHang,
   });
 };
 
+// ================= NHÂN VIÊN: HỦY ĐƠN BẤT KỲ =================
 const huyDonBatKy = async (req, res) => {
   const { id } = req.params;
 
@@ -405,11 +616,22 @@ const huyDonBatKy = async (req, res) => {
     });
   }
 
-  await donHang.update({ trang_thai: "huy" });
+  await sequelize.transaction(async (t) => {
+    await donHang.update({ trang_thai: "huy" }, { transaction: t });
+
+    const hoaDon = await HoaDon.findOne({
+      where: { don_hang_id: donHang.id },
+      transaction: t,
+    });
+
+    if (hoaDon) {
+      await hoaDon.update({ trang_thai: "da_huy" }, { transaction: t });
+    }
+  });
 
   res.json({
     success: true,
-    message: "Huy don hang thanh cong",
+    message: "Hủy đơn hàng thành công",
     data: donHang,
   });
 };

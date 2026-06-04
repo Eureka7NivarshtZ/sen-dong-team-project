@@ -1,4 +1,4 @@
-const { GioHang, GioHangChiTiet, Tranh } = require("../models");
+const { GioHang, GioHangChiTiet, Tranh, HinhAnhTranh } = require("../models"); // 🌟 ĐÃ THÊM: Import HinhAnhTranh vào đây
 
 const xemGioHangCuaToi = async (req, res) => {
   const khachHangId = req.user.khach_hang_id;
@@ -21,11 +21,23 @@ const xemGioHangCuaToi = async (req, res) => {
     });
   }
 
+  // 🌟 ĐÃ SỬA: Thêm include lồng HinhAnhTranh để SQL bốc kèm toàn bộ mảng ảnh thật về cho giỏ hàng
   const chiTiet = await GioHangChiTiet.findAll({
     where: {
       gio_hang_id: gioHang.id,
     },
-    include: [{ model: Tranh, as: "tranh" }],
+    include: [
+      { 
+        model: Tranh, 
+        as: "tranh",
+        include: [
+          {
+            model: HinhAnhTranh,
+            as: "hinh_anh" // Khớp đúng alias định nghĩa quan hệ trong hệ thống của ông
+          }
+        ]
+      }
+    ],
   });
 
   const danhSach = chiTiet.map((item) => {
@@ -147,8 +159,6 @@ const themVaoGioHang = async (req, res) => {
   });
 };
 
-// src/controllers/gioHang.js hoặc file controller tương đương ở Backend
-
 const capNhatSoLuong = async (req, res) => {
   try {
     const { id } = req.params;
@@ -214,7 +224,6 @@ const capNhatSoLuong = async (req, res) => {
       data: chiTiet,
     });
   } catch (error) {
-    // 🛡️ KHIÊN BẢO VỆ: Nếu lỗi hệ thống, trả về lỗi 500 chứ không làm sập nguồn Server Node
     console.error("Lỗi hệ thống tại capNhatSoLuong Backend:", error);
     return res.status(500).json({
       success: false,
