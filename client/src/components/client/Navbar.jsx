@@ -39,7 +39,6 @@ const Navbar = () => {
             <Button sx={navButtonStyle} component={Link} to="/gioi-thieu">Giới thiệu</Button>
             <Button sx={navButtonStyle} component={Link} to="/tranh">Bộ sưu tập</Button>
             <Button sx={navButtonStyle} component={Link} to="/khuyen-mai">Khuyến mãi</Button>
-            {/* 🌟 ĐÃ XÓA: Nút bấm chuyển tới trang Hỗ trợ cũ */}
           </Box>
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -51,7 +50,24 @@ const Navbar = () => {
             </IconButton>
             <Menu anchorEl={userMenuAnchor} open={isUserMenuOpen} onClose={() => setUserMenuAnchor(null)}>
               {user && <MenuItem disabled>Xin chào, {user.hoTen || user.ten || user.email}</MenuItem>}
-              <MenuItem onClick={() => { authService.dangXuat(); setUser(null); setUserMenuAnchor(null); navigate("/"); }} sx={{ color: "#e74c3c", gap: 1 }}>
+              
+              {/* 🌟 ĐÃ THÊM: Lối tắt chuyển thẳng sang trang quản lý tiến độ đơn hàng */}
+              <MenuItem onClick={() => { setUserMenuAnchor(null); navigate("/thong-tin-ca-nhan"); }}>
+                👤 Thông tin cá nhân
+              </MenuItem>
+
+              <MenuItem 
+                onClick={() => { 
+                  authService.dangXuat(); 
+                  // 🌟 ĐÃ THÊM: Xóa dứt điểm khóa token thật để trình duyệt giải phóng bộ nhớ đệm chống xung đột tài khoản
+                  localStorage.removeItem("authToken"); 
+                  localStorage.removeItem("user"); 
+                  setUser(null); 
+                  setUserMenuAnchor(null); 
+                  navigate("/"); 
+                }} 
+                sx={{ color: "#e74c3c", gap: 1 }}
+              >
                 <LogoutIcon fontSize="small" /> Đăng xuất
               </MenuItem>
             </Menu>

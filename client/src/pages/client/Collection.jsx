@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ProductCard_TrangChu from "../../components/client/ProductCard";
 
@@ -71,16 +71,7 @@ function Collection({ products }) {
               zIndex: 20,
             }}
           >
-            <h1
-              style={{
-                fontSize: "32px",
-                fontWeight: "normal",
-                color: "#111111",
-                margin: "0 0 40px 0",
-              }}
-            >
-              Bộ sưu tập
-            </h1>
+            <h1 style={{ fontSize: "32px", fontWeight: "normal", color: "#111111", margin: "0 0 40px 0" }}>Bộ sưu tập</h1>
 
             <input
               type="text"
@@ -96,24 +87,9 @@ function Collection({ products }) {
               }}
             />
 
-            <h3
-              style={{
-                fontSize: "16px",
-                fontWeight: "bold",
-                color: "#000000",
-                margin: "0 0 20px 0",
-              }}
-            >
-              Danh mục
-            </h3>
+            <h3 style={{ fontSize: "16px", fontWeight: "bold", color: "#000000", margin: "0 0 20px 0" }}>Danh mục</h3>
 
-            <ul
-              style={{
-                listStyle: "none",
-                padding: 0,
-                margin: 0,
-              }}
-            >
+            <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
               {getCategories().map((cat) => {
                 const isActive = selectedCategory === cat;
 
@@ -149,35 +125,39 @@ function Collection({ products }) {
           >
             {filteredProducts.length > 0 ? (
               filteredProducts.map((product) => {
+                // 🌟 ĐÃ SỬA CHUẨN ĐỒNG BỘ: Sửa lỗi chính tả hinh_annh -> hinh_anh gốc từ DB của ông
                 const hinhAnhChinh =
-                  product.hinh_annh?.find((h) => h.la_chinh) ||
+                  product.hinh_anh?.find((h) => h.la_chinh) ||
                   product.hinh_anh?.[0];
+
+                // 🌟 ĐÃ SỬA: Đọc dữ liệu thật tính sao trung bình và số lượt từ Backend SQL Server
+                const saoTrungBinh = Number(product.trung_binh_sao || product.rating_trung_binh || 5).toFixed(1);
+                const tongLuotDanhGia = product.so_luot_danh_gia || product.tong_danh_gia || 0;
+
                 return (
-                  <ProductCard_TrangChu
-                    key={product.id}
-                    image={
-                      hinhAnhChinh?.url ||
-                      "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'><rect width='100%' height='100%' fill='%23f5f5f5'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='14' fill='%23b3b3b3'>Sen Dong Art Gallery</text></svg>"
-                    }
-                    title={product.ten_tranh}
-                    category={product.danh_muc?.ten || "Danh mục"}
-                    price={
-                      product.gia_ban
-                        ? `${Number(product.gia_ban).toLocaleString()}đ`
-                        : "0đ"
-                    }
-                    onOpenDetail={() => navigate(`/tranh/${product.id}`)}
-                  />
+                  <div key={product.id} style={{ display: "flex", flexDirection: "column", textAlign: "left" }}>
+                    <ProductCard_TrangChu
+                      image={
+                        hinhAnhChinh?.url ||
+                        "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'><rect width='100%' height='100%' fill='%23f5f5f5'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='14' fill='%23b3b3b3'>Sen Dong Art Gallery</text></svg>"
+                      }
+                      title={product.ten_tranh}
+                      category={product.danh_muc?.ten || "Danh mục"}
+                      price={product.gia_ban ? `${Number(product.gia_ban).toLocaleString()}đ` : "0đ"}
+                      onOpenDetail={() => navigate(`/tranh/${product.id}`)}
+                    />
+                    
+                    {/* 🌟 ĐÃ THÊM: Hiện điểm đánh giá tổng hợp thật ngay dưới Card trong Bộ Sưu Tập */}
+                    <div style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "13px", marginTop: "6px", color: "#ff9800", padding: "0 4px" }}>
+                      <span style={{ fontSize: "14px" }}>★</span>
+                      <span style={{ fontWeight: "bold", color: "#333" }}>{saoTrungBinh}</span>
+                      <span style={{ color: "#888" }}>({tongLuotDanhGia} đánh giá)</span>
+                    </div>
+                  </div>
                 );
               })
             ) : (
-              <div
-                style={{
-                  gridColumn: "1 / -1",
-                  textAlign: "center",
-                  padding: "40px",
-                }}
-              >
+              <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: "40px" }}>
                 <p>Không tìm thấy sản phẩm nào</p>
               </div>
             )}

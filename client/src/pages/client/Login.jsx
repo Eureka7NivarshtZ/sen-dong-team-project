@@ -131,17 +131,6 @@ function Login() {
               <label style={{ fontSize: "14px", color: "#333" }}>
                 Mật Khẩu:
               </label>
-              <a
-                href="#"
-                onClick={(e) => e.preventDefault()}
-                style={{
-                  fontSize: "13px",
-                  color: "#666",
-                  textDecoration: "none",
-                }}
-              >
-                Quên mật khẩu?
-              </a>
             </div>
             <input
               type="password"
