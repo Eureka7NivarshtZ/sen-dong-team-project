@@ -11,7 +11,7 @@ import Login from "./pages/client/Login";
 import Register from "./pages/client/Register";
 import ProductDetail from "./pages/client/ProductDetail";
 import CustomerSupport from "./pages/client/CustomerSupport";
-
+import Coupons from "./pages/client/Coupons";
 // ADMIN PAGES
 import Dashboard from "./pages/admin/Dashboard";
 import Orders from "./pages/admin/Orders";
@@ -60,6 +60,7 @@ function App() {
         <Route path="/gio-hang" element={<CartCheckout />} />
         <Route path="/auth/dang-nhap" element={<Login />} />
         <Route path="/auth/dang-ky" element={<Register />} />
+        <Route path="/khuyen-mai" element={<Coupons />} />
       </Route>
 
       {/* ADMIN ROUTES */}

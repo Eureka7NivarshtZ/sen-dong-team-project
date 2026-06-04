@@ -33,11 +33,15 @@ const Navbar = () => {
             <Typography variant="h6" sx={{ fontWeight: 600, color: "#333333" }}>SEN DONG</Typography>
           </Box>
 
+          {/* CỤM MENU ĐIỀU HƯỚNG CHÍNH */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <Button sx={navButtonStyle} component={Link} to="/">Trang chủ</Button>
             <Button sx={navButtonStyle} component={Link} to="/gioi-thieu">Giới thiệu</Button>
             <Button sx={navButtonStyle} component={Link} to="/tranh">Bộ sưu tập</Button>
-            {/* Nút đã liên kết điều hướng */}
+            
+            {/* 🎟️ ĐÃ THÊM: Nút bấm chuyển nhanh đến trang Kho ưu đãi / Mã khuyến mãi */}
+            <Button sx={navButtonStyle} component={Link} to="/khuyen-mai">Khuyến mãi</Button>
+            
             <Button sx={navButtonStyle} component={Link} to="/ho-tro">Hỗ trợ</Button>
           </Box>
 
