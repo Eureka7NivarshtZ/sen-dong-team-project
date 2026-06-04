@@ -22,8 +22,33 @@ const adminChamSocRoutes = require("./routes/adminChamSoc.routes");
 
 const app = express();
 
-app.use(cors());
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  process.env.CLIENT_URL,
+].filter(Boolean);
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Cho phép Postman, server-to-server, hoặc request không có origin
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
+    credentials: true,
+  }),
+);
+
 app.use(express.json());
+
+app.get("/", (req, res) => {
+  res.send("API is running");
+});
 
 app.use("/api/auth", authRoutes);
 app.use("/api/tranh", tranhRoutes);

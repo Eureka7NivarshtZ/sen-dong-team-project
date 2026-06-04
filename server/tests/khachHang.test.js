@@ -10,7 +10,7 @@ describe("Khách Hàng API (/api/khach-hang)", () => {
     // Không dùng email khachhang@example.com ở đây nữa vì sẽ bị lỗi phân quyền 500
     const resN = await request(app)
       .post("/api/auth/dang-nhap")
-      .send({ email: "nhanvien@example.com", mat_khau: "12345678" });
+      .send({ email: "admin@example.com", mat_khau: "12345678" });
     tokenNV = resN.body.data?.token;
 
     // Đăng nhập tài khoản Quản lý có sẵn dưới DB

@@ -118,9 +118,17 @@ const taoDonHang = async (req, res) => {
         const tranh = item.tranh;
         const soLuongMua = Number(item.so_luong || 0);
 
-        if (!tranh) throw new Error("Có tranh trong giỏ hàng không tồn tại");
-        if (tranh.trang_thai !== "ban") throw new Error(`Tranh "${tranh.ten_tranh}" hiện không được bán`);
-        if (Number(tranh.so_luong_ton || 0) < soLuongMua) throw new Error(`Tranh "${tranh.ten_tranh}" không đủ số lượng tồn`);
+        if (!tranh) {
+          throw new Error("Có tranh trong giỏ hàng không tồn tại");
+        }
+
+        if (tranh.trang_thai !== "ban") {
+          throw new Error(`Tranh "${tranh.ten_tranh}" hiện không được bán`);
+        }
+
+        if (Number(tranh.so_luong_ton || 0) < soLuongMua) {
+          throw new Error(`Tranh "${tranh.ten_tranh}" hiện đã hết hàng`);
+        }
 
         tongTienHang += soLuongMua * Number(tranh.gia_ban || 0);
       }

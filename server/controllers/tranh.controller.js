@@ -166,6 +166,13 @@ const taoTranh = async (req, res) => {
     });
   }
 
+  if (so_luong_ton !== undefined && Number(so_luong_ton) < 0) {
+    return res.status(400).json({
+      success: false,
+      error: "Số lượng tồn không được nhỏ hơn 0",
+    });
+  }
+
   const tranh = await Tranh.create({
     ten_tranh,
     danh_muc_id,
@@ -206,6 +213,16 @@ const capNhatTranh = async (req, res) => {
     });
   }
 
+  if (
+    req.body.so_luong_ton !== undefined &&
+    Number(req.body.so_luong_ton) < 0
+  ) {
+    return res.status(400).json({
+      success: false,
+      error: "Số lượng tồn không được nhỏ hơn 0",
+    });
+  }
+
   const tranhData = {
     ...req.body,
     cap_nhat_luc: new Date(),
@@ -213,10 +230,9 @@ const capNhatTranh = async (req, res) => {
 
   await tranh.update(tranhData);
 
-  // 🌟 ĐÃ THÊM: Cập nhật hoặc chèn mới ảnh chính khi sửa tranh
   if (hinh_anh_url) {
     const anhChinh = await HinhAnhTranh.findOne({
-      where: { tranh_id: id, la_chinh: true }
+      where: { tranh_id: id, la_chinh: true },
     });
 
     if (anhChinh) {
@@ -226,7 +242,7 @@ const capNhatTranh = async (req, res) => {
         tranh_id: id,
         url: hinh_anh_url,
         la_chinh: true,
-        thu_tu: 0
+        thu_tu: 0,
       });
     }
   }
