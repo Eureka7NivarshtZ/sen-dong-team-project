@@ -1,6 +1,4 @@
-import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { tranhService } from "../../services";
 import ProductCard_TrangChu from "../../components/client/ProductCard";
 
 // Dữ liệu mẫu hiển thị trên Trang Chủ của bạn
