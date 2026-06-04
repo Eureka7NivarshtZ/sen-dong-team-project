@@ -21,68 +21,75 @@ const taoToken = (taiKhoan) => {
 };
 
 const dangNhap = async (req, res) => {
-  const { email, mat_khau } = req.body;
+  try {
+    const { email, mat_khau } = req.body;
 
-  if (!email || !mat_khau) {
-    return res.status(400).json({
-      success: false,
-      error: "Vui long nhap email va mat khau",
+    if (!email || !mat_khau) {
+      return res.status(400).json({
+        success: false,
+        error: "Vui long nhap email va mat khau",
+      });
+    }
+
+    const taiKhoan = await TaiKhoan.findOne({
+      where: { email },
+      include: [
+        {
+          model: KhachHang,
+          as: "khach_hang",
+        },
+        {
+          model: NhanVien,
+          as: "nhan_vien",
+        },
+      ],
     });
-  }
 
-  const taiKhoan = await TaiKhoan.findOne({
-    where: { email },
-    include: [
-      {
-        model: KhachHang,
-        as: "khach_hang",
+    if (!taiKhoan) {
+      return res.status(400).json({
+        success: false,
+        error: "Email hoac mat khau khong dung",
+      });
+    }
+
+    if (!taiKhoan.kich_hoat) {
+      return res.status(403).json({
+        success: false,
+        error: "Tai khoan da bi khoa",
+      });
+    }
+
+    const dungMatKhau = await bcrypt.compare(mat_khau, taiKhoan.mat_khau_hash);
+
+    if (!dungMatKhau) {
+      return res.status(401).json({
+        success: false,
+        error: "Email hoac mat khau khong dung",
+      });
+    }
+
+    const token = taoToken(taiKhoan);
+
+    res.json({
+      success: true,
+      message: "Dang nhap thanh cong",
+      data: {
+        token,
+        tai_khoan: {
+          id: taiKhoan.id,
+          email: taiKhoan.email,
+          loai: taiKhoan.loai,
+        },
+        khach_hang: taiKhoan.khach_hang,
+        nhan_vien: taiKhoan.nhan_vien,
       },
-      {
-        model: NhanVien,
-        as: "nhan_vien",
-      },
-    ],
-  });
-
-  if (!taiKhoan) {
-    return res.status(400).json({
+    });
+  } catch (error) {
+    res.status(400).json({
       success: false,
-      error: "Email hoac mat khau khong dung",
+      error: "Đăng nhập không thành công",
     });
   }
-
-  if (!taiKhoan.kich_hoat) {
-    return res.status(403).json({
-      success: false,
-      error: "Tai khoan da bi khoa",
-    });
-  }
-
-  const dungMatKhau = await bcrypt.compare(mat_khau, taiKhoan.mat_khau_hash);
-
-  if (!dungMatKhau) {
-    return res.status(401).json({
-      success: false,
-      error: "Email hoac mat khau khong dung",
-    });
-  }
-
-  const token = taoToken(taiKhoan);
-
-  res.json({
-    success: true,
-    message: "Dang nhap thanh cong",
-    data: {
-      token,
-      tai_khoan: {
-        id: taiKhoan.id,
-        email: taiKhoan.email,
-        loai: taiKhoan.loai,
-      },
-      khach_hang: taiKhoan.khach_hang,
-      nhan_vien: taiKhoan.nhan_vien,
-    },
-  });
 };
 
 const xemThongTinCuaToi = async (req, res) => {
