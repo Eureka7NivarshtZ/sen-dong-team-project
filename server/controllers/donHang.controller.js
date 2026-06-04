@@ -162,7 +162,7 @@ const taoDonHang = async (req, res) => {
         }
 
         if (Number(tranh.so_luong_ton || 0) < soLuongMua) {
-          throw new Error(`Tranh "${tranh.ten_tranh}" không đủ số lượng tồn`);
+          throw new Error(`Tranh "${tranh.ten_tranh}" hiện đã hết hàng`);
         }
 
         tongTienHang += soLuongMua * Number(tranh.gia_ban || 0);
