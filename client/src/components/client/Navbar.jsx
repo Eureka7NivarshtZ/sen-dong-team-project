@@ -38,11 +38,8 @@ const Navbar = () => {
             <Button sx={navButtonStyle} component={Link} to="/">Trang chủ</Button>
             <Button sx={navButtonStyle} component={Link} to="/gioi-thieu">Giới thiệu</Button>
             <Button sx={navButtonStyle} component={Link} to="/tranh">Bộ sưu tập</Button>
-            
-            {/* 🎟️ ĐÃ THÊM: Nút bấm chuyển nhanh đến trang Kho ưu đãi / Mã khuyến mãi */}
             <Button sx={navButtonStyle} component={Link} to="/khuyen-mai">Khuyến mãi</Button>
-            
-            <Button sx={navButtonStyle} component={Link} to="/ho-tro">Hỗ trợ</Button>
+            {/* 🌟 ĐÃ XÓA: Nút bấm chuyển tới trang Hỗ trợ cũ */}
           </Box>
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
