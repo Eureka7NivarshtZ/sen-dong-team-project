@@ -9,6 +9,7 @@ const {
   xemDonCuaToi,
   xemChiTietDonCuaToi,
   huyDonCuaToi,
+  capNhatThongTinGiaoHangCuaToi,
 } = require("../controllers/donHang.controller");
 
 const {
@@ -24,6 +25,11 @@ router.post("/them", yeuCauKhachHang, taoDonHang);
 router.get("/cua-toi", yeuCauKhachHang, xemDonCuaToi);
 router.get("/chi-tiet/:id", yeuCauKhachHang, xemChiTietDonCuaToi);
 router.put("/huy/:id", yeuCauKhachHang, huyDonCuaToi);
+router.put(
+  "/cap-nhat-thong-tin-giao-hang/:id",
+  yeuCauKhachHang,
+  capNhatThongTinGiaoHangCuaToi
+);
 
 // ========== NHÂN VIÊN: Quản lý tất cả đơn hàng ==========
 router.use(yeuCauNhanVien);

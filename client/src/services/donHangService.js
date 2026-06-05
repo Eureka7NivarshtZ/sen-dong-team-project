@@ -2,6 +2,23 @@ import apiClient from "./apiClient";
 
 const donHangService = {
   // ================= KHÁCH HÀNG =================
+  capNhatThongTinGiaoHangCuaToi: async (id, data) => {
+    try {
+      const response = await apiClient.put(
+        `/don-hang/cap-nhat-thong-tin-giao-hang/${id}`,
+        data,
+      );
+      return response.data;
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error.response?.data?.error ||
+          "Cập nhật thông tin giao hàng thất bại",
+      };
+    }
+  },
+
   taoDonHang: async (donHangData) => {
     try {
       const response = await apiClient.post("/don-hang/them", donHangData);

@@ -7,7 +7,10 @@ const khachHangService = {
       const response = await apiClient.get("/khach-hang/ho-so");
       return response.data;
     } catch (error) {
-      return { success: false, error: error.response?.data?.error || "Lấy thông tin cá nhân thất bại" };
+      return {
+        success: false,
+        error: error.response?.data?.error || "Lấy thông tin cá nhân thất bại",
+      };
     }
   },
 
@@ -17,7 +20,10 @@ const khachHangService = {
       const response = await apiClient.put("/khach-hang/cap-nhat", data);
       return response.data;
     } catch (error) {
-      return { success: false, error: error.response?.data?.error || "Cập nhật thông tin thất bại" };
+      return {
+        success: false,
+        error: error.response?.data?.error || "Cập nhật thông tin thất bại",
+      };
     }
   },
 
@@ -27,9 +33,13 @@ const khachHangService = {
       const response = await apiClient.get("/admin/khach-hang", { params });
       return response.data;
     } catch (error) {
-      return { success: false, error: error.response?.data?.error || "Lấy danh sách khách hàng thất bại" };
+      return {
+        success: false,
+        error:
+          error.response?.data?.error || "Lấy danh sách khách hàng thất bại",
+      };
     }
-  }
+  },
 };
 
 export default khachHangService;

@@ -64,12 +64,74 @@ function formatCurrency(value) {
   });
 }
 
+function parseOrderDate(value) {
+  if (!value) return null;
+
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : value;
+  }
+
+  if (typeof value === "number") {
+    // Hỗ trợ cả timestamp giây và mili giây.
+    const timestamp = value < 10000000000 ? value * 1000 : value;
+    const date = new Date(timestamp);
+
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  const text = String(value).trim();
+
+  if (!text) return null;
+
+  // MySQL DATETIME thường trả về dạng: 2026-06-06 15:30:20
+  const mysqlDateTimeMatch = text.match(
+    /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?/,
+  );
+
+  if (mysqlDateTimeMatch) {
+    const [, year, month, day, hour, minute, second = "0"] = mysqlDateTimeMatch;
+    const date = new Date(
+      Number(year),
+      Number(month) - 1,
+      Number(day),
+      Number(hour),
+      Number(minute),
+      Number(second),
+    );
+
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  // Hỗ trợ trường hợp backend trả về ngày dạng Việt Nam: 06/06/2026 15:30:20
+  const vietnameseDateMatch = text.match(
+    /^(\d{1,2})[/-](\d{1,2})[/-](\d{4})(?:\s+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?/,
+  );
+
+  if (vietnameseDateMatch) {
+    const [, day, month, year, hour = "0", minute = "0", second = "0"] =
+      vietnameseDateMatch;
+    const date = new Date(
+      Number(year),
+      Number(month) - 1,
+      Number(day),
+      Number(hour),
+      Number(minute),
+      Number(second),
+    );
+
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  const normalizedText = text.replace(" ", "T");
+  const date = new Date(normalizedText);
+
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
 function formatDate(value) {
-  if (!value) return "-";
+  const date = parseOrderDate(value);
 
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) return "-";
+  if (!date) return "-";
 
   return date.toLocaleDateString("vi-VN", {
     day: "2-digit",
@@ -78,22 +140,32 @@ function formatDate(value) {
   });
 }
 
-function getOrderTimestamp(order) {
-  const value =
+function getOrderDateValue(order) {
+  return (
     order?.ngay_dat ||
+    order?.ngayDat ||
     order?.createdAt ||
     order?.created_at ||
+    order?.created ||
     order?.updatedAt ||
-    order?.updated_at;
+    order?.updated_at
+  );
+}
 
-  const time = new Date(value).getTime();
+function getOrderTimestamp(order) {
+  const date = parseOrderDate(getOrderDateValue(order));
 
-  return Number.isNaN(time) ? 0 : time;
+  return date ? date.getTime() : 0;
 }
 
 function sortOrdersNewestFirst(list) {
   return [...(list || [])].sort((a, b) => {
-    return getOrderTimestamp(b) - getOrderTimestamp(a);
+    const timeDifference = getOrderTimestamp(b) - getOrderTimestamp(a);
+
+    if (timeDifference !== 0) return timeDifference;
+
+    // Nếu ngày bằng nhau hoặc thiếu ngày, ưu tiên id lớn hơn để đơn mới hơn nằm trên.
+    return String(b?.id || "").localeCompare(String(a?.id || ""));
   });
 }
 
@@ -233,8 +305,15 @@ function Orders() {
       const params = {
         page: pageOverride,
         limit,
+
+        // Gửi nhiều alias để tương thích với các backend khác nhau.
+        // Quan trọng nhất: backend nên ORDER BY don_hang.ngay_dat DESC.
         sort_by: "ngay_dat",
         sort_order: "desc",
+        order_by: "ngay_dat",
+        order: "desc",
+        sortBy: "ngay_dat",
+        sortOrder: "DESC",
       };
 
       if (filterStatus) {
@@ -381,6 +460,10 @@ function Orders() {
       setActionLoading(false);
     }
   };
+
+  const displayOrders = useMemo(() => {
+    return sortOrdersNewestFirst(orders);
+  }, [orders]);
 
   const detailItems = getOrderItems(selectedOrder);
 
@@ -566,14 +649,14 @@ function Orders() {
                     Đang tải đơn hàng...
                   </td>
                 </tr>
-              ) : orders.length === 0 ? (
+              ) : displayOrders.length === 0 ? (
                 <tr>
                   <td colSpan="8" style={emptyStyle}>
                     Không có đơn hàng nào.
                   </td>
                 </tr>
               ) : (
-                orders.map((order) => (
+                displayOrders.map((order) => (
                   <tr
                     key={order.id}
                     style={{ borderBottom: "1px solid #f2f4f7" }}
@@ -595,7 +678,7 @@ function Orders() {
                     </td>
 
                     <td style={tdStyle}>
-                      {formatDate(order.ngay_dat || order.createdAt)}
+                      {formatDate(getOrderDateValue(order))}
                     </td>
 
                     <td
@@ -799,9 +882,7 @@ function Orders() {
                   />
                   <InfoBox
                     label="Ngày đặt"
-                    value={formatDate(
-                      selectedOrder.ngay_dat || selectedOrder.createdAt,
-                    )}
+                    value={formatDate(getOrderDateValue(selectedOrder))}
                   />
                   <InfoBox
                     label="Địa chỉ giao"
