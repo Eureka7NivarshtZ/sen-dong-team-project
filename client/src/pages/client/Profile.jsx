@@ -1,134 +1,503 @@
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { authService } from "../../services";
-import apiClient from "../../services/apiClient";
 
 function Profile() {
   const navigate = useNavigate();
-  const user = authService.getUser();
-  const [orders, setOrders] = useState([]);
+
+  const [user, setUser] = useState(authService.getUser());
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  const [isEditing, setIsEditing] = useState(false);
+
+  const [formData, setFormData] = useState({
+    ho_ten: "",
+    email: "",
+    sdt: "",
+    dia_chi: "",
+  });
 
   useEffect(() => {
-    const layDonHangThat = async () => {
+    const layThongTinTaiKhoan = async () => {
       try {
-        const res = await apiClient.get("/don-hang/cua-toi"); 
-        if (res.data && res.data.success) {
-          setOrders(res.data.data || []);
+        if (!authService.isAuthenticated()) {
+          navigate("/dang-nhap");
+          return;
         }
-      } catch (err) {
-        console.error("Lỗi lấy đơn hàng thật:", err);
+
+        const res = await authService.xemThongTinCuaToi();
+
+        const currentUser = res?.success ? res.data : authService.getUser();
+
+        setUser(currentUser);
+        setFormData({
+          ho_ten:
+            currentUser?.ho_ten ||
+            currentUser?.hoTen ||
+            currentUser?.ten ||
+            "",
+          email: currentUser?.email || "",
+          sdt:
+            currentUser?.sdt ||
+            currentUser?.so_dien_thoai ||
+            currentUser?.soDienThoai ||
+            "",
+          dia_chi:
+            currentUser?.dia_chi ||
+            currentUser?.diaChi ||
+            currentUser?.address ||
+            "",
+        });
+      } catch (error) {
+        console.error("Lỗi lấy thông tin tài khoản:", error);
       } finally {
         setLoading(false);
       }
     };
-    if (authService.isAuthenticated()) layDonHangThat();
-  }, []);
 
-  // 🌟 ĐÃ ĐỒNG BỘ: Đổi chuẩn tên biến trạng thái đồng nhất với cơ sở dữ liệu Backend SQL
-  const milestones = [
-    { status: "cho_xac_nhan", label: "Chờ xác nhận" },
-    { status: "dang_chuan_bi", label: "Đang chuẩn bị" },
-    { status: "dang_giao", label: "Đang giao" },
-    { status: "hoan_thanh", label: "Đánh Giá" }
-  ];
+    layThongTinTaiKhoan();
+  }, [navigate]);
 
-  const getStepIndex = (status) => {
-    if (status === "huy") return -1;
-    const index = milestones.findIndex(m => m.status === status);
-    return index !== -1 ? index : 0;
+  const handleLogout = () => {
+    authService.dangXuat();
+    navigate("/dang-nhap");
   };
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleCancelEdit = () => {
+    setFormData({
+      ho_ten: getFullName(),
+      email: user?.email || "",
+      sdt: getPhoneRaw(),
+      dia_chi: getAddressRaw(),
+    });
+
+    setIsEditing(false);
+  };
+
+  const handleSave = async () => {
+    if (!formData.ho_ten.trim()) {
+      alert("Vui lòng nhập họ và tên");
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      const payload = {
+        ho_ten: formData.ho_ten.trim(),
+        sdt: formData.sdt.trim(),
+        dia_chi: formData.dia_chi.trim(),
+      };
+
+      const res = await authService.capNhatThongTinCuaToi(payload);
+
+      if (res?.success) {
+        alert("Cập nhật thông tin thành công");
+
+        setUser(res.data);
+        setIsEditing(false);
+      } else {
+        alert(res?.error || "Cập nhật thông tin thất bại");
+      }
+    } catch (error) {
+      console.error("Lỗi cập nhật thông tin:", error);
+      alert("Có lỗi xảy ra khi cập nhật thông tin");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const getFullName = () => {
+    return (
+      user?.ho_ten ||
+      user?.hoTen ||
+      user?.ten ||
+      user?.name ||
+      "Chưa cập nhật"
+    );
+  };
+
+  const getPhoneRaw = () => {
+    return (
+      user?.sdt ||
+      user?.so_dien_thoai ||
+      user?.soDienThoai ||
+      user?.phone ||
+      ""
+    );
+  };
+
+  const getPhone = () => {
+    return getPhoneRaw() || "Chưa cập nhật";
+  };
+
+  const getAddressRaw = () => {
+    return (
+      user?.dia_chi ||
+      user?.diaChi ||
+      user?.address ||
+      ""
+    );
+  };
+
+  const getAddress = () => {
+    return getAddressRaw() || "Chưa cập nhật";
+  };
+
+  const getRole = () => {
+    const role = user?.vai_tro || user?.vaiTro || user?.role;
+
+    const roleLabel = {
+      khach_hang: "Khách hàng",
+      nhan_vien: "Nhân viên",
+      quan_ly: "Quản lý",
+      admin: "Quản trị viên",
+    };
+
+    return roleLabel[role] || role || "Khách hàng";
+  };
+
+  const formatDate = (value) => {
+    if (!value) return "Chưa cập nhật";
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) return "Chưa cập nhật";
+
+    return date.toLocaleDateString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  };
+
+  if (loading) {
+    return (
+      <div
+        style={{
+          maxWidth: "900px",
+          margin: "60px auto",
+          padding: "0 20px",
+          fontFamily: "Arial, sans-serif",
+          textAlign: "center",
+          color: "#667085",
+        }}
+      >
+        Đang tải thông tin tài khoản...
+      </div>
+    );
+  }
+
   return (
-    <div style={{ maxWidth: "1100px", margin: "40px auto", padding: "0 20px", fontFamily: "Arial, sans-serif" }}>
-      <h2 style={{ color: "#1c3f3a", textAlign: "left", borderBottom: "2px solid #1c3f3a", paddingBottom: "10px", fontWeight: "bold" }}>👤 Hồ Sơ Khách Hàng</h2>
-      
-      <div style={{ display: "grid", gridTemplateColumns: "0.32fr 0.68fr", gap: "40px", marginTop: "30px", textAlign: "left" }}>
-        
-        {/* THÔNG TIN TÀI KHOẢN */}
-        <div style={{ background: "#f8f9fa", padding: "25px", borderRadius: "8px", border: "1px solid #eee", height: "fit-content" }}>
-          <h3 style={{ margin: "0 0 20px 0", fontSize: "17px", color: "#333", fontWeight: "bold" }}>Thông tin tài khoản</h3>
-          <div style={{ display: "flex", flexDirection: "column", gap: "15px", fontSize: "14px" }}>
-            <div><strong style={{ color: "#666" }}>Họ và tên:</strong><div style={{ fontSize: "15px", marginTop: "4px", fontWeight: "600" }}>{user?.hoTen || user?.ten || "Khách hàng Sen Đông"}</div></div>
-            <div><strong style={{ color: "#666" }}>Địa chỉ Email:</strong><div style={{ fontSize: "15px", marginTop: "4px" }}>{user?.email || "Chưa cập nhật"}</div></div>
+    <div
+      style={{
+        maxWidth: "900px",
+        margin: "40px auto",
+        padding: "0 20px",
+        fontFamily: "Arial, sans-serif",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: "20px",
+          borderBottom: "2px solid #1c3f3a",
+          paddingBottom: "14px",
+          marginBottom: "30px",
+        }}
+      >
+        <h2
+          style={{
+            color: "#1c3f3a",
+            margin: 0,
+            fontWeight: "bold",
+          }}
+        >
+          👤 Hồ Sơ Cá Nhân
+        </h2>
+
+        <button
+          onClick={handleLogout}
+          style={{
+            padding: "10px 16px",
+            backgroundColor: "#fff1f0",
+            color: "#cf1322",
+            border: "1px solid #ffa39e",
+            borderRadius: "6px",
+            cursor: "pointer",
+            fontWeight: "bold",
+          }}
+        >
+          Đăng xuất
+        </button>
+      </div>
+
+      <div
+        style={{
+          backgroundColor: "#ffffff",
+          border: "1px solid #e5e7eb",
+          borderRadius: "12px",
+          boxShadow: "0 4px 14px rgba(0,0,0,0.05)",
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            backgroundColor: "#f8fafc",
+            padding: "24px",
+            borderBottom: "1px solid #e5e7eb",
+            display: "flex",
+            alignItems: "center",
+            gap: "18px",
+          }}
+        >
+          <div
+            style={{
+              width: "70px",
+              height: "70px",
+              borderRadius: "50%",
+              backgroundColor: "#1c3f3a",
+              color: "#fff",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "28px",
+              fontWeight: "bold",
+              flexShrink: 0,
+            }}
+          >
+            {getFullName().charAt(0).toUpperCase()}
+          </div>
+
+          <div>
+            <h3
+              style={{
+                margin: "0 0 6px",
+                color: "#1c3f3a",
+                fontSize: "22px",
+              }}
+            >
+              {getFullName()}
+            </h3>
+            <p
+              style={{
+                margin: 0,
+                color: "#667085",
+                fontSize: "14px",
+              }}
+            >
+              {user?.email || "Chưa cập nhật email"}
+            </p>
           </div>
         </div>
 
-        {/* TIẾN ĐỘ ĐƠN HÀNG THẬT */}
-        <div>
-          <h3 style={{ margin: "0 0 25px 0", fontSize: "17px", color: "#333", fontWeight: "bold" }}>Tiến độ giao hàng của đơn</h3>
-          {loading ? (
-            <p style={{ color: "#888" }}>Đang quét kiểm tra lộ trình đơn hàng thật...</p>
-          ) : orders.length === 0 ? (
-            <div style={{ border: "1px dashed #ccc", padding: "40px", textAlign: "center", color: "#999", borderRadius: "8px" }}>Bạn chưa có đơn hàng thật nào.</div>
+        <div
+          style={{
+            padding: "26px",
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "18px",
+          }}
+        >
+          {isEditing ? (
+            <>
+              <InputItem
+                label="Họ và tên"
+                name="ho_ten"
+                value={formData.ho_ten}
+                onChange={handleChange}
+              />
+
+              <InputItem
+                label="Email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                disabled
+              />
+
+              <InputItem
+                label="Số điện thoại"
+                name="sdt"
+                value={formData.sdt}
+                onChange={handleChange}
+              />
+
+              <InputItem
+                label="Địa chỉ"
+                name="dia_chi"
+                value={formData.dia_chi}
+                onChange={handleChange}
+              />
+
+              <InfoItem label="Vai trò tài khoản" value={getRole()} />
+
+              <InfoItem
+                label="Ngày tạo tài khoản"
+                value={formatDate(user?.createdAt || user?.created_at)}
+              />
+            </>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: "35px" }}>
-              {orders.map((order) => {
-                const currentStep = getStepIndex(order.trang_thai);
-                const itemChiTiet = order.chi_tiet || order.don_hang_chi_tiet || [];
-                const dHangId = order.id || order.don_hang_id;
-
-                return (
-                  <div key={order.id} style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "25px", boxShadow: "0 2px 8px rgba(0,0,0,0.02)" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "20px", borderBottom: "1px solid #f1f5f9", paddingBottom: "12px", fontSize: "13px" }}>
-                      <span>Mã đơn: <strong style={{ color: "#1c3f3a" }}>#DH{dHangId}</strong></span>
-                      <span style={{ fontWeight: "bold", color: order.trang_thai === "huy" ? "#e74c3c" : "#2ecc71" }}>
-                        {order.trang_thai === "huy" ? "ĐỀN BÙ / ĐÃ HỦY" : `TRẠNG THÁI: ${order.trang_thai.toUpperCase()}`}
-                      </span>
-                    </div>
-
-                    <div style={{ marginBottom: "25px", display: "flex", flexDirection: "column", gap: "15px" }}>
-                      {itemChiTiet.map((item, idx) => {
-                        const exactTranhId = item.tranh?.id || item.tranh_id;
-
-                        return (
-                          <div key={idx} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: idx < itemChiTiet.length - 1 ? "1px dashed #f1f5f9" : "none", paddingBottom: "10px" }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-                              <div style={{ fontSize: "14px", fontWeight: "bold", color: "#333" }}>{item.tranh?.ten_tranh || "Tác phẩm nghệ thuật"}</div>
-                              <small style={{ color: "#888" }}>x{item.so_luong} kiện</small>
-                            </div>
-
-                            {order.trang_thai === "hoan_thanh" && exactTranhId && (
-                              <button 
-                                onClick={() => navigate(`/danh-gia-tranh/${dHangId}/${exactTranhId}`)} 
-                                style={{ backgroundColor: "#1c3f3a", color: "#fff", border: "none", padding: "6px 14px", borderRadius: "4px", fontWeight: "bold", cursor: "pointer", fontSize: "12px" }}
-                              >
-                                ⭐ Viết Đánh Giá
-                              </button>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    {order.trang_thai !== "huy" && (
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", position: "relative", padding: "10px 0 10px 0" }}>
-                        {milestones.map((m, idx) => {
-                          const isDone = idx <= currentStep;
-                          return (
-                            <div key={idx} style={{ display: "flex", flexDirection: "column", alignItems: "center", flex: 1, position: "relative", zIndex: 2 }}>
-                              <div style={{ width: "30px", height: "30px", borderRadius: "50%", backgroundColor: isDone ? "#2ecc71" : "#e2e8f0", color: isDone ? "#fff" : "#718096", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: "bold", border: "3px solid #fff" }}>
-                                {idx + 1}
-                              </div>
-                              <span style={{ position: "absolute", bottom: "-32px", width: "95px", textAlign: "center", fontSize: "10.5px", color: isDone ? "#27ae60" : "#a0aec0", fontWeight: isDone ? "600" : "normal" }}>
-                                {m.label}
-                              </span>
-                              {idx < milestones.length - 1 && (
-                                <div style={{ position: "absolute", left: "50%", top: "15px", width: "100%", height: "4px", backgroundColor: idx < currentStep ? "#2ecc71" : "#e2e8f0", zIndex: -1 }} />
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+            <>
+              <InfoItem label="Họ và tên" value={getFullName()} />
+              <InfoItem label="Email" value={user?.email || "Chưa cập nhật"} />
+              <InfoItem label="Số điện thoại" value={getPhone()} />
+              <InfoItem label="Địa chỉ" value={getAddress()} />
+              <InfoItem label="Vai trò tài khoản" value={getRole()} />
+              <InfoItem
+                label="Ngày tạo tài khoản"
+                value={formatDate(user?.createdAt || user?.created_at)}
+              />
+            </>
           )}
         </div>
 
+        <div
+          style={{
+            padding: "0 26px 26px",
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: "12px",
+          }}
+        >
+          {isEditing ? (
+            <>
+              <button
+                onClick={handleCancelEdit}
+                disabled={saving}
+                style={{
+                  padding: "11px 18px",
+                  backgroundColor: "#ffffff",
+                  color: "#344054",
+                  border: "1px solid #d0d5dd",
+                  borderRadius: "6px",
+                  cursor: saving ? "not-allowed" : "pointer",
+                  fontWeight: "bold",
+                }}
+              >
+                Hủy
+              </button>
+
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                style={{
+                  padding: "11px 18px",
+                  backgroundColor: saving ? "#98a2b3" : "#1c3f3a",
+                  color: "#ffffff",
+                  border: "none",
+                  borderRadius: "6px",
+                  cursor: saving ? "not-allowed" : "pointer",
+                  fontWeight: "bold",
+                }}
+              >
+                {saving ? "Đang lưu..." : "Lưu thay đổi"}
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => setIsEditing(true)}
+              style={{
+                padding: "11px 18px",
+                backgroundColor: "#1c3f3a",
+                color: "#ffffff",
+                border: "none",
+                borderRadius: "6px",
+                cursor: "pointer",
+                fontWeight: "bold",
+              }}
+            >
+              Chỉnh sửa thông tin
+            </button>
+          )}
+        </div>
       </div>
+    </div>
+  );
+}
+
+function InfoItem({ label, value }) {
+  return (
+    <div
+      style={{
+        backgroundColor: "#f8fafc",
+        border: "1px solid #eef2f6",
+        borderRadius: "10px",
+        padding: "16px",
+      }}
+    >
+      <div
+        style={{
+          color: "#667085",
+          fontSize: "13px",
+          marginBottom: "7px",
+        }}
+      >
+        {label}
+      </div>
+
+      <strong
+        style={{
+          color: "#1c3f3a",
+          fontSize: "15px",
+          wordBreak: "break-word",
+        }}
+      >
+        {value}
+      </strong>
+    </div>
+  );
+}
+
+function InputItem({ label, name, value, onChange, disabled = false }) {
+  return (
+    <div
+      style={{
+        backgroundColor: "#f8fafc",
+        border: "1px solid #eef2f6",
+        borderRadius: "10px",
+        padding: "16px",
+      }}
+    >
+      <label
+        style={{
+          display: "block",
+          color: "#667085",
+          fontSize: "13px",
+          marginBottom: "7px",
+        }}
+      >
+        {label}
+      </label>
+
+      <input
+        name={name}
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+        style={{
+          width: "100%",
+          padding: "11px 12px",
+          borderRadius: "6px",
+          border: "1px solid #d0d5dd",
+          outline: "none",
+          boxSizing: "border-box",
+          backgroundColor: disabled ? "#f2f4f7" : "#ffffff",
+          color: disabled ? "#667085" : "#111827",
+        }}
+      />
     </div>
   );
 }
