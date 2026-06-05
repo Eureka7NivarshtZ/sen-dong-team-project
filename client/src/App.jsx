@@ -25,10 +25,11 @@ import Promotions from "./pages/admin/Promotions";
 import { useEffect, useState } from "react";
 import { authService, tranhService } from "./services";
 import Shipping from "./pages/admin/Shipping";
+import OrderTracking from "./pages/client/OrderTracking";
 
 // 🌟 BONG BÓNG CHAT ZALO NỔI TOÀN CỤC
 function ZaloBubble() {
-  const zaloUrl = "https://zalo.me/0836666644"; 
+  const zaloUrl = "https://zalo.me/0836666644";
 
   return (
     <div
@@ -57,7 +58,17 @@ function ZaloBubble() {
       }}
       title="Chat qua Zalo với Xưởng tranh Sen Đông"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="28"
+        height="28"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="#ffffff"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
         <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
       </svg>
     </div>
@@ -100,11 +111,13 @@ function App() {
           <Route path="/gio-hang" element={<CartCheckout />} />
           <Route path="/auth/dang-nhap" element={<Login />} />
           <Route path="/auth/dang-ky" element={<Register />} />
+          <Route path="/auth/thong-tin" element={<Profile />} />
           <Route path="/khuyen-mai" element={<Coupons />} />
-          
-          {/* 🌟 ĐÃ THÊM: Định tuyến trang thông tin và đánh giá chuẩn tham số biến */}
-          <Route path="/thong-tin-ca-nhan" element={<Profile />} />
-          <Route path="/danh-gia-tranh/:don_hang_id/:tranh_id" element={<ProductReview />} />
+          <Route path="/don-hang/cua-toi" element={<OrderTracking />} />
+          <Route
+            path="/danh-gia-tranh/:don_hang_id/:tranh_id"
+            element={<ProductReview />}
+          />
         </Route>
 
         {/* ADMIN ROUTES */}

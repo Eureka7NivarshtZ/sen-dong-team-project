@@ -9,9 +9,11 @@ const taoToken = (taiKhoan) => {
       id: taiKhoan.id,
       email: taiKhoan.email,
       loai: taiKhoan.loai,
-      nhan_vien_id: taiKhoan.nhan_vien?.id || null,
-      vai_tro: taiKhoan.nhan_vien?.vai_tro || null,
+
       khach_hang_id: taiKhoan.khach_hang?.id || null,
+      nhan_vien_id: taiKhoan.nhan_vien?.id || null,
+
+      vai_tro: taiKhoan.nhan_vien?.vai_tro || taiKhoan.loai || null,
     },
     process.env.JWT_SECRET,
     {
@@ -93,19 +95,68 @@ const dangNhap = async (req, res) => {
 };
 
 const xemThongTinCuaToi = async (req, res) => {
-  const taiKhoan = await TaiKhoan.findByPk(req.user.id, {
-    attributes: { exclude: ["mat_khau_hash"] },
-    include: [
-      { model: KhachHang, as: "khach_hang" },
-      { model: NhanVien, as: "nhan_vien" },
-    ],
-  });
+  try {
+    const taiKhoanId = req.user?.id;
 
-  res.json({
-    success: true,
-    message: "Lay thong tin thanh cong",
-    data: taiKhoan,
-  });
+    if (!taiKhoanId) {
+      return res.status(401).json({
+        success: false,
+        error: "Bạn chưa đăng nhập",
+      });
+    }
+
+    const taiKhoan = await TaiKhoan.findByPk(taiKhoanId, {
+      attributes: [
+        "id",
+        "email",
+        "loai",
+        "kich_hoat",
+        "tao_luc",
+        "cap_nhat_luc",
+      ],
+      include: [
+        { model: KhachHang, as: "khach_hang" },
+        { model: NhanVien, as: "nhan_vien" },
+      ],
+    });
+
+    if (!taiKhoan) {
+      return res.status(404).json({
+        success: false,
+        error: "Không tìm thấy tài khoản",
+      });
+    }
+
+    const thongTin =
+      taiKhoan.loai === "khach_hang" ? taiKhoan.khach_hang : taiKhoan.nhan_vien;
+
+    return res.json({
+      success: true,
+      message: "Lấy thông tin thành công",
+      data: {
+        tai_khoan_id: taiKhoan.id,
+        email: taiKhoan.email,
+        loai: taiKhoan.loai,
+        vai_tro: thongTin?.vai_tro || taiKhoan.loai,
+        kich_hoat: taiKhoan.kich_hoat,
+
+        id: thongTin?.id || null,
+        ho_ten: thongTin?.ho_ten || "",
+        sdt: thongTin?.sdt || "",
+        dia_chi: thongTin?.dia_chi || "",
+
+        created_at: thongTin?.tao_luc || taiKhoan.tao_luc,
+        updated_at: thongTin?.cap_nhat_luc || taiKhoan.cap_nhat_luc,
+      },
+    });
+  } catch (error) {
+    console.error("Lỗi lấy thông tin cá nhân:", error);
+
+    return res.status(500).json({
+      success: false,
+      error: error.message || "Lấy thông tin thất bại",
+    });
+  }
 };
 
 const dangKyKhachHang = async (req, res) => {
@@ -269,10 +320,116 @@ const datLaiMatKhau = async (req, res) => {
   });
 };
 
+const capNhatThongTinCuaToi = async (req, res) => {
+  try {
+    const taiKhoanId = req.user?.id;
+    const loai = req.user?.loai;
+
+    const { ho_ten, sdt, dia_chi } = req.body;
+
+    if (!taiKhoanId) {
+      return res.status(401).json({
+        success: false,
+        error: "Bạn chưa đăng nhập",
+      });
+    }
+
+    if (!ho_ten || !ho_ten.trim()) {
+      return res.status(400).json({
+        success: false,
+        error: "Họ và tên không được để trống",
+      });
+    }
+
+    const taiKhoan = await TaiKhoan.findByPk(taiKhoanId, {
+      attributes: [
+        "id",
+        "email",
+        "loai",
+        "kich_hoat",
+        "tao_luc",
+        "cap_nhat_luc",
+      ],
+    });
+
+    if (!taiKhoan) {
+      return res.status(404).json({
+        success: false,
+        error: "Không tìm thấy tài khoản",
+      });
+    }
+
+    let model = null;
+
+    if (taiKhoan.loai === "khach_hang" || loai === "khach_hang") {
+      model = KhachHang;
+    } else if (taiKhoan.loai === "nhan_vien" || loai === "nhan_vien") {
+      model = NhanVien;
+    } else {
+      return res.status(403).json({
+        success: false,
+        error: "Loại tài khoản không hợp lệ",
+      });
+    }
+
+    const thongTin = await model.findOne({
+      where: { tai_khoan_id: taiKhoanId },
+    });
+
+    if (!thongTin) {
+      return res.status(404).json({
+        success: false,
+        error: "Không tìm thấy thông tin người dùng",
+      });
+    }
+
+    const dataCapNhat = {
+      ho_ten: ho_ten.trim(),
+      sdt: sdt?.trim() || null,
+    };
+
+    // Chỉ update địa chỉ nếu model có field dia_chi.
+    // Nếu bảng NhanVien không có dia_chi thì đoạn này tránh lỗi.
+    if (Object.prototype.hasOwnProperty.call(thongTin.dataValues, "dia_chi")) {
+      dataCapNhat.dia_chi = dia_chi?.trim() || null;
+    }
+
+    await thongTin.update(dataCapNhat);
+
+    return res.json({
+      success: true,
+      message: "Cập nhật thông tin cá nhân thành công",
+      data: {
+        tai_khoan_id: taiKhoan.id,
+        email: taiKhoan.email,
+        loai: taiKhoan.loai,
+        vai_tro: thongTin.vai_tro || taiKhoan.loai,
+        kich_hoat: taiKhoan.kich_hoat,
+
+        id: thongTin.id,
+        ho_ten: thongTin.ho_ten,
+        sdt: thongTin.sdt,
+        dia_chi: thongTin.dia_chi || "",
+
+        created_at: thongTin.tao_luc || taiKhoan.tao_luc,
+        updated_at: thongTin.cap_nhat_luc || taiKhoan.cap_nhat_luc,
+      },
+    });
+  } catch (error) {
+    console.error("Lỗi cập nhật thông tin cá nhân:", error);
+
+    return res.status(500).json({
+      success: false,
+      error: error.message || "Cập nhật thông tin cá nhân thất bại",
+    });
+  }
+};
+
 module.exports = {
   dangNhap,
   xemThongTinCuaToi,
   dangKyKhachHang,
   quenMatKhau,
   datLaiMatKhau,
+  capNhatThongTinCuaToi,
 };
