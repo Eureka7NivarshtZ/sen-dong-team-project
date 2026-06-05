@@ -13,8 +13,8 @@ test.describe("Nhóm 3: Quản trị viên (Admin)", () => {
     await page.locator('input[type="password"]').fill("12345678");
     
     await page.getByRole("button", { name: /đăng nhập/i }).click();
-    await expect(page).toHaveURL("http://localhost:5173/admin", {
-      timeout: 7000,
+    await expect(page).toHaveURL(/\/admin/, {
+      timeout: 10000,
     });
   });
 

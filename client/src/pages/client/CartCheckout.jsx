@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   gioHangService,
@@ -6,6 +6,7 @@ import {
   khuyenMaiService,
   donViVanChuyenService,
 } from "../../services";
+import authService from "../../services/authService";
 
 function useResponsive() {
   const [width, setWidth] = useState(
@@ -50,7 +51,6 @@ function CartCheckout() {
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [couponError, setCouponError] = useState("");
-
   const [shippingMethods, setShippingMethods] = useState([]);
 
   const svgFallback90 =
@@ -101,6 +101,38 @@ function CartCheckout() {
     return Number(item.so_luong || item.quantity || 1);
   };
 
+  const getUserDefaultName = (user) => {
+    return (
+      user?.ho_ten ||
+      user?.ten ||
+      user?.name ||
+      user?.khach_hang?.ho_ten ||
+      user?.data?.ho_ten ||
+      ""
+    );
+  };
+
+  const getUserDefaultPhone = (user) => {
+    return (
+      user?.sdt ||
+      user?.so_dien_thoai ||
+      user?.phone ||
+      user?.khach_hang?.sdt ||
+      user?.data?.sdt ||
+      ""
+    );
+  };
+
+  const getUserDefaultAddress = (user) => {
+    return (
+      user?.dia_chi ||
+      user?.address ||
+      user?.khach_hang?.dia_chi ||
+      user?.data?.dia_chi ||
+      ""
+    );
+  };
+
   const subtotal = (cartItems || []).reduce((sum, item) => {
     return sum + getItemPrice(item) * getItemQuantity(item);
   }, 0);
@@ -109,9 +141,8 @@ function CartCheckout() {
     ? parsePrice(
         appliedCoupon.so_tien_giam ||
           appliedCoupon.tien_giam ||
-          appliedCoupon.gia_tri_giam ||
           appliedCoupon.khuyen_mai?.so_tien_giam ||
-          appliedCoupon.khuyen_mai?.gia_tri_giam ||
+          appliedCoupon.khuyen_mai?.tien_giam ||
           0,
       )
     : 0;
@@ -170,6 +201,17 @@ function CartCheckout() {
   };
 
   useEffect(() => {
+    const user = authService.getUser?.() || {};
+
+    setShippingInfo((prev) => ({
+      ...prev,
+      name: prev.name || getUserDefaultName(user),
+      phone: prev.phone || getUserDefaultPhone(user),
+      address: prev.address || getUserDefaultAddress(user),
+    }));
+  }, []);
+
+  useEffect(() => {
     const fetchShippingMethods = async () => {
       try {
         const res = await donViVanChuyenService.layDanhSach();
@@ -187,8 +229,9 @@ function CartCheckout() {
         if (list.length > 0) {
           setShippingInfo((prev) => ({
             ...prev,
-            method: list[0].id,
-            phi_van_chuyen: parsePrice(list[0].phi_co_ban),
+            method: prev.method || list[0].id,
+            phi_van_chuyen:
+              prev.phi_van_chuyen || parsePrice(list[0].phi_co_ban),
           }));
         }
       } catch (err) {
@@ -410,7 +453,7 @@ function CartCheckout() {
         phuong_thuc_van_chuyen: shippingInfo.method,
         don_vi_van_chuyen_id: shippingInfo.method,
 
-        phuong_thuc_thanh_toan: "cod",
+        phuong_thuc_thanh_toan: shippingInfo.payment || "cod",
 
         khuyen_mai_id:
           appliedCoupon?.khuyen_mai?.id ||
@@ -511,6 +554,7 @@ function CartCheckout() {
               >
                 {title}
               </div>
+
               <span style={{ color: "#888", fontSize: "12px" }}>
                 Số lượng: x{qty}
               </span>
@@ -708,6 +752,7 @@ function CartCheckout() {
                   >
                     {s.id}
                   </div>
+
                   <span
                     style={{
                       fontSize: isSmallMobile ? "13px" : "14px",
@@ -744,9 +789,11 @@ function CartCheckout() {
                 }}
               >
                 <div style={{ fontSize: "50px", marginBottom: "15px" }}>🛒</div>
+
                 <p style={{ fontSize: "16px", margin: "0 0 20px 0" }}>
                   Giỏ hàng trống
                 </p>
+
                 <button
                   onClick={() => navigate("/tranh")}
                   style={{
@@ -828,9 +875,11 @@ function CartCheckout() {
                             >
                               {title}
                             </h4>
+
                             <span style={{ color: "#888", fontSize: "13px" }}>
                               {item.category || "Tranh độc bản Sen Đông"}
                             </span>
+
                             <div
                               style={{
                                 marginTop: "10px",
@@ -877,9 +926,11 @@ function CartCheckout() {
                             >
                               -
                             </button>
+
                             <span style={{ fontSize: "14px", minWidth: 18 }}>
                               {qty}
                             </span>
+
                             <button
                               style={{
                                 border: "none",
@@ -940,6 +991,7 @@ function CartCheckout() {
                     }}
                   >
                     <span>Tạm tính</span>
+
                     <strong style={{ fontSize: "16px" }}>
                       {formatPrice(subtotal)}
                     </strong>
@@ -979,7 +1031,10 @@ function CartCheckout() {
                   placeholder="Họ và tên *"
                   value={shippingInfo.name}
                   onChange={(e) =>
-                    setShippingInfo({ ...shippingInfo, name: e.target.value })
+                    setShippingInfo((prev) => ({
+                      ...prev,
+                      name: e.target.value,
+                    }))
                   }
                   style={inputStyle}
                 />
@@ -989,7 +1044,10 @@ function CartCheckout() {
                   placeholder="Số điện thoại *"
                   value={shippingInfo.phone}
                   onChange={(e) =>
-                    setShippingInfo({ ...shippingInfo, phone: e.target.value })
+                    setShippingInfo((prev) => ({
+                      ...prev,
+                      phone: e.target.value,
+                    }))
                   }
                   style={inputStyle}
                 />
@@ -999,10 +1057,10 @@ function CartCheckout() {
                   placeholder="Địa chỉ nhận tranh chi tiết *"
                   value={shippingInfo.address}
                   onChange={(e) =>
-                    setShippingInfo({
-                      ...shippingInfo,
+                    setShippingInfo((prev) => ({
+                      ...prev,
                       address: e.target.value,
-                    })
+                    }))
                   }
                   style={inputStyle}
                 />
@@ -1012,7 +1070,10 @@ function CartCheckout() {
                   rows="3"
                   value={shippingInfo.note}
                   onChange={(e) =>
-                    setShippingInfo({ ...shippingInfo, note: e.target.value })
+                    setShippingInfo((prev) => ({
+                      ...prev,
+                      note: e.target.value,
+                    }))
                   }
                   style={{ ...inputStyle, resize: "none" }}
                 />
@@ -1057,11 +1118,11 @@ function CartCheckout() {
                       <div
                         key={m.id}
                         onClick={() =>
-                          setShippingInfo({
-                            ...shippingInfo,
+                          setShippingInfo((prev) => ({
+                            ...prev,
                             method: m.id,
                             phi_van_chuyen: parsePrice(m.phi_co_ban),
-                          })
+                          }))
                         }
                         style={{
                           ...methodBoxStyle,
@@ -1077,6 +1138,7 @@ function CartCheckout() {
                           <h4 style={{ margin: 0 }}>
                             {m.ten || m.ten_don_vi || "Đơn vị vận chuyển"}
                           </h4>
+
                           {m.mo_ta && (
                             <p
                               style={{
@@ -1154,6 +1216,7 @@ function CartCheckout() {
                     <h4 style={{ margin: "0 0 4px 0", color: "#1c3f3a" }}>
                       Thanh toán khi nhận hàng (COD)
                     </h4>
+
                     <p
                       style={{
                         margin: 0,

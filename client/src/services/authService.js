@@ -10,13 +10,20 @@ const authService = {
         mat_khau,
       });
 
-      // Lưu token nếu đăng nhập thành công
       if (response.data.success && response.data.data?.token) {
-        localStorage.setItem("authToken", response.data.data.token);
-        const userData =
-          response.data.data.nhan_vien ||
-          response.data.data.khach_hang ||
-          response.data.data.user;
+        const data = response.data.data;
+
+        localStorage.setItem("authToken", data.token);
+
+        const userData = {
+          ...data.tai_khoan,
+          ...(data.nhan_vien || data.khach_hang || {}),
+          loai: data.tai_khoan?.loai,
+          vai_tro: data.nhan_vien?.vai_tro || data.tai_khoan?.loai,
+          nhan_vien_id: data.nhan_vien?.id || null,
+          khach_hang_id: data.khach_hang?.id || null,
+        };
+
         localStorage.setItem("user", JSON.stringify(userData));
       }
 
