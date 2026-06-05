@@ -22,7 +22,7 @@ function Profile() {
     const layThongTinTaiKhoan = async () => {
       try {
         if (!authService.isAuthenticated()) {
-          navigate("/dang-nhap");
+          navigate("/auth/dang-nhap");
           return;
         }
 
@@ -33,10 +33,7 @@ function Profile() {
         setUser(currentUser);
         setFormData({
           ho_ten:
-            currentUser?.ho_ten ||
-            currentUser?.hoTen ||
-            currentUser?.ten ||
-            "",
+            currentUser?.ho_ten || currentUser?.hoTen || currentUser?.ten || "",
           email: currentUser?.email || "",
           sdt:
             currentUser?.sdt ||
@@ -61,7 +58,7 @@ function Profile() {
 
   const handleLogout = () => {
     authService.dangXuat();
-    navigate("/dang-nhap");
+    navigate("/auth/dang-nhap");
   };
 
   const handleChange = (e) => {
@@ -119,21 +116,13 @@ function Profile() {
 
   const getFullName = () => {
     return (
-      user?.ho_ten ||
-      user?.hoTen ||
-      user?.ten ||
-      user?.name ||
-      "Chưa cập nhật"
+      user?.ho_ten || user?.hoTen || user?.ten || user?.name || "Chưa cập nhật"
     );
   };
 
   const getPhoneRaw = () => {
     return (
-      user?.sdt ||
-      user?.so_dien_thoai ||
-      user?.soDienThoai ||
-      user?.phone ||
-      ""
+      user?.sdt || user?.so_dien_thoai || user?.soDienThoai || user?.phone || ""
     );
   };
 
@@ -142,12 +131,7 @@ function Profile() {
   };
 
   const getAddressRaw = () => {
-    return (
-      user?.dia_chi ||
-      user?.diaChi ||
-      user?.address ||
-      ""
-    );
+    return user?.dia_chi || user?.diaChi || user?.address || "";
   };
 
   const getAddress = () => {
