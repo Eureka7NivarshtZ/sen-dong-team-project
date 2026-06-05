@@ -77,7 +77,7 @@ const authService = {
     try {
       const response = await apiClient.post("/auth/dat-lai-mat-khau", {
         token,
-        matKhauMoi,
+        mat_khau_moi: matKhauMoi,
       });
 
       return response.data;
@@ -103,6 +103,23 @@ const authService = {
       return {
         success: false,
         error: error.response?.data?.error || "Lấy thông tin thất bại",
+      };
+    }
+  },
+
+  capNhatThongTinCuaToi: async (data) => {
+    try {
+      const response = await apiClient.put("/auth/thong-tin", data);
+
+      if (response.data.success) {
+        localStorage.setItem("user", JSON.stringify(response.data.data));
+      }
+
+      return response.data;
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.error || "Cập nhật thông tin thất bại",
       };
     }
   },
