@@ -2,16 +2,24 @@ import { test, expect } from "@playwright/test";
 
 test.describe("Nhóm 3: Quản trị viên (Admin)", () => {
   // Ép robot phải đăng nhập quyền Admin trước khi test các chức năng dưới
+  // Ép robot phải đăng nhập quyền Admin trước khi test các chức năng dưới
   test.beforeEach(async ({ page }) => {
     await page.goto("http://localhost:5173/auth/dang-nhap");
-    await page.locator('input[type="email"]').fill("admin@example.com");
+    
+    // 💡 XÓA HẲN chữ "admin@example.com" đi, thay bằng Email admin thật trong DB của bạn
+    await page.locator('input[type="email"]').fill("admin@example.com ");
+    
+    // 💡 XÓA HẲN chữ "12345678" đi, thay bằng Mật khẩu thật tương ứng
     await page.locator('input[type="password"]').fill("12345678");
+    
     await page.getByRole("button", { name: /đăng nhập/i }).click();
     await expect(page).toHaveURL("http://localhost:5173/admin", {
       timeout: 7000,
     });
   });
 
+  // --- CHỨC NĂNG 8: QUẢN LÝ SẢN PHẨM ---
+  // (Giữ nguyên toàn bộ phần code phía dưới của bạn...)
   // --- CHỨC NĂNG 8: QUẢN LÝ SẢN PHẨM ---
   // --- CHỨC NĂNG 8: QUẢN LÝ SẢN PHẨM ---
   test("Admin - Thêm sản phẩm không thành công do thiếu Giá tiền", async ({
