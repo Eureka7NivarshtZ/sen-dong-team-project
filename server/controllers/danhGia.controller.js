@@ -7,11 +7,12 @@ const {
   NhanVien,
 } = require("../models");
 
+// ========== XEM ĐÁNH GIÁ CÔNG KHAI THEO TRANH ==========
 const xemDanhGiaTheoTranh = async (req, res) => {
   const { tranhId } = req.params;
 
   const danhSachDanhGia = await DanhGia.findAll({
-    where: { tranh_id: tranhId, trang_thai: "hien" },
+    where: { tranh_id: tranhId, trang_thai: "hien" }, // 🌟 Đã khớp chuẩn trạng thái hiển thị luôn
     include: [
       { model: KhachHang, as: "khach_hang", attributes: ["id", "ho_ten"] },
       {
@@ -20,7 +21,7 @@ const xemDanhGiaTheoTranh = async (req, res) => {
         attributes: ["id", "ho_ten"],
       },
     ],
-    order: [["tao_luc", "DESC"]],
+    order: [["id", "DESC"]], // Sắp xếp đánh giá mới nhất lên đầu
   });
 
   res.json({
@@ -30,6 +31,7 @@ const xemDanhGiaTheoTranh = async (req, res) => {
   });
 };
 
+// ========== KHÁCH HÀNG TẠO ĐÁNH GIÁ (BỎ QUA DUYỆT) ==========
 const taoDanhGia = async (req, res) => {
   const { tranh_id, don_hang_id, so_sao, noi_dung, hinh_anh_url } = req.body;
   const khach_hang_id = req.user.khach_hang_id;
@@ -92,6 +94,7 @@ const taoDanhGia = async (req, res) => {
     });
   }
 
+  // 🌟 ĐÃ SỬA CHỖ NÀY: Thay 'cho_duyet' thành 'hien' để lưu xuống SQL ăn ngay lập tức!
   const danhGia = await DanhGia.create({
     khach_hang_id,
     tranh_id,
@@ -99,16 +102,15 @@ const taoDanhGia = async (req, res) => {
     so_sao,
     noi_dung,
     hinh_anh_url,
-    trang_thai: "cho_duyet",
+    trang_thai: "hien", 
   });
 
   res.status(201).json({
     success: true,
-    message: "Gui danh gia thanh cong, vui long cho duyet",
+    message: "Gui danh gia thanh cong và hiển thị công khai!",
     data: danhGia,
   });
 };
-
 const xemDanhGiaCuaToi = async (req, res) => {
   const khach_hang_id = req.user.khach_hang_id;
 
@@ -117,7 +119,7 @@ const xemDanhGiaCuaToi = async (req, res) => {
     include: [
       { model: Tranh, as: "tranh", attributes: ["id", "ten_tranh", "gia_ban"] },
     ],
-    order: [["tao_luc", "DESC"]],
+    order: [["id", "DESC"]],
   });
 
   res.json({
@@ -138,7 +140,7 @@ const adminXemTatCaDanhGia = async (req, res) => {
       { model: KhachHang, as: "khach_hang", attributes: ["id", "ho_ten"] },
       { model: Tranh, as: "tranh", attributes: ["id", "ten_tranh"] },
     ],
-    order: [["tao_luc", "DESC"]],
+    order: [["id", "DESC"]],
   });
 
   res.json({

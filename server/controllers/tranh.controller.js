@@ -202,35 +202,22 @@ const taoTranh = async (req, res) => {
 
 const capNhatTranh = async (req, res) => {
   const { id } = req.params;
-  const { hinh_anh_url } = req.body;
+  // Bốc tách riêng hinh_anh_url ra khỏi dữ liệu cập nhật tranh
+  const { hinh_anh_url, ...tranhUpdateData } = req.body; 
 
   const tranh = await Tranh.findByPk(id);
-
   if (!tranh) {
-    return res.status(404).json({
-      success: false,
-      error: "Khong tim thay tranh",
-    });
+    return res.status(404).json({ success: false, error: "Khong tim thay tranh" });
   }
 
-  if (
-    req.body.so_luong_ton !== undefined &&
-    Number(req.body.so_luong_ton) < 0
-  ) {
-    return res.status(400).json({
-      success: false,
-      error: "Số lượng tồn không được nhỏ hơn 0",
-    });
-  }
-
-  const tranhData = {
-    ...req.body,
+  // Cập nhật các trường hợp lệ của bảng tranh (không dính dáng tới hinh_anh_url)
+  await tranh.update({
+    ...tranhUpdateData,
     cap_nhat_luc: new Date(),
-  };
+  });
 
-  await tranh.update(tranhData);
-
-  if (hinh_anh_url) {
+  // Xử lý hình ảnh riêng
+  if (hinh_anh_url !== undefined) {
     const anhChinh = await HinhAnhTranh.findOne({
       where: { tranh_id: id, la_chinh: true },
     });
