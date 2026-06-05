@@ -5,7 +5,7 @@ const KhachHang = require("./KhachHang.js");
 const NhanVien = require("./NhanVien.js");
 
 const Tranh = require("./Tranh.js");
-const HinhAnhTranh = require("./HinhAnhTranh");
+const HinhAnhTranh = require("./HinhAnhTranh.js");
 const TacGia = require("./TacGia.js");
 const DanhMuc = require("./DanhMuc.js");
 const DanhGia = require("./DanhGia.js");
@@ -27,10 +27,7 @@ const DonHangChiTiet = require("./DonHangChiTiet.js");
 const HoaDon = require("./HoaDon.js");
 const ThanhToan = require("./ThanhToan.js");
 
-// 🌟 ĐÃ THÊM: Require Model Chăm sóc khách hàng mới
-const ChamSocKhachHang = require("./ChamSocKhachHang.js");
-
-// Quan he tai khoan
+// ==================== TÀI KHOẢN - NHÂN VIÊN ====================
 TaiKhoan.hasOne(NhanVien, {
   foreignKey: "tai_khoan_id",
   as: "nhan_vien",
@@ -41,6 +38,7 @@ NhanVien.belongsTo(TaiKhoan, {
   as: "tai_khoan",
 });
 
+// ==================== TÀI KHOẢN - KHÁCH HÀNG ====================
 TaiKhoan.hasOne(KhachHang, {
   foreignKey: "tai_khoan_id",
   as: "khach_hang",
@@ -51,7 +49,7 @@ KhachHang.belongsTo(TaiKhoan, {
   as: "tai_khoan",
 });
 
-// Quan he tranh
+// ==================== TRANH - HÌNH ẢNH ====================
 Tranh.hasMany(HinhAnhTranh, {
   foreignKey: "tranh_id",
   as: "hinh_anh",
@@ -62,6 +60,7 @@ HinhAnhTranh.belongsTo(Tranh, {
   as: "tranh",
 });
 
+// ==================== TÁC GIẢ - TRANH ====================
 TacGia.hasMany(Tranh, {
   foreignKey: "tac_gia_id",
   as: "tranh",
@@ -72,6 +71,7 @@ Tranh.belongsTo(TacGia, {
   as: "tac_gia",
 });
 
+// ==================== DANH MỤC - TRANH ====================
 DanhMuc.hasMany(Tranh, {
   foreignKey: "danh_muc_id",
   as: "tranh",
@@ -82,30 +82,15 @@ Tranh.belongsTo(DanhMuc, {
   as: "danh_muc",
 });
 
-// Đánh giá
-DanhGia.belongsTo(KhachHang, {
-  foreignKey: "khach_hang_id",
-  as: "khach_hang",
-});
-
-DanhGia.belongsTo(Tranh, {
-  foreignKey: "tranh_id",
-  as: "tranh",
-});
-
-DanhGia.belongsTo(DonHang, {
-  foreignKey: "don_hang_id",
-  as: "don_hang",
-});
-
-DanhGia.belongsTo(NhanVien, {
-  foreignKey: "nhan_vien_phan_hoi_id",
-  as: "nhan_vien_phan_hoi",
-});
-
+// ==================== ĐÁNH GIÁ ====================
 KhachHang.hasMany(DanhGia, {
   foreignKey: "khach_hang_id",
   as: "danh_gia",
+});
+
+DanhGia.belongsTo(KhachHang, {
+  foreignKey: "khach_hang_id",
+  as: "khach_hang",
 });
 
 Tranh.hasMany(DanhGia, {
@@ -113,7 +98,32 @@ Tranh.hasMany(DanhGia, {
   as: "danh_gia",
 });
 
-// Quan he gio hang
+DanhGia.belongsTo(Tranh, {
+  foreignKey: "tranh_id",
+  as: "tranh",
+});
+
+DonHang.hasMany(DanhGia, {
+  foreignKey: "don_hang_id",
+  as: "danh_gia",
+});
+
+DanhGia.belongsTo(DonHang, {
+  foreignKey: "don_hang_id",
+  as: "don_hang",
+});
+
+NhanVien.hasMany(DanhGia, {
+  foreignKey: "nhan_vien_phan_hoi_id",
+  as: "danh_gia_phan_hoi",
+});
+
+DanhGia.belongsTo(NhanVien, {
+  foreignKey: "nhan_vien_phan_hoi_id",
+  as: "nhan_vien_phan_hoi",
+});
+
+// ==================== GIỎ HÀNG ====================
 KhachHang.hasOne(GioHang, {
   foreignKey: "khach_hang_id",
   as: "gio_hang",
@@ -122,16 +132,6 @@ KhachHang.hasOne(GioHang, {
 GioHang.belongsTo(KhachHang, {
   foreignKey: "khach_hang_id",
   as: "khach_hang",
-});
-
-Tranh.hasMany(GioHangChiTiet, {
-  foreignKey: "tranh_id",
-  as: "gio_hang_chi_tiet",
-});
-
-GioHangChiTiet.belongsTo(Tranh, {
-  foreignKey: "tranh_id",
-  as: "tranh",
 });
 
 GioHang.hasMany(GioHangChiTiet, {
@@ -144,7 +144,20 @@ GioHangChiTiet.belongsTo(GioHang, {
   as: "gio_hang",
 });
 
-// Don hang
+Tranh.hasMany(GioHangChiTiet, {
+  foreignKey: "tranh_id",
+  as: "gio_hang_chi_tiet",
+});
+
+GioHangChiTiet.belongsTo(Tranh, {
+  foreignKey: "tranh_id",
+  as: "tranh",
+});
+
+// ==================== ĐƠN HÀNG ====================
+// Quan trọng:
+// Query từ KhachHang include DonHang phải dùng as: "don_hang"
+// Query từ DonHang include KhachHang phải dùng as: "khach_hang"
 KhachHang.hasMany(DonHang, {
   foreignKey: "khach_hang_id",
   as: "don_hang",
@@ -165,16 +178,6 @@ DonHang.belongsTo(NhanVien, {
   as: "nhan_vien",
 });
 
-Tranh.hasMany(DonHangChiTiet, {
-  foreignKey: "tranh_id",
-  as: "don_hang_chi_tiet",
-});
-
-DonHangChiTiet.belongsTo(Tranh, {
-  foreignKey: "tranh_id",
-  as: "tranh",
-});
-
 DonHang.hasMany(DonHangChiTiet, {
   foreignKey: "don_hang_id",
   as: "chi_tiet",
@@ -185,7 +188,17 @@ DonHangChiTiet.belongsTo(DonHang, {
   as: "don_hang",
 });
 
-// Van chuyen
+Tranh.hasMany(DonHangChiTiet, {
+  foreignKey: "tranh_id",
+  as: "don_hang_chi_tiet",
+});
+
+DonHangChiTiet.belongsTo(Tranh, {
+  foreignKey: "tranh_id",
+  as: "tranh",
+});
+
+// ==================== ĐƠN VỊ VẬN CHUYỂN ====================
 DonViVanChuyen.hasMany(DonHang, {
   foreignKey: "don_vi_van_chuyen_id",
   as: "don_hang",
@@ -196,7 +209,7 @@ DonHang.belongsTo(DonViVanChuyen, {
   as: "don_vi_van_chuyen",
 });
 
-// Hoa don - Thanh toan
+// ==================== HÓA ĐƠN - THANH TOÁN ====================
 DonHang.hasMany(HoaDon, {
   foreignKey: "don_hang_id",
   as: "hoa_don",
@@ -207,9 +220,15 @@ HoaDon.belongsTo(DonHang, {
   as: "don_hang",
 });
 
+// Hóa đơn gốc / hóa đơn điều chỉnh
 HoaDon.belongsTo(HoaDon, {
   foreignKey: "hoa_don_goc_id",
   as: "hoa_don_goc",
+});
+
+HoaDon.hasMany(HoaDon, {
+  foreignKey: "hoa_don_goc_id",
+  as: "hoa_don_dieu_chinh",
 });
 
 HoaDon.hasMany(ThanhToan, {
@@ -222,6 +241,7 @@ ThanhToan.belongsTo(HoaDon, {
   as: "hoa_don",
 });
 
+// ==================== KHUYẾN MÃI - TRANH ====================
 KhuyenMai.belongsToMany(Tranh, {
   through: KhuyenMaiTranh,
   foreignKey: "khuyen_mai_id",
@@ -236,6 +256,7 @@ Tranh.belongsToMany(KhuyenMai, {
   as: "khuyen_mai",
 });
 
+// ==================== KHUYẾN MÃI - DANH MỤC ====================
 KhuyenMai.belongsToMany(DanhMuc, {
   through: KhuyenMaiDanhMuc,
   foreignKey: "khuyen_mai_id",
@@ -250,6 +271,7 @@ DanhMuc.belongsToMany(KhuyenMai, {
   as: "khuyen_mai",
 });
 
+// ==================== LỊCH SỬ SỬ DỤNG KHUYẾN MÃI ====================
 KhuyenMai.hasMany(LichSuSuDungKhuyenMai, {
   foreignKey: "khuyen_mai_id",
   as: "lich_su_su_dung",
@@ -280,7 +302,7 @@ LichSuSuDungKhuyenMai.belongsTo(DonHang, {
   as: "don_hang",
 });
 
-// KhuyenMai - DonHang
+// ==================== KHUYẾN MÃI - ĐƠN HÀNG ====================
 KhuyenMai.hasMany(DonHang, {
   foreignKey: "khuyen_mai_id",
   as: "don_hang",
@@ -291,46 +313,55 @@ DonHang.belongsTo(KhuyenMai, {
   as: "khuyen_mai",
 });
 
+// ==================== THÔNG BÁO ====================
+KhachHang.hasMany(ThongBao, {
+  foreignKey: "khach_hang_id",
+  as: "thong_bao",
+});
+
 ThongBao.belongsTo(KhachHang, {
   foreignKey: "khach_hang_id",
   as: "khach_hang",
 });
 
-ThongBao.belongsTo(NhanVien, { foreignKey: "nhan_vien_id", as: "nhan_vien" });
-
-// 🌟 ĐÃ THÊM: Quan he ChamSocKhachHang - KhachHang
-KhachHang.hasMany(ChamSocKhachHang, {
-  foreignKey: "khach_hang_id",
-  as: "cham_soc_khach_hang",
+NhanVien.hasMany(ThongBao, {
+  foreignKey: "nhan_vien_id",
+  as: "thong_bao",
 });
 
-ChamSocKhachHang.belongsTo(KhachHang, {
-  foreignKey: "khach_hang_id",
-  as: "khach_hang",
+ThongBao.belongsTo(NhanVien, {
+  foreignKey: "nhan_vien_id",
+  as: "nhan_vien",
 });
 
+// ==================== EXPORT ====================
 module.exports = {
   sequelize,
+
   TaiKhoan,
   KhachHang,
   NhanVien,
+
   Tranh,
   HinhAnhTranh,
   TacGia,
   DanhMuc,
-  GioHang,
-  GioHangChiTiet,
-  DonHang,
-  DonHangChiTiet,
-  DonViVanChuyen,
-  HoaDon,
-  ThanhToan,
   DanhGia,
+
   KhuyenMai,
   KhuyenMaiDanhMuc,
   KhuyenMaiTranh,
   LichSuSuDungKhuyenMai,
+
   ThongBao,
-  // 🌟 ĐÃ THÊM: Export Model ra de Controller su dung công khai
-  ChamSocKhachHang
+
+  GioHang,
+  GioHangChiTiet,
+
+  DonViVanChuyen,
+  DonHang,
+  DonHangChiTiet,
+
+  HoaDon,
+  ThanhToan,
 };
