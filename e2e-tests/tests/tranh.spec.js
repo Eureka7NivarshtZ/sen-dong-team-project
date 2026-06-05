@@ -1,125 +1,178 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Nhóm 2: Mua sắm & Khách hàng", () => {
-  // Tự động vào trang chủ trước mỗi bài test
+  
+  // 🎯 TỰ ĐỘNG VÀO TRANG CHỦ (ĐÃ SỬA: Đổi chế độ chờ domcontentloaded để không bị treo màn hình trắng)
   test.beforeEach(async ({ page }) => {
-    await page.goto("http://localhost:5173/", { waitUntil: "networkidle" });
+    await page.goto("http://localhost:5173/", { waitUntil: "domcontentloaded", timeout: 10000 });
   });
 
   // --- CHỨC NĂNG 3: TÌM KIẾM SẢN PHẨM ---
-  test("Tìm kiếm - Hiển thị lỗi khi tìm từ khóa không tồn tại", async ({
-    page,
-  }) => {
+  test("Tìm kiếm - Hiển thị lỗi khi tìm từ khóa không tồn tại", async ({ page }) => {
     // Nếu trang chủ chưa có ô tìm kiếm, robot sẽ nhảy thẳng vào trang bộ sưu tập để tìm
-    await page.getByRole("button", { name: /khám phá bộ sưu tập/i }).click();
-    await page.waitForLoadState("networkidle");
+    const btnKhamPha = page.getByRole("button", { name: /khám phá bộ sưu tập/i });
+    if (await btnKhamPha.isVisible()) {
+      await btnKhamPha.click();
+    } else {
+      await page.goto("http://localhost:5173/tranh", { waitUntil: "domcontentloaded" });
+    }
 
-    // Tìm ô input nhập từ khóa (Sửa selector nếu class/placeholder của bạn khác)
+    // Tìm ô input nhập từ khóa
     const searchInput = page
-      .locator(
-        'input[type="text"], input[placeholder*="tìm"], input[placeholder*="Search"]',
-      )
+      .locator('input[type="text"], input[placeholder*="tìm"], input[placeholder*="Search"]')
       .first();
 
     if (await searchInput.isVisible()) {
       await searchInput.fill("từ_khóa_không_có_thật_123");
       await page.keyboard.press("Enter");
-      // Kiểm tra URL không đổi hoặc hiển thị thông báo trống
-      await expect(
-        page.locator("text=Không tìm thấy sản phẩm nào"),
-      ).toBeVisible();
+      // Kiểm tra thông báo trống
+      await expect(page.locator("text=Không tìm thấy sản phẩm nào")).toBeVisible({ timeout: 5000 });
     } else {
-      console.log(
-        "Không tìm thấy ô tìm kiếm trực diện, bỏ qua test để không bị lỗi treo.",
-      );
+      console.log("Không tìm thấy ô tìm kiếm trực diện, bỏ qua test để không bị lỗi treo.");
     }
   });
 
   // --- CHỨC NĂNG 4: THÊM VÀO GIỎ HÀNG ---
   test("Giỏ hàng - Tăng số lượng khi bấm thêm vào giỏ", async ({ page }) => {
-    // 1. Click chuyển sang trang Bộ sưu tập
-    await page.getByRole("button", { name: /khám phá bộ sưu tập/i }).click();
-    await page.waitForLoadState("networkidle");
+    // Vì beforeEach đã vào trang chủ, ở đây chỉ cần điều hướng tiếp sang trang /tranh
+    await page.goto("http://localhost:5173/tranh", { 
+      waitUntil: "domcontentloaded", 
+      timeout: 10000 
+    });
 
-    // 2. Click vào tên hoặc hình ảnh của sản phẩm đầu tiên (Ví dụ click vào chữ "Hồng" hoặc sản phẩm đầu)
-    // Robot sẽ nhấp vào thẻ chứa tên sản phẩm để mở trang chi tiết
-    const sanPhamDauTien = page
-      .locator("text=Hồng, text=Lốp, text=Hanh")
-      .first();
-    if (await sanPhamDauTien.isVisible()) {
-      await sanPhamDauTien.click();
-    } else {
-      // Nếu không tìm thấy text cụ thể, click đại vào một cái link/hình ảnh sản phẩm đầu tiên
-      await page.locator("img").first().click();
-    }
+    // Chờ 2 giây cố định cho dữ liệu đổ ra ổn định
+    await page.waitForTimeout(2000); 
 
-    // Đợi trang chi tiết sản phẩm load xong
-    await page.waitForLoadState("networkidle");
+    // Robot tự động tìm và click vào hình ảnh của sản phẩm đầu tiên xuất hiện trên màn hình
+    const sanPham = page.locator("img").first();
+    await expect(sanPham).toBeVisible({ timeout: 5000 });
+    await sanPham.click();
 
-    // 3. Lúc này đã ở trang chi tiết, robot tìm nút "Thêm vào giỏ" thực tế
+    // Tiến hành tìm nút "Thêm vào giỏ" ở trang chi tiết
     const btnThemGio = page.locator(
       'button:has-text("Thêm vào giỏ"), button:has-text("Mua"), button:has-text("Giỏ hàng")',
-    );
+    ).first();
+    
     await expect(btnThemGio).toBeVisible({ timeout: 5000 });
     await btnThemGio.click();
 
-    console.log(
-      "Đã vào trang chi tiết và click nút thêm vào giỏ hàng thành công.",
-    );
+    console.log("Đã tự động thêm sản phẩm vào giỏ hàng thành công.");
   });
 
   // --- CHỨC NĂNG 5 & 6: THANH TOÁN VÀ THEO DÕI ĐƠN ---
-  test("Thanh toán - Không cho phép thanh toán giỏ hàng trống", async ({
-    page,
-  }) => {
-    // Thử truy cập thẳng vào trang giỏ hàng/thanh toán của bạn
-    await page
-      .goto("http://localhost:5173/gio-hang", { waitUntil: "networkidle" })
-      .catch(() => page.goto("http://localhost:5173/gio-hang"));
+  test("Thanh toán - Không cho phép thanh toán giỏ hàng trống", async ({ page }) => {
+    await page.goto("http://localhost:5173/gio-hang", { waitUntil: "domcontentloaded" });
 
-    // Nút đặt hàng/thanh toán nếu có thì không được cho phép xử lý khi giỏ trống
     const btnThanhToan = page.locator(
       'button:has-text("Thanh toán"), button:has-text("Đặt hàng")',
-    );
+    ).first();
+    
     if (await btnThanhToan.isVisible()) {
       await expect(btnThanhToan).not.toBeEnabled();
     }
   });
 
   // --- CHỨC NĂNG 9: CHĂM SÓC KHÁCH HÀNG (LIÊN KẾT ZALO) ---
-  test("Hỗ trợ - Click biểu tượng chat mở đúng link liên kết Zalo", async ({
-    page,
-    context,
-  }) => {
-    // 1. Chuyển hướng sang trang Bộ sưu tập
-    await page.getByRole("button", { name: /khám phá bộ sưu tập/i }).click();
-    await page.waitForLoadState("networkidle");
-
-    // 2. Nhắm vào cái bong bóng chat hình tròn màu xanh nằm ở góc màn hình.
-    // Dựa vào giao diện của bạn, đây là selector quét chuẩn nhất theo icon svg hoặc vị trí cố định
+  test("Hỗ trợ - Click biểu tượng chat mở đúng link liên kết Zalo", async ({ page, context }) => {
+    // Nhắm vào cái bong bóng chat hình tròn màu xanh nằm ở góc màn hình.
     const zaloBubble = page
       .locator('.fixed, [class*="fixed"], button, div')
       .filter({ has: page.locator("svg") })
       .last();
 
-    // Đợi 5 giây cho nút xuất hiện hẳn trên UI
     await expect(zaloBubble).toBeVisible({ timeout: 5000 });
 
-    // 3. Thiết lập lệnh đợi robot hứng một Tab mới chuẩn bị mở ra sau khi click
+    // Thiết lập lệnh đợi robot hứng một Tab mới chuẩn bị mở ra sau khi click
     const pagePromise = context.waitForEvent("page");
 
-    // 4. Robot thực hiện hành động click vào nút tròn màu xanh đó
+    // Click vào nút tròn màu xanh đó
     await zaloBubble.click();
 
-    // 5. Bắt lấy tab mới vừa được mở ra
+    // Bắt lấy tab mới vừa được mở ra
     const newTab = await pagePromise;
     await newTab.waitForLoadState("domcontentloaded").catch(() => {});
 
-    // 6. KIỂM TRA CHÍNH XÁC: Đường link của tab mới phải chứa địa chỉ "zalo.me"
+    // Kiểm tra đường link của tab mới phải chứa địa chỉ "zalo.me"
     await expect(newTab).toHaveURL(/.*zalo\.me.*/);
 
-    console.log(
-      "Đã kiểm tra luồng: Biểu tượng chat mở đúng tab liên kết Zalo thành công!",
-    );
+    console.log("Đã kiểm tra luồng liên kết Zalo thành công!");
+  });
+ // --- CHỨC NĂNG: ĐÁNH GIÁ SẢN PHẨM SAU KHI ĐẶT HÀNG ---
+  test("Khách hàng - Chỉ hiển thị nút Đánh giá khi đơn hàng ở trạng thái Đang giao hoặc Hoàn thành", async ({ page }) => {
+    test.setTimeout(25000); // Tăng thời gian chờ tổng lên 25 giây cho thoải mái
+
+    // 1. Vào trang đăng nhập tài khoản khách hàng
+    await page.goto("http://localhost:5173/auth/dang-nhap", { waitUntil: "domcontentloaded" });
+    await page.locator('input[type="email"]').fill("khachhang@example.com");
+    await page.locator('input[type="password"]').fill("12345678");
+    await page.getByRole("button", { name: /đăng nhập/i }).click();
+    
+    await page.waitForTimeout(2000); 
+
+    // 2. Click vào biểu tượng Avatar ở góc trên bên phải
+    const avatar = page.locator('img[src*="avatar"], .avatar, button:has(svg), [class*="user"]').first();
+    await expect(avatar).toBeVisible({ timeout: 5000 });
+    await avatar.click();
+
+    // 3. Click chọn mục "Đơn hàng của tôi"
+    const menuDonHang = page.getByText(/đơn hàng của tôi/i).first();
+    await expect(menuDonHang).toBeVisible({ timeout: 5000 });
+    await menuDonHang.click();
+
+    // Đợi 3 giây cho trang danh sách đơn hàng kịp load dữ liệu ra màn hình
+    await page.waitForTimeout(3000);
+
+    await page.waitForURL(/.*don-hang.*/, { timeout: 10000 });
+    await page.waitForLoadState("domcontentloaded");
+    await page.waitForTimeout(2000);
+
+    // Tìm ô select dropdown lọc trạng thái (ô đang hiển thị chữ "Tất cả trạng thái" hoặc có thẻ select)
+    const boLocTrangThai = page.locator('select, [class*="select"], [class*="dropdown"]').first();
+    
+    if (await boLocTrangThai.isVisible()) {
+      // Cách 1: Nếu là thẻ <select> chuẩn của HTML, chọn trực tiếp bằng value hoặc label
+      await boLocTrangThai.selectOption({ label: 'Hoàn thành' }).catch(async () => {
+        // Cách 2: Nếu là thẻ div/custom UI, click mở ra rồi bấm vào chữ "Hoàn thành"
+        await boLocTrangThai.click();
+        await page.locator('text="Hoàn thành"').last().click();
+      });
+      
+      console.log("-> Robot đã click chọn bộ lọc: Hoàn thành");
+      // Đợi 2 giây cho Front-end và Back-end lọc lại danh sách đơn hàng mới
+      await page.waitForTimeout(2000);
+    }
+
+    // 4. Lúc này giao diện chỉ còn các đơn hàng đã Hoàn thành, Robot nhặt khối đơn đầu tiên
+    const donHangDauTien = page.locator('div, tr, .order-item, [class*="order"]')
+      .filter({ hasText: /DH|Đơn hàng|Chi tiết|Trạng thái/i })
+      .first();
+
+    if (await donHangDauTien.isVisible()) {
+      const textNoiDungDon = await donHangDauTien.innerText();
+      console.log(`-> Robot quét thấy đơn sau khi lọc: "${textNoiDungDon.replace(/\n/g, ' ')}"`);
+
+      // 5. Bấm đích danh vào chữ "Xem chi tiết" nằm bên trong khối đơn hàng đó
+        const btnXemChiTiet = donHangDauTien.getByText('Xem chi tiết', { exact: false }).first();
+        await expect(btnXemChiTiet).toBeVisible({ timeout: 5000 });
+        await btnXemChiTiet.click();
+
+        // Ép Robot đợi đường link chuyển sang trang chi tiết
+        // (Bắt buộc phải đợi để tránh quét nhầm giao diện cũ)
+        await page.waitForTimeout(3000);
+
+      // Định vị nút Đánh giá trong trang chi tiết
+       const btnDanhGia = page.getByText(/đánh giá/i).first();
+      // 6. KIỂM TRA PHÂN QUYỀN TỰ ĐỘNG THEO DỮ LIỆU THỰC TẾ
+      if (textNoiDungDon.includes("Đang giao") || textNoiDungDon.includes("Hoàn thành") || textNoiDungDon.includes("dang_giao") || textNoiDungDon.includes("hoan_thanh")) {
+        await expect(btnDanhGia).toBeVisible({ timeout: 5000 });
+        console.log("✅ THÀNH CÔNG: Đơn hàng Đã hoàn thành/Đang giao -> Nút Đánh giá ĐÃ hiển thị đúng!");
+      } else {
+        await expect(btnDanhGia).not.toBeVisible({ timeout: 5000 });
+        console.log("✅ THÀNH CÔNG: Đơn hàng ở trạng thái khác -> Nút Đánh giá KHÔNG hiển thị!");
+      }
+    } else {
+      // Trường hợp tài khoản này thực sự chưa có đơn hoàn thành nào (số 6 ở tab Hoàn thành nhưng bộ lọc trống)
+      console.log("⚠️ Thông báo: Không tìm thấy khối đơn hàng nào sau khi chọn bộ lọc.");
+    }
   });
 });
