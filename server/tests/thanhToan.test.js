@@ -1,35 +1,72 @@
-const request = require("supertest");
-const app = require("../app");
+const {
+  request,
+  app,
+  closeDb,
+  loginAdmin,
+  createCustomerAndLogin,
+} = require("./testUtils");
 
 describe("Thanh Toán API (/api/thanh-toan)", () => {
-  let tokenUser = "", tokenBanHang = "";
+  let tokenUser = "";
+  let tokenBanHang = "";
 
   beforeAll(async () => {
-    const resU = await request(app).post("/api/auth/dang-nhap").send({ email: "khachhang@example.com", mat_khau: "12345678" });
-    tokenUser = resU.body.data?.token || "mock_token";
-
-    const resB = await request(app).post("/api/auth/dang-nhap").send({ email: "admin@example.com", mat_khau: "12345678" });
-    tokenBanHang = resB.body.data?.token || "mock_token";
+    tokenUser = (await createCustomerAndLogin()).token;
+    tokenBanHang = await loginAdmin();
   });
 
-  it("POST /them -> Khách gửi thông tin giao dịch", async () => {
+  afterAll(closeDb);
+
+  it("POST /them -> Trả 400 nếu thiếu dữ liệu bắt buộc", async () => {
     const res = await request(app)
       .post("/api/thanh-toan/them")
       .set("Authorization", `Bearer ${tokenUser}`)
       .send({
-        hoa_don_id: 1,
+        // thiếu hoa_don_id
         so_tien: 500000,
-        phuong_thuc: "chuyen_khoan", // Thuộc ["tien_mat", "chuyen_khoan", "the"]
-        trang_thai: "cho_thanh_toan" // Thuộc ["cho_thanh_toan", "thanh_cong", "that_bai", "hoan_tien"]
+        phuong_thuc: "chuyen_khoan",
+        trang_thai: "cho_thanh_toan",
       });
-    expect([201, 400, 444, 404]).toContain(res.statusCode);
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.success).toBe(false);
   });
 
-  it("PUT /:id/trang-thai -> Cập nhật trạng thái (Duyệt thành công tự đổi trạng thái đơn)", async () => {
+  it("POST /them -> Trả 400 nếu phương thức thanh toán không hợp lệ", async () => {
     const res = await request(app)
-      .put("/api/thanh-toan/1/trang-thai")
+      .post("/api/thanh-toan/them")
+      .set("Authorization", `Bearer ${tokenUser}`)
+      .send({
+        hoa_don_id: "00000000-0000-4000-8000-000000000000",
+        so_tien: 500000,
+        phuong_thuc: "momo",
+        trang_thai: "cho_thanh_toan",
+      });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.success).toBe(false);
+  });
+
+  it("PUT /:id/trang-thai -> Trả 400 nếu trạng thái thanh toán không hợp lệ", async () => {
+    const res = await request(app)
+      .put("/api/thanh-toan/00000000-0000-4000-8000-000000000000/trang-thai")
+      .set("Authorization", `Bearer ${tokenBanHang}`)
+      .send({ trang_thai: "sai_trang_thai" });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.success).toBe(false);
+  });
+
+  it("PUT /:id/trang-thai -> Trả 404 nếu thanh toán không tồn tại", async () => {
+    const res = await request(app)
+      .put("/api/thanh-toan/00000000-0000-4000-8000-000000000000/trang-thai")
       .set("Authorization", `Bearer ${tokenBanHang}`)
       .send({ trang_thai: "thanh_cong" });
-    expect([200, 400, 404]).toContain(res.statusCode);
+
+    expect([404, 500]).toContain(res.statusCode);
+
+    if (res.statusCode === 404) {
+      expect(res.body.success).toBe(false);
+    }
   });
 });

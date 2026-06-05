@@ -1,35 +1,40 @@
-const bcrypt = require("bcrypt");
-const { TaiKhoan, sequelize, KhachHang, DonHang } = require("../models");
+const { Op } = require("sequelize");
+const { TaiKhoan, KhachHang, DonHang } = require("../models");
 
 // ==================== ADMIN ====================
 const xemTatCaKhachHang = async (req, res) => {
   try {
-    const { search, page = 1, limit = 10 } = req.query;
+    const { search } = req.query;
 
-    let whereCondition = {};
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.max(parseInt(req.query.limit) || 10, 1);
+
+    const whereCondition = {};
 
     if (search) {
-      whereCondition = {
-        [require("sequelize").Op.or]: [
-          { ho_ten: { [require("sequelize").Op.like]: `%${search}%` } },
-          { sdt: { [require("sequelize").Op.like]: `%${search}%` } },
-        ],
-      };
+      whereCondition[Op.or] = [
+        { ho_ten: { [Op.like]: `%${search}%` } },
+        { sdt: { [Op.like]: `%${search}%` } },
+      ];
     }
 
     const danhSach = await KhachHang.findAndCountAll({
       where: whereCondition,
       include: [
-        { model: TaiKhoan, as: "tai_khoan" },
+        {
+          model: TaiKhoan,
+          as: "tai_khoan",
+        },
         {
           model: DonHang,
-          as: "khach_hang",
+          as: "don_hang", // đổi theo alias thật trong model của bạn
           required: false,
         },
       ],
+      distinct: true,
       order: [["tao_luc", "DESC"]],
       offset: (page - 1) * limit,
-      limit: parseInt(limit),
+      limit,
     });
 
     res.json({
@@ -37,10 +42,12 @@ const xemTatCaKhachHang = async (req, res) => {
       message: "Lay danh sach khach hang thanh cong",
       data: danhSach.rows,
       total: danhSach.count,
-      page: parseInt(page),
-      limit: parseInt(limit),
+      page,
+      limit,
     });
   } catch (error) {
+    console.error("Lỗi xemTatCaKhachHang:", error);
+
     res.status(500).json({
       success: false,
       error: error.message,
@@ -54,10 +61,14 @@ const xemChiTietKhachHang = async (req, res) => {
 
     const khachHang = await KhachHang.findByPk(id, {
       include: [
-        { model: TaiKhoan, as: "tai_khoan" },
+        {
+          model: TaiKhoan,
+          as: "tai_khoan",
+        },
         {
           model: DonHang,
-          as: "khach_hang",
+          as: "don_hang", // đổi theo alias thật
+          required: false,
         },
       ],
     });
@@ -75,6 +86,8 @@ const xemChiTietKhachHang = async (req, res) => {
       data: khachHang,
     });
   } catch (error) {
+    console.error("Lỗi xemChiTietKhachHang:", error);
+
     res.status(500).json({
       success: false,
       error: error.message,
@@ -87,13 +100,25 @@ const khoa_KhachHang = async (req, res) => {
     const { id } = req.params;
 
     const khachHang = await KhachHang.findByPk(id, {
-      include: [{ model: TaiKhoan, as: "tai_khoan" }],
+      include: [
+        {
+          model: TaiKhoan,
+          as: "tai_khoan",
+        },
+      ],
     });
 
     if (!khachHang) {
       return res.status(404).json({
         success: false,
         error: "Không tìm thấy khách hàng",
+      });
+    }
+
+    if (!khachHang.tai_khoan) {
+      return res.status(404).json({
+        success: false,
+        error: "Khách hàng chưa có tài khoản liên kết",
       });
     }
 
@@ -105,6 +130,8 @@ const khoa_KhachHang = async (req, res) => {
       data: khachHang,
     });
   } catch (error) {
+    console.error("Lỗi khoa_KhachHang:", error);
+
     res.status(500).json({
       success: false,
       error: error.message,
