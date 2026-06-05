@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { FaShoppingCart } from "react-icons/fa";
 import { tranhService, gioHangService, authService } from "../../services";
+import ReviewSection from "../../components/client/ReviewSection"; // 🌟 ĐÃ THÊM: Nhúng hộp bình luận vạn năng vào
 
 function ProductDetail() {
   const { id } = useParams();
@@ -77,13 +78,13 @@ function ProductDetail() {
     }
   };
 
-  // Tự động kiểm tra mảng hinh_anh, nếu trống gán chuỗi SVG offline bảo vệ giao diện[cite: 12]
   const hinhTranhBieuDien = product.hinh_anh && product.hinh_anh.length > 0 
     ? product.hinh_anh[0].url 
     : "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'><rect width='100%' height='100%' fill='%23f8f8f8'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='16' fill='%23999'>Sen Dong Art Gallery</text></svg>";
 
   return (
     <div style={{ width: "100%", backgroundColor: "#fff", fontFamily: "Arial, sans-serif", padding: "70px 120px 90px", boxSizing: "border-box" }}>
+      {/* LƯỚI THÔNG TIN CHI TIẾT TRANH */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "70px", alignItems: "start" }}>
         {/* HÌNH ẢNH SẢN PHẨM */}
         <div>
@@ -121,10 +122,14 @@ function ProductDetail() {
           </div>
         </div>
       </div>
+
+      {/* 🌟 ĐÃ THÊM: Khu vực đổ toàn bộ bình luận công khai dưới chân trang chi tiết sản phẩm */}
+      <ReviewSection tranhId={id} />
     </div>
   );
 }
 
 const quantityButtonStyle = { width: "36px", border: "none", backgroundColor: "#f7f7f7", cursor: "pointer", fontSize: "16px" };
 const radioLabelStyle = { display: "flex", alignItems: "center", gap: "6px", fontSize: "14px", color: "#333" };
+
 export default ProductDetail;
