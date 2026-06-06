@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Topbar from "../../components/admin/Topbar";
 import donHangService from "../../services/donHangService";
+import { dashboardService } from "../../services";
 
 const TRANG_THAI_OPTIONS = [
   { value: "", label: "Tất cả trạng thái" },
@@ -56,12 +57,7 @@ function parseMoney(value) {
 }
 
 function formatCurrency(value) {
-  const number = parseMoney(value);
-
-  return number.toLocaleString("vi-VN", {
-    style: "currency",
-    currency: "VND",
-  });
+  return parseMoney(value).toLocaleString("vi-VN") + " đ";
 }
 
 function parseOrderDate(value) {
@@ -72,7 +68,6 @@ function parseOrderDate(value) {
   }
 
   if (typeof value === "number") {
-    // Hỗ trợ cả timestamp giây và mili giây.
     const timestamp = value < 10000000000 ? value * 1000 : value;
     const date = new Date(timestamp);
 
@@ -83,13 +78,13 @@ function parseOrderDate(value) {
 
   if (!text) return null;
 
-  // MySQL DATETIME thường trả về dạng: 2026-06-06 15:30:20
   const mysqlDateTimeMatch = text.match(
     /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?/,
   );
 
   if (mysqlDateTimeMatch) {
     const [, year, month, day, hour, minute, second = "0"] = mysqlDateTimeMatch;
+
     const date = new Date(
       Number(year),
       Number(month) - 1,
@@ -102,7 +97,6 @@ function parseOrderDate(value) {
     return Number.isNaN(date.getTime()) ? null : date;
   }
 
-  // Hỗ trợ trường hợp backend trả về ngày dạng Việt Nam: 06/06/2026 15:30:20
   const vietnameseDateMatch = text.match(
     /^(\d{1,2})[/-](\d{1,2})[/-](\d{4})(?:\s+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?/,
   );
@@ -110,6 +104,7 @@ function parseOrderDate(value) {
   if (vietnameseDateMatch) {
     const [, day, month, year, hour = "0", minute = "0", second = "0"] =
       vietnameseDateMatch;
+
     const date = new Date(
       Number(year),
       Number(month) - 1,
@@ -128,57 +123,212 @@ function parseOrderDate(value) {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-function formatDate(value) {
+function formatDateTime(value) {
   const date = parseOrderDate(value);
 
   if (!date) return "-";
 
-  return date.toLocaleDateString("vi-VN", {
+  return date.toLocaleString("vi-VN", {
+    hour: "2-digit",
+    minute: "2-digit",
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
   });
 }
 
+function normalizeStatus(status) {
+  if (!status) return "";
+
+  const text = String(status).trim();
+  const lower = text.toLowerCase();
+
+  if (
+    [
+      "cho_xac_nhan",
+      "chờ xác nhận",
+      "cho xac nhan",
+      "pending",
+      "wait_confirm",
+    ].includes(lower)
+  ) {
+    return "cho_xac_nhan";
+  }
+
+  if (
+    [
+      "dang_chuan_bi",
+      "dang_xu_ly",
+      "đang chuẩn bị",
+      "đang xử lý",
+      "dang xu ly",
+      "processing",
+    ].includes(lower)
+  ) {
+    return "dang_chuan_bi";
+  }
+
+  if (
+    ["dang_giao", "đang giao", "dang giao", "shipping", "delivering"].includes(
+      lower,
+    )
+  ) {
+    return "dang_giao";
+  }
+
+  if (
+    [
+      "hoan_thanh",
+      "da_tra_loi",
+      "hoàn thành",
+      "hoan thanh",
+      "completed",
+      "complete",
+      "done",
+    ].includes(lower)
+  ) {
+    return "hoan_thanh";
+  }
+
+  if (
+    [
+      "huy",
+      "da_huy",
+      "bi_huy",
+      "đã hủy",
+      "hủy",
+      "da huy",
+      "cancelled",
+      "canceled",
+    ].includes(lower)
+  ) {
+    return "huy";
+  }
+
+  return text;
+}
+
+function getStatusLabel(status) {
+  const normalizedStatus = normalizeStatus(status);
+
+  return STATUS_LABEL[normalizedStatus] || status || "Không rõ";
+}
+
 function getOrderDateValue(order) {
   return (
     order?.ngay_dat ||
     order?.ngayDat ||
-    order?.createdAt ||
+    order?.NgayDat ||
     order?.created_at ||
-    order?.created ||
-    order?.updatedAt ||
-    order?.updated_at
+    order?.createdAt ||
+    order?.ngay_tao ||
+    order?.ngayTao ||
+    order?.thoi_gian_dat ||
+    order?.thoiGianDat ||
+    order?.order_date ||
+    order?.date ||
+    null
   );
 }
 
 function getOrderTimestamp(order) {
   const date = parseOrderDate(getOrderDateValue(order));
 
-  return date ? date.getTime() : 0;
+  return date ? date.getTime() : null;
+}
+
+function getOrderIdValue(order) {
+  const directId = Number(order?.id);
+
+  if (!Number.isNaN(directId) && directId > 0) return directId;
+
+  const maDonHang = String(order?.ma_don_hang || order?.maDonHang || "");
+  const idFromCode = Number(maDonHang.replace(/[^\d]/g, ""));
+
+  return Number.isNaN(idFromCode) ? 0 : idFromCode;
 }
 
 function sortOrdersNewestFirst(list) {
   return [...(list || [])].sort((a, b) => {
-    const timeDifference = getOrderTimestamp(b) - getOrderTimestamp(a);
+    const timeA = getOrderTimestamp(a);
+    const timeB = getOrderTimestamp(b);
 
-    if (timeDifference !== 0) return timeDifference;
+    if (timeA !== null && timeB !== null && timeA !== timeB) {
+      return timeB - timeA;
+    }
 
-    // Nếu ngày bằng nhau hoặc thiếu ngày, ưu tiên id lớn hơn để đơn mới hơn nằm trên.
-    return String(b?.id || "").localeCompare(String(a?.id || ""));
+    return getOrderIdValue(b) - getOrderIdValue(a);
   });
+}
+
+function getOrderUniqueKey(order, index = 0) {
+  if (order?.id !== undefined && order?.id !== null) {
+    return `id-${order.id}`;
+  }
+
+  if (order?.ma_don_hang) {
+    return `ma-${order.ma_don_hang}`;
+  }
+
+  if (order?.maDonHang) {
+    return `ma-${order.maDonHang}`;
+  }
+
+  return `unknown-${index}`;
+}
+
+function mergeOrders(...orderGroups) {
+  const map = new Map();
+
+  orderGroups.flat().forEach((order, index) => {
+    if (!order || typeof order !== "object") return;
+
+    const key = getOrderUniqueKey(order, index);
+    const oldOrder = map.get(key);
+
+    map.set(key, oldOrder ? { ...oldOrder, ...order } : order);
+  });
+
+  return sortOrdersNewestFirst(Array.from(map.values()));
 }
 
 function getCustomerName(order) {
   return (
     order?.ten_nguoi_nhan ||
+    order?.tenNguoiNhan ||
     order?.khach_hang?.ho_ten ||
+    order?.khach_hang?.ten ||
     order?.khach_hang?.ten_khach_hang ||
     order?.khach_hang?.tai_khoan?.ho_ten ||
     order?.khach_hang?.email ||
     order?.nguoi_dung?.ho_ten ||
     order?.user?.ho_ten ||
+    order?.user?.name ||
     "Khách hàng"
+  );
+}
+
+function getOrderAddress(order) {
+  return (
+    order?.dia_chi_giao ||
+    order?.dia_chi_giao_hang ||
+    order?.diaChiGiao ||
+    order?.diaChiGiaoHang ||
+    order?.dia_chi_nhan_hang ||
+    order?.dia_chi ||
+    order?.address ||
+    "-"
+  );
+}
+
+function getOrderPhone(order) {
+  return (
+    order?.sdt_nguoi_nhan ||
+    order?.so_dien_thoai ||
+    order?.phone ||
+    order?.khach_hang?.so_dien_thoai ||
+    order?.khach_hang?.sdt ||
+    "-"
   );
 }
 
@@ -201,11 +351,19 @@ function getOrderTotal(order) {
     return parseMoney(order.tong_thanh_toan);
   }
 
+  if (order?.tongThanhToan !== undefined && order?.tongThanhToan !== null) {
+    return parseMoney(order.tongThanhToan);
+  }
+
   if (order?.tong_tien !== undefined && order?.tong_tien !== null) {
     return parseMoney(order.tong_tien);
   }
 
-  const tongTienHang = parseMoney(order?.tong_tien_hang);
+  if (order?.tongTien !== undefined && order?.tongTien !== null) {
+    return parseMoney(order.tongTien);
+  }
+
+  const tongTienHang = parseMoney(order?.tong_tien_hang || order?.tam_tinh);
   const phiVanChuyen = parseMoney(order?.phi_van_chuyen);
   const giamGia = getOrderDiscount(order);
 
@@ -223,10 +381,11 @@ function getOrderItems(order) {
   );
 }
 
-function normalizeOrderListResponse(result) {
+function extractOrderList(result) {
   const data = result?.data;
 
   const possibleLists = [
+    result,
     data,
     data?.danh_sach,
     data?.orders,
@@ -235,38 +394,49 @@ function normalizeOrderListResponse(result) {
     data?.rows,
     data?.items,
     data?.data,
+    data?.data?.rows,
+    data?.data?.items,
+    data?.data?.orders,
     result?.orders,
     result?.don_hang,
     result?.rows,
     result?.items,
   ];
 
-  const rawList = possibleLists.find((item) => Array.isArray(item)) || [];
-  const list = sortOrdersNewestFirst(rawList);
+  return possibleLists.find((item) => Array.isArray(item)) || [];
+}
 
-  const possibleTotals = [
-    result?.total,
-    result?.count,
-    result?.totalItems,
-    result?.tong_so,
-    data?.total,
-    data?.count,
-    data?.totalItems,
-    data?.tong_so,
-    data?.pagination?.total,
-    data?.pagination?.totalItems,
-    data?.meta?.total,
-    data?.meta?.totalItems,
+function normalizeOrderListResponse(result) {
+  return sortOrdersNewestFirst(extractOrderList(result));
+}
+
+function isOrderMatchSearch(order, searchText) {
+  const keyword = searchText.trim().toLowerCase();
+
+  if (!keyword) return true;
+
+  const searchableValues = [
+    order?.id,
+    order?.ma_don_hang,
+    order?.maDonHang,
+    getCustomerName(order),
+    getOrderAddress(order),
+    getOrderPhone(order),
+    order?.khach_hang?.email,
+    order?.user?.email,
   ];
 
-  const totalValue = possibleTotals.find(
-    (item) => item !== undefined && item !== null && item !== "",
+  return searchableValues.some((value) =>
+    String(value || "")
+      .toLowerCase()
+      .includes(keyword),
   );
+}
 
-  return {
-    list,
-    total: Number(totalValue ?? list.length) || list.length,
-  };
+function isOrderMatchStatus(order, filterStatus) {
+  if (!filterStatus) return true;
+
+  return normalizeStatus(order?.trang_thai) === filterStatus;
 }
 
 function Orders() {
@@ -275,73 +445,85 @@ function Orders() {
 
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
-  const [page, setPage] = useState(1);
-  const [limit] = useState(10);
-  const [total, setTotal] = useState(0);
 
   const [loading, setLoading] = useState(false);
   const [detailLoading, setDetailLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const totalPages = Math.max(1, Math.ceil(total / limit));
-
-  const stats = useMemo(() => {
-    return {
-      tongDon: total,
-      choXacNhan: orders.filter((item) => item.trang_thai === "cho_xac_nhan")
-        .length,
-      dangGiao: orders.filter((item) => item.trang_thai === "dang_giao").length,
-      hoanThanh: orders.filter((item) => item.trang_thai === "hoan_thanh")
-        .length,
-    };
-  }, [orders, total]);
-
-  const fetchOrders = async (pageOverride = page) => {
+  const fetchOrders = async () => {
     setLoading(true);
     setError("");
 
     try {
       const params = {
-        page: pageOverride,
-        limit,
-
-        // Gửi nhiều alias để tương thích với các backend khác nhau.
-        // Quan trọng nhất: backend nên ORDER BY don_hang.ngay_dat DESC.
+        page: 1,
+        limit: 1000,
+        per_page: 1000,
+        pageSize: 1000,
+        page_size: 1000,
+        size: 1000,
+        all: true,
+        no_pagination: true,
         sort_by: "ngay_dat",
         sort_order: "desc",
         order_by: "ngay_dat",
         order: "desc",
         sortBy: "ngay_dat",
         sortOrder: "DESC",
+        sort: "ngay_dat:desc",
+        _sort: "ngay_dat",
+        _order: "desc",
       };
 
-      if (filterStatus) {
-        params.trang_thai = filterStatus;
-      }
+      const allOrdersRequest = donHangService.xemTatCaDonHang(params);
 
-      if (search.trim()) {
-        params.search = search.trim();
-      }
+      const recentOrdersRequest = dashboardService?.layDonHangGanDay
+        ? dashboardService.layDonHangGanDay()
+        : Promise.resolve({ success: false, data: [] });
 
-      const result = await donHangService.xemTatCaDonHang(params);
+      const [allOrdersResult, recentOrdersResult] = await Promise.allSettled([
+        allOrdersRequest,
+        recentOrdersRequest,
+      ]);
 
-      console.log("Kết quả lấy danh sách đơn hàng:", result);
+      let allOrders = [];
+      let recentOrders = [];
 
-      if (result?.success) {
-        const normalized = normalizeOrderListResponse(result);
+      if (allOrdersResult.status === "fulfilled") {
+        console.log("Kết quả lấy tất cả đơn hàng:", allOrdersResult.value);
 
-        setOrders(normalized.list);
-        setTotal(normalized.total);
+        if (allOrdersResult.value?.success !== false) {
+          allOrders = normalizeOrderListResponse(allOrdersResult.value);
+        } else {
+          setError(
+            allOrdersResult.value?.error ||
+              allOrdersResult.value?.message ||
+              "Không thể tải danh sách đơn hàng",
+          );
+        }
       } else {
-        setOrders([]);
-        setTotal(0);
-        setError(result?.error || "Không thể tải danh sách đơn hàng");
+        console.error("Lỗi API xemTatCaDonHang:", allOrdersResult.reason);
+        setError("Không thể tải danh sách đơn hàng");
       }
+
+      if (recentOrdersResult.status === "fulfilled") {
+        console.log("Kết quả lấy đơn hàng gần đây:", recentOrdersResult.value);
+
+        if (recentOrdersResult.value?.success !== false) {
+          recentOrders = normalizeOrderListResponse(recentOrdersResult.value);
+        }
+      } else {
+        console.warn(
+          "Không lấy được API đơn gần đây:",
+          recentOrdersResult.reason,
+        );
+      }
+
+      setOrders(mergeOrders(allOrders, recentOrders));
     } catch (err) {
       console.error("Lỗi fetchOrders:", err);
       setOrders([]);
-      setTotal(0);
       setError("Có lỗi khi tải danh sách đơn hàng");
     } finally {
       setLoading(false);
@@ -349,22 +531,24 @@ function Orders() {
   };
 
   useEffect(() => {
-    fetchOrders(page);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, filterStatus]);
+    fetchOrders();
+  }, []);
+
+  const displayOrders = useMemo(() => {
+    return sortOrdersNewestFirst(orders)
+      .filter((order) => isOrderMatchStatus(order, filterStatus))
+      .filter((order) => isOrderMatchSearch(order, search));
+  }, [orders, filterStatus, search]);
 
   const handleSearchSubmit = (event) => {
     event.preventDefault();
-    setPage(1);
-    fetchOrders(1);
-  };
-
-  const handleRefresh = () => {
-    fetchOrders(page);
   };
 
   const handleViewDetail = async (id) => {
-    if (!id) return;
+    if (!id) {
+      alert("Không tìm thấy ID đơn hàng");
+      return;
+    }
 
     setDetailLoading(true);
     setSelectedOrder(null);
@@ -388,10 +572,12 @@ function Orders() {
   };
 
   const handleChangeStatus = async (order, nextStatus) => {
-    if (!nextStatus || nextStatus === order.trang_thai) return;
+    const currentStatus = normalizeStatus(order.trang_thai);
+
+    if (!nextStatus || nextStatus === currentStatus) return;
 
     const confirmMessage = `Cập nhật đơn ${
-      order.ma_don_hang || order.id
+      order.ma_don_hang || order.maDonHang || order.id
     } sang trạng thái "${STATUS_LABEL[nextStatus] || nextStatus}"?`;
 
     if (!window.confirm(confirmMessage)) return;
@@ -407,7 +593,7 @@ function Orders() {
       if (result?.success) {
         alert("Cập nhật trạng thái thành công");
 
-        await fetchOrders(page);
+        await fetchOrders();
 
         if (selectedOrder?.id === order.id) {
           await handleViewDetail(order.id);
@@ -424,14 +610,18 @@ function Orders() {
   };
 
   const handleCancelOrder = async (order) => {
-    if (!["cho_xac_nhan", "dang_chuan_bi"].includes(order.trang_thai)) {
+    const currentStatus = normalizeStatus(order.trang_thai);
+
+    if (!["cho_xac_nhan", "dang_chuan_bi"].includes(currentStatus)) {
       alert("Chỉ có thể hủy đơn ở trạng thái Chờ xác nhận hoặc Đang chuẩn bị");
       return;
     }
 
     if (
       !window.confirm(
-        `Bạn có chắc muốn hủy đơn ${order.ma_don_hang || order.id}?`,
+        `Bạn có chắc muốn hủy đơn ${
+          order.ma_don_hang || order.maDonHang || order.id
+        }?`,
       )
     ) {
       return;
@@ -445,7 +635,7 @@ function Orders() {
       if (result?.success) {
         alert("Hủy đơn hàng thành công");
 
-        await fetchOrders(page);
+        await fetchOrders();
 
         if (selectedOrder?.id === order.id) {
           setSelectedOrder(null);
@@ -461,441 +651,237 @@ function Orders() {
     }
   };
 
-  const displayOrders = useMemo(() => {
-    return sortOrdersNewestFirst(orders);
-  }, [orders]);
-
   const detailItems = getOrderItems(selectedOrder);
 
   return (
-    <div
-      className="dashboard-content"
-      style={{
-        flex: 1,
-        backgroundColor: "#f6f7f8",
-        minHeight: "100vh",
-      }}
-    >
+    <div className="dashboard-content" style={pageWrapperStyle}>
       <Topbar />
 
-      <div style={{ padding: "30px", textAlign: "left" }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            gap: "20px",
-            alignItems: "center",
-            marginBottom: "24px",
-          }}
-        >
-          <div>
-            <h1
+      <div style={pageContentStyle}>
+        <div style={pageHeaderStyle}>
+          <h1 style={pageTitleStyle}>Danh sách đơn hàng xưởng vẽ</h1>
+
+          <form onSubmit={handleSearchSubmit} style={toolbarStyle}>
+            <input
+              type="text"
+              placeholder="Tìm kiếm đơn hàng..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              style={searchInputStyle}
+            />
+
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              style={statusFilterStyle}
+            >
+              {TRANG_THAI_OPTIONS.map((item) => (
+                <option key={item.value} value={item.value}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
+
+            <button
+              type="button"
+              onClick={fetchOrders}
+              disabled={loading}
               style={{
-                color: "#1c3f3a",
-                margin: 0,
-                fontSize: "26px",
-                fontWeight: "bold",
+                ...refreshButtonStyle,
+                opacity: loading ? 0.7 : 1,
+                cursor: loading ? "not-allowed" : "pointer",
               }}
             >
-              Quản lý đơn hàng
-            </h1>
-            <p style={{ margin: "6px 0 0", color: "#667085" }}>
-              Theo dõi, xác nhận, cập nhật trạng thái và hủy đơn hàng.
-            </p>
-          </div>
-
-          <button
-            onClick={handleRefresh}
-            disabled={loading}
-            style={{
-              padding: "10px 18px",
-              borderRadius: "8px",
-              border: "none",
-              backgroundColor: "#1c3f3a",
-              color: "#fff",
-              fontWeight: 700,
-              cursor: loading ? "not-allowed" : "pointer",
-              opacity: loading ? 0.7 : 1,
-            }}
-          >
-            {loading ? "Đang tải..." : "Làm mới"}
-          </button>
+              {loading ? "Đang tải..." : "Làm mới"}
+            </button>
+          </form>
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
-            gap: "16px",
-            marginBottom: "24px",
-          }}
-        >
-          <StatCard title="Tổng đơn" value={stats.tongDon} />
-          <StatCard title="Chờ xác nhận" value={stats.choXacNhan} />
-          <StatCard title="Đang giao" value={stats.dangGiao} />
-          <StatCard title="Hoàn thành" value={stats.hoanThanh} />
-        </div>
+        {error && <div style={errorBoxStyle}>{error}</div>}
 
-        <form
-          onSubmit={handleSearchSubmit}
-          style={{
-            backgroundColor: "#fff",
-            padding: "18px",
-            borderRadius: "12px",
-            boxShadow: "0 4px 14px rgba(0,0,0,0.05)",
-            marginBottom: "20px",
-            display: "flex",
-            gap: "12px",
-            alignItems: "center",
-          }}
-        >
-          <input
-            type="text"
-            placeholder="Tìm theo mã đơn, tên khách hàng..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{
-              flex: 1,
-              padding: "11px 14px",
-              borderRadius: "8px",
-              border: "1px solid #d0d5dd",
-              outline: "none",
-            }}
-          />
-
-          <select
-            value={filterStatus}
-            onChange={(e) => {
-              setFilterStatus(e.target.value);
-              setPage(1);
-            }}
-            style={{
-              padding: "11px 14px",
-              borderRadius: "8px",
-              border: "1px solid #d0d5dd",
-              minWidth: "190px",
-            }}
-          >
-            {TRANG_THAI_OPTIONS.map((item) => (
-              <option key={item.value} value={item.value}>
-                {item.label}
-              </option>
-            ))}
-          </select>
-
-          <button
-            type="submit"
-            style={{
-              padding: "11px 18px",
-              borderRadius: "8px",
-              border: "none",
-              backgroundColor: "#1c3f3a",
-              color: "#fff",
-              fontWeight: 700,
-              cursor: "pointer",
-            }}
-          >
-            Tìm kiếm
-          </button>
-        </form>
-
-        {error && (
-          <div
-            style={{
-              backgroundColor: "#fff1f0",
-              color: "#cf1322",
-              padding: "12px 14px",
-              borderRadius: "8px",
-              marginBottom: "16px",
-            }}
-          >
-            {error}
+        <div style={tableCardStyle}>
+          <div style={tableInfoStyle}>
+            Đang hiển thị <strong>{displayOrders.length}</strong> đơn.
           </div>
-        )}
 
-        <div
-          style={{
-            backgroundColor: "#fff",
-            padding: "20px",
-            borderRadius: "12px",
-            boxShadow: "0 4px 14px rgba(0,0,0,0.05)",
-            overflowX: "auto",
-          }}
-        >
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead>
-              <tr
-                style={{
-                  borderBottom: "1px solid #eaecf0",
-                  color: "#475467",
-                  textAlign: "left",
-                }}
-              >
-                <th style={thStyle}>Mã đơn</th>
-                <th style={thStyle}>Khách hàng</th>
-                <th style={thStyle}>Địa chỉ</th>
-                <th style={thStyle}>Ngày đặt</th>
-                <th style={thStyle}>Tổng tiền</th>
-                <th style={thStyle}>Trạng thái</th>
-                <th style={thStyle}>Cập nhật</th>
-                <th style={thStyle}>Hành động</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {loading ? (
+          <div style={tableResponsiveStyle}>
+            <table style={tableStyle}>
+              <thead>
                 <tr>
-                  <td colSpan="8" style={emptyStyle}>
-                    Đang tải đơn hàng...
-                  </td>
+                  <th style={{ ...thStyle, width: "13%" }}>Mã đơn</th>
+                  <th style={{ ...thStyle, width: "16%" }}>Khách hàng</th>
+                  <th style={{ ...thStyle, width: "18%" }}>Địa chỉ</th>
+                  <th style={{ ...thStyle, width: "13%" }}>Ngày đặt</th>
+                  <th style={{ ...thStyle, width: "13%" }}>Tổng tiền</th>
+                  <th style={{ ...thStyle, width: "13%" }}>Trạng thái</th>
+                  <th style={{ ...thStyle, width: "14%" }}>Hành động</th>
                 </tr>
-              ) : displayOrders.length === 0 ? (
-                <tr>
-                  <td colSpan="8" style={emptyStyle}>
-                    Không có đơn hàng nào.
-                  </td>
-                </tr>
-              ) : (
-                displayOrders.map((order) => (
-                  <tr
-                    key={order.id}
-                    style={{ borderBottom: "1px solid #f2f4f7" }}
-                  >
-                    <td style={tdStyle}>
-                      <strong>{order.ma_don_hang || `DH-${order.id}`}</strong>
-                    </td>
+              </thead>
 
-                    <td style={tdStyle}>{getCustomerName(order)}</td>
-
-                    <td
-                      style={{
-                        ...tdStyle,
-                        maxWidth: "260px",
-                        color: "#667085",
-                      }}
-                    >
-                      {order.dia_chi_giao || "-"}
-                    </td>
-
-                    <td style={tdStyle}>
-                      {formatDate(getOrderDateValue(order))}
-                    </td>
-
-                    <td
-                      style={{
-                        ...tdStyle,
-                        color: "#2e7d32",
-                        fontWeight: 700,
-                      }}
-                    >
-                      {formatCurrency(getOrderTotal(order))}
-                    </td>
-
-                    <td style={tdStyle}>
-                      <StatusBadge status={order.trang_thai} />
-                    </td>
-
-                    <td style={tdStyle}>
-                      <select
-                        value={order.trang_thai || ""}
-                        disabled={actionLoading || order.trang_thai === "huy"}
-                        onChange={(e) =>
-                          handleChangeStatus(order, e.target.value)
-                        }
-                        style={{
-                          padding: "8px 10px",
-                          borderRadius: "8px",
-                          border: "1px solid #d0d5dd",
-                          cursor:
-                            actionLoading || order.trang_thai === "huy"
-                              ? "not-allowed"
-                              : "pointer",
-                        }}
-                      >
-                        {TRANG_THAI_OPTIONS.filter((item) => item.value).map(
-                          (item) => (
-                            <option key={item.value} value={item.value}>
-                              {item.label}
-                            </option>
-                          ),
-                        )}
-                      </select>
-                    </td>
-
-                    <td style={tdStyle}>
-                      <div style={{ display: "flex", gap: "8px" }}>
-                        <button
-                          onClick={() => handleViewDetail(order.id)}
-                          style={buttonOutlineStyle}
-                        >
-                          Chi tiết
-                        </button>
-
-                        <button
-                          onClick={() => handleCancelOrder(order)}
-                          disabled={
-                            actionLoading ||
-                            !["cho_xac_nhan", "dang_chuan_bi"].includes(
-                              order.trang_thai,
-                            )
-                          }
-                          style={{
-                            ...buttonDangerStyle,
-                            opacity: ![
-                              "cho_xac_nhan",
-                              "dang_chuan_bi",
-                            ].includes(order.trang_thai)
-                              ? 0.5
-                              : 1,
-                            cursor:
-                              actionLoading ||
-                              !["cho_xac_nhan", "dang_chuan_bi"].includes(
-                                order.trang_thai,
-                              )
-                                ? "not-allowed"
-                                : "pointer",
-                          }}
-                        >
-                          Hủy
-                        </button>
-                      </div>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan="7" style={emptyStyle}>
+                      Đang tải đơn hàng...
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : displayOrders.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" style={emptyStyle}>
+                      Không có đơn hàng nào.
+                    </td>
+                  </tr>
+                ) : (
+                  displayOrders.map((order, index) => {
+                    const currentStatus = normalizeStatus(order.trang_thai);
+                    const canCancel = [
+                      "cho_xac_nhan",
+                      "dang_chuan_bi",
+                    ].includes(currentStatus);
 
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginTop: "18px",
-            }}
-          >
-            <span style={{ color: "#667085" }}>
-              Trang {page} / {totalPages} — Tổng {total} đơn
-            </span>
+                    return (
+                      <tr key={getOrderUniqueKey(order, index)}>
+                        <td style={tdStyle}>
+                          <strong style={orderCodeStyle}>
+                            {order.ma_don_hang ||
+                              order.maDonHang ||
+                              `DH-${order.id || index + 1}`}
+                          </strong>
+                        </td>
 
-            <div style={{ display: "flex", gap: "8px" }}>
-              <button
-                disabled={page <= 1}
-                onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-                style={{
-                  ...paginationButtonStyle,
-                  opacity: page <= 1 ? 0.5 : 1,
-                  cursor: page <= 1 ? "not-allowed" : "pointer",
-                }}
-              >
-                Trước
-              </button>
+                        <td style={tdStyle}>
+                          <div style={customerNameStyle}>
+                            {getCustomerName(order)}
+                          </div>
+                          <div style={customerPhoneStyle}>
+                            {getOrderPhone(order)}
+                          </div>
+                        </td>
 
-              <button
-                disabled={page >= totalPages}
-                onClick={() =>
-                  setPage((prev) => Math.min(totalPages, prev + 1))
-                }
-                style={{
-                  ...paginationButtonStyle,
-                  opacity: page >= totalPages ? 0.5 : 1,
-                  cursor: page >= totalPages ? "not-allowed" : "pointer",
-                }}
-              >
-                Sau
-              </button>
-            </div>
+                        <td style={tdStyle}>
+                          <div
+                            style={ellipsisStyle}
+                            title={getOrderAddress(order)}
+                          >
+                            {getOrderAddress(order)}
+                          </div>
+                        </td>
+
+                        <td style={tdStyle}>
+                          {formatDateTime(getOrderDateValue(order))}
+                        </td>
+
+                        <td style={tdStyle}>
+                          <strong style={moneyStyle}>
+                            {formatCurrency(getOrderTotal(order))}
+                          </strong>
+                        </td>
+
+                        <td style={tdStyle}>
+                          <StatusBadge status={order.trang_thai} />
+
+                          <select
+                            value={currentStatus || ""}
+                            disabled={actionLoading || currentStatus === "huy"}
+                            onChange={(e) =>
+                              handleChangeStatus(order, e.target.value)
+                            }
+                            style={miniSelectStyle}
+                          >
+                            {TRANG_THAI_OPTIONS.filter(
+                              (item) => item.value,
+                            ).map((item) => (
+                              <option key={item.value} value={item.value}>
+                                {item.label}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+
+                        <td style={tdStyle}>
+                          <div style={actionGroupStyle}>
+                            <button
+                              onClick={() => handleViewDetail(order.id)}
+                              disabled={!order.id}
+                              style={{
+                                ...detailButtonStyle,
+                                opacity: order.id ? 1 : 0.5,
+                              }}
+                            >
+                              Chi tiết
+                            </button>
+
+                            <button
+                              onClick={() => handleCancelOrder(order)}
+                              disabled={
+                                actionLoading || !canCancel || !order.id
+                              }
+                              style={{
+                                ...cancelButtonStyle,
+                                opacity: canCancel && order.id ? 1 : 0.5,
+                              }}
+                            >
+                              Hủy
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
 
       {(selectedOrder || detailLoading) && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            backgroundColor: "rgba(0,0,0,0.45)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 2000,
-            padding: "20px",
-          }}
-        >
-          <div
-            style={{
-              width: "760px",
-              maxHeight: "90vh",
-              overflowY: "auto",
-              backgroundColor: "#fff",
-              borderRadius: "14px",
-              padding: "24px",
-            }}
-          >
+        <div style={modalOverlayStyle}>
+          <div style={modalBoxStyle}>
             {detailLoading ? (
               <p>Đang tải chi tiết đơn hàng...</p>
             ) : (
               <>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    gap: "16px",
-                    alignItems: "flex-start",
-                    marginBottom: "18px",
-                  }}
-                >
+                <div style={modalHeaderStyle}>
                   <div>
-                    <h2 style={{ margin: 0, color: "#1c3f3a" }}>
-                      Chi tiết đơn hàng
-                    </h2>
-                    <p style={{ margin: "6px 0 0", color: "#667085" }}>
-                      {selectedOrder.ma_don_hang || `DH-${selectedOrder.id}`}
+                    <h2 style={modalTitleStyle}>Chi tiết đơn hàng</h2>
+
+                    <p style={modalSubtitleStyle}>
+                      {selectedOrder.ma_don_hang ||
+                        selectedOrder.maDonHang ||
+                        `DH-${selectedOrder.id}`}
                     </p>
                   </div>
 
                   <button
                     onClick={() => setSelectedOrder(null)}
-                    style={{
-                      border: "none",
-                      backgroundColor: "#f2f4f7",
-                      borderRadius: "8px",
-                      padding: "8px 12px",
-                      cursor: "pointer",
-                    }}
+                    style={closeButtonStyle}
                   >
                     Đóng
                   </button>
                 </div>
 
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: "12px",
-                    marginBottom: "18px",
-                  }}
-                >
+                <div style={infoGridStyle}>
                   <InfoBox
                     label="Khách hàng"
                     value={getCustomerName(selectedOrder)}
                   />
+
                   <InfoBox
                     label="Ngày đặt"
-                    value={formatDate(getOrderDateValue(selectedOrder))}
+                    value={formatDateTime(getOrderDateValue(selectedOrder))}
                   />
+
                   <InfoBox
                     label="Địa chỉ giao"
-                    value={selectedOrder.dia_chi_giao || "-"}
+                    value={getOrderAddress(selectedOrder)}
                   />
+
                   <InfoBox
                     label="Số điện thoại"
-                    value={
-                      selectedOrder.sdt_nguoi_nhan ||
-                      selectedOrder.so_dien_thoai ||
-                      "-"
-                    }
+                    value={getOrderPhone(selectedOrder)}
                   />
+
                   <InfoBox
                     label="Đơn vị vận chuyển"
                     value={
@@ -905,6 +891,7 @@ function Orders() {
                       "-"
                     }
                   />
+
                   <InfoBox
                     label="Phương thức thanh toán"
                     value={
@@ -913,32 +900,27 @@ function Orders() {
                         : selectedOrder?.phuong_thuc_thanh_toan || "-"
                     }
                   />
+
                   <InfoBox
                     label="Trạng thái"
-                    value={STATUS_LABEL[selectedOrder.trang_thai] || "-"}
+                    value={getStatusLabel(selectedOrder.trang_thai)}
                   />
+
                   <InfoBox
                     label="Tổng tiền"
                     value={formatCurrency(getOrderTotal(selectedOrder))}
                   />
                 </div>
 
-                <h3 style={{ color: "#1c3f3a", marginBottom: "12px" }}>
-                  Sản phẩm trong đơn
-                </h3>
+                <h3 style={sectionTitleStyle}>Sản phẩm trong đơn</h3>
 
-                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <table style={detailTableStyle}>
                   <thead>
-                    <tr
-                      style={{
-                        borderBottom: "1px solid #eaecf0",
-                        textAlign: "left",
-                      }}
-                    >
-                      <th style={thStyle}>Tranh</th>
-                      <th style={thStyle}>Số lượng</th>
-                      <th style={thStyle}>Đơn giá</th>
-                      <th style={thStyle}>Thành tiền</th>
+                    <tr>
+                      <th style={detailThStyle}>Tranh</th>
+                      <th style={detailThStyle}>Số lượng</th>
+                      <th style={detailThStyle}>Đơn giá</th>
+                      <th style={detailThStyle}>Thành tiền</th>
                     </tr>
                   </thead>
 
@@ -954,6 +936,7 @@ function Orders() {
                         const soLuong = parseMoney(
                           item.so_luong || item.quantity || 1,
                         );
+
                         const donGia = parseMoney(
                           item.don_gia ||
                             item.gia ||
@@ -963,18 +946,18 @@ function Orders() {
                         );
 
                         return (
-                          <tr
-                            key={item.id || index}
-                            style={{ borderBottom: "1px solid #f2f4f7" }}
-                          >
+                          <tr key={item.id || index}>
                             <td style={tdStyle}>
                               {item?.tranh?.ten_tranh ||
                                 item?.ten_tranh ||
                                 item?.title ||
                                 "Tranh"}
                             </td>
+
                             <td style={tdStyle}>{soLuong}</td>
+
                             <td style={tdStyle}>{formatCurrency(donGia)}</td>
+
                             <td style={tdStyle}>
                               {formatCurrency(soLuong * donGia)}
                             </td>
@@ -985,15 +968,7 @@ function Orders() {
                   </tbody>
                 </table>
 
-                <div
-                  style={{
-                    marginTop: "18px",
-                    backgroundColor: "#f8fafc",
-                    border: "1px solid #eaecf0",
-                    borderRadius: "10px",
-                    padding: "14px",
-                  }}
-                >
+                <div style={summaryBoxStyle}>
                   <div style={summaryLineStyle}>
                     <span>Tiền hàng</span>
                     <strong>
@@ -1021,16 +996,7 @@ function Orders() {
                     </div>
                   )}
 
-                  <div
-                    style={{
-                      ...summaryLineStyle,
-                      borderTop: "1px solid #eaecf0",
-                      paddingTop: "10px",
-                      marginTop: "10px",
-                      color: "#2e7d32",
-                      fontSize: "16px",
-                    }}
-                  >
+                  <div style={summaryTotalLineStyle}>
                     <span>Tổng thanh toán</span>
                     <strong>
                       {formatCurrency(getOrderTotal(selectedOrder))}
@@ -1053,24 +1019,10 @@ function Orders() {
   );
 }
 
-function StatCard({ title, value }) {
-  return (
-    <div
-      style={{
-        backgroundColor: "#fff",
-        padding: "18px",
-        borderRadius: "12px",
-        boxShadow: "0 4px 14px rgba(0,0,0,0.05)",
-      }}
-    >
-      <p style={{ margin: 0, color: "#667085" }}>{title}</p>
-      <h2 style={{ margin: "8px 0 0", color: "#1c3f3a" }}>{value}</h2>
-    </div>
-  );
-}
-
 function StatusBadge({ status }) {
-  const style = STATUS_STYLE[status] || {
+  const normalizedStatus = normalizeStatus(status);
+
+  const style = STATUS_STYLE[normalizedStatus] || {
     backgroundColor: "#f2f4f7",
     color: "#344054",
   };
@@ -1078,45 +1030,204 @@ function StatusBadge({ status }) {
   return (
     <span
       style={{
-        padding: "5px 10px",
+        padding: "6px 11px",
         borderRadius: "999px",
         fontSize: "12px",
         fontWeight: 700,
+        display: "inline-block",
+        marginBottom: "8px",
+        whiteSpace: "nowrap",
         ...style,
       }}
     >
-      {STATUS_LABEL[status] || status || "Không rõ"}
+      {getStatusLabel(status)}
     </span>
   );
 }
 
 function InfoBox({ label, value }) {
   return (
-    <div
-      style={{
-        backgroundColor: "#f8fafc",
-        border: "1px solid #eaecf0",
-        borderRadius: "10px",
-        padding: "12px",
-      }}
-    >
-      <p style={{ margin: 0, color: "#667085", fontSize: "13px" }}>{label}</p>
-      <strong style={{ display: "block", marginTop: "6px", color: "#1c3f3a" }}>
-        {value}
-      </strong>
+    <div style={infoBoxStyle}>
+      <p style={infoLabelStyle}>{label}</p>
+      <strong style={infoValueStyle}>{value || "-"}</strong>
     </div>
   );
 }
 
+const pageWrapperStyle = {
+  flex: 1,
+  backgroundColor: "#f6f7f8",
+  minHeight: "100vh",
+  overflowX: "hidden",
+};
+
+const pageContentStyle = {
+  padding: "40px",
+  textAlign: "left",
+};
+
+const pageHeaderStyle = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  gap: "20px",
+  marginBottom: "32px",
+};
+
+const pageTitleStyle = {
+  margin: 0,
+  color: "#123c35",
+  fontSize: "30px",
+  fontWeight: "bold",
+};
+
+const toolbarStyle = {
+  display: "flex",
+  gap: "12px",
+  alignItems: "center",
+};
+
+const searchInputStyle = {
+  width: "260px",
+  padding: "12px 16px",
+  borderRadius: "6px",
+  border: "1px solid #d0d5dd",
+  fontSize: "15px",
+  outline: "none",
+  backgroundColor: "#fff",
+};
+
+const statusFilterStyle = {
+  width: "190px",
+  padding: "12px 14px",
+  borderRadius: "6px",
+  border: "1px solid #d0d5dd",
+  fontSize: "15px",
+  backgroundColor: "#fff",
+};
+
+const refreshButtonStyle = {
+  padding: "12px 24px",
+  borderRadius: "6px",
+  border: "none",
+  backgroundColor: "#123c35",
+  color: "#fff",
+  fontWeight: "bold",
+  fontSize: "15px",
+};
+
+const errorBoxStyle = {
+  backgroundColor: "#fff1f0",
+  color: "#cf1322",
+  padding: "12px 14px",
+  borderRadius: "8px",
+  marginBottom: "16px",
+};
+
+const tableCardStyle = {
+  backgroundColor: "#fff",
+  borderRadius: "10px",
+  padding: "28px",
+  boxShadow: "0 4px 16px rgba(0,0,0,0.04)",
+};
+
+const tableInfoStyle = {
+  color: "#667085",
+  marginBottom: "18px",
+  fontSize: "15px",
+};
+
+const tableResponsiveStyle = {
+  width: "100%",
+  overflowX: "auto",
+};
+
+const tableStyle = {
+  width: "100%",
+  borderCollapse: "collapse",
+  tableLayout: "fixed",
+};
+
 const thStyle = {
-  padding: "12px",
-  fontSize: "13px",
-  fontWeight: 700,
+  padding: "14px 12px",
+  textAlign: "left",
+  color: "#4a5568",
+  fontSize: "15px",
+  fontWeight: "bold",
+  borderBottom: "2px solid #edf2f7",
 };
 
 const tdStyle = {
-  padding: "12px",
+  padding: "16px 12px",
   verticalAlign: "middle",
+  borderBottom: "1px solid #edf2f7",
+  color: "#1f2937",
+  fontSize: "14px",
+};
+
+const orderCodeStyle = {
+  color: "#123c35",
+  wordBreak: "break-word",
+};
+
+const customerNameStyle = {
+  fontWeight: "bold",
+  color: "#1f2937",
+  lineHeight: 1.35,
+};
+
+const customerPhoneStyle = {
+  marginTop: "4px",
+  color: "#98a2b3",
+  fontSize: "13px",
+};
+
+const ellipsisStyle = {
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+  color: "#667085",
+};
+
+const moneyStyle = {
+  color: "#16803c",
+  fontWeight: "bold",
+  wordBreak: "break-word",
+};
+
+const miniSelectStyle = {
+  width: "100%",
+  padding: "8px 10px",
+  borderRadius: "6px",
+  border: "1px solid #d0d5dd",
+  backgroundColor: "#fff",
+  fontSize: "14px",
+};
+
+const actionGroupStyle = {
+  display: "flex",
+  gap: "8px",
+  flexWrap: "wrap",
+};
+
+const detailButtonStyle = {
+  padding: "8px 12px",
+  borderRadius: "6px",
+  border: "1px solid #123c35",
+  backgroundColor: "#fff",
+  color: "#123c35",
+  fontWeight: "bold",
+  cursor: "pointer",
+};
+
+const cancelButtonStyle = {
+  padding: "8px 12px",
+  borderRadius: "6px",
+  border: "none",
+  backgroundColor: "#ff4d4f",
+  color: "#fff",
+  fontWeight: "bold",
+  cursor: "pointer",
 };
 
 const emptyStyle = {
@@ -1125,37 +1236,122 @@ const emptyStyle = {
   color: "#667085",
 };
 
-const buttonOutlineStyle = {
-  padding: "8px 12px",
-  borderRadius: "8px",
-  border: "1px solid #1c3f3a",
-  backgroundColor: "#fff",
-  color: "#1c3f3a",
-  fontWeight: 700,
-  cursor: "pointer",
+const modalOverlayStyle = {
+  position: "fixed",
+  inset: 0,
+  backgroundColor: "rgba(0,0,0,0.45)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  zIndex: 2000,
+  padding: "20px",
 };
 
-const buttonDangerStyle = {
-  padding: "8px 12px",
-  borderRadius: "8px",
+const modalBoxStyle = {
+  width: "820px",
+  maxWidth: "100%",
+  maxHeight: "90vh",
+  overflowY: "auto",
+  backgroundColor: "#fff",
+  borderRadius: "12px",
+  padding: "24px",
+};
+
+const modalHeaderStyle = {
+  display: "flex",
+  justifyContent: "space-between",
+  gap: "16px",
+  alignItems: "flex-start",
+  marginBottom: "18px",
+};
+
+const modalTitleStyle = {
+  margin: 0,
+  color: "#123c35",
+};
+
+const modalSubtitleStyle = {
+  margin: "6px 0 0",
+  color: "#667085",
+};
+
+const closeButtonStyle = {
   border: "none",
-  backgroundColor: "#ff4d4f",
-  color: "#fff",
-  fontWeight: 700,
+  backgroundColor: "#f2f4f7",
+  color: "#344054",
+  borderRadius: "8px",
+  padding: "8px 12px",
   cursor: "pointer",
+  fontWeight: "bold",
 };
 
-const paginationButtonStyle = {
-  padding: "8px 14px",
-  borderRadius: "8px",
-  border: "1px solid #d0d5dd",
-  backgroundColor: "#fff",
+const infoGridStyle = {
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr",
+  gap: "12px",
+  marginBottom: "18px",
+};
+
+const infoBoxStyle = {
+  backgroundColor: "#f8fafc",
+  border: "1px solid #eaecf0",
+  borderRadius: "10px",
+  padding: "12px",
+};
+
+const infoLabelStyle = {
+  margin: 0,
+  color: "#667085",
+  fontSize: "13px",
+};
+
+const infoValueStyle = {
+  display: "block",
+  marginTop: "6px",
+  color: "#123c35",
+};
+
+const sectionTitleStyle = {
+  color: "#123c35",
+  margin: "18px 0 12px",
+};
+
+const detailTableStyle = {
+  width: "100%",
+  borderCollapse: "collapse",
+  border: "1px solid #eaecf0",
+};
+
+const detailThStyle = {
+  padding: "12px",
+  textAlign: "left",
+  backgroundColor: "#f8fafc",
+  fontSize: "13px",
+  color: "#475467",
+};
+
+const summaryBoxStyle = {
+  marginTop: "18px",
+  backgroundColor: "#f8fafc",
+  border: "1px solid #eaecf0",
+  borderRadius: "10px",
+  padding: "14px",
 };
 
 const summaryLineStyle = {
   display: "flex",
   justifyContent: "space-between",
   marginBottom: "8px",
+};
+
+const summaryTotalLineStyle = {
+  ...summaryLineStyle,
+  borderTop: "1px solid #eaecf0",
+  paddingTop: "10px",
+  marginTop: "10px",
+  color: "#16803c",
+  fontSize: "16px",
+  fontWeight: "bold",
 };
 
 export default Orders;
