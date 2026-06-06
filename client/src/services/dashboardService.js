@@ -3,7 +3,6 @@ import apiClient from "./apiClient";
 const dashboardService = {
   // ========== DASHBOARD ENDPOINTS ==========
 
-  // 🌟 ĐÃ SỬA: Bỏ /admin để khớp với app.use("/api/dashboard") của Backend
   layDashboardTongQuan: async () => {
     try {
       const response = await apiClient.get("/dashboard");
@@ -11,12 +10,13 @@ const dashboardService = {
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.error || "Lấy thông tin dashboard thất bại",
+        error:
+          error.response?.data?.error ||
+          "Lấy thông tin dashboard thất bại",
       };
     }
   },
 
-  // 🌟 ĐÃ SỬA: Bỏ /admin để khớp với Backend
   layDonHangGanDay: async () => {
     try {
       const response = await apiClient.get("/dashboard/don-hang-gan-day");
@@ -24,32 +24,44 @@ const dashboardService = {
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.error || "Lấy đơn hàng gần đây thất bại",
+        error:
+          error.response?.data?.error ||
+          "Lấy đơn hàng gần đây thất bại",
       };
     }
   },
 
-  // 🌟 ĐÃ SỬA: Bỏ /admin để khớp với Backend
   layDoanhThuTheoThang: async (nam = null) => {
     try {
       const params = nam ? { nam } : {};
-      const response = await apiClient.get("/dashboard/doanh-thu-theo-thang", { params });
+      const response = await apiClient.get("/dashboard/doanh-thu-theo-thang", {
+        params,
+      });
+
       return response.data;
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.error || "Lấy doanh thu thất bại",
+        error:
+          error.response?.data?.error ||
+          "Lấy doanh thu theo tháng thất bại",
       };
     }
   },
 
-  // ========== CÁC MỤC KHÁCH HÀNG / NHÂN VIÊN MANAGEMENT PHÍA DƯỚI GIỮ NGUYÊN... ==========
+  // ========== KHÁCH HÀNG / NHÂN VIÊN MANAGEMENT ==========
+
   layTatCaKhachHang: async (params = {}) => {
     try {
       const response = await apiClient.get("/admin/khach-hang", { params });
       return response.data;
     } catch (error) {
-      return { success: false, error: error.response?.data?.error || "Lấy danh sách thất bại" };
+      return {
+        success: false,
+        error:
+          error.response?.data?.error ||
+          "Lấy danh sách khách hàng thất bại",
+      };
     }
   },
 };
