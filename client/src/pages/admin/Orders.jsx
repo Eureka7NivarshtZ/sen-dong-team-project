@@ -78,12 +78,14 @@ function parseOrderDate(value) {
 
   if (!text) return null;
 
+  // MySQL DATETIME: 2026-06-06 15:30:20
   const mysqlDateTimeMatch = text.match(
     /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?/,
   );
 
   if (mysqlDateTimeMatch) {
-    const [, year, month, day, hour, minute, second = "0"] = mysqlDateTimeMatch;
+    const [, year, month, day, hour, minute, second = "0"] =
+      mysqlDateTimeMatch;
 
     const date = new Date(
       Number(year),
@@ -97,6 +99,25 @@ function parseOrderDate(value) {
     return Number.isNaN(date.getTime()) ? null : date;
   }
 
+  // MySQL DATE: 2026-06-06
+  const mysqlDateMatch = text.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
+  if (mysqlDateMatch) {
+    const [, year, month, day] = mysqlDateMatch;
+
+    const date = new Date(
+      Number(year),
+      Number(month) - 1,
+      Number(day),
+      0,
+      0,
+      0,
+    );
+
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  // Việt Nam: 06/06/2026 hoặc 06/06/2026 15:30:20
   const vietnameseDateMatch = text.match(
     /^(\d{1,2})[/-](\d{1,2})[/-](\d{4})(?:\s+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?/,
   );
@@ -131,6 +152,18 @@ function formatDateTime(value) {
   return date.toLocaleString("vi-VN", {
     hour: "2-digit",
     minute: "2-digit",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
+
+function formatDateOnly(value) {
+  const date = parseOrderDate(value);
+
+  if (!date) return "-";
+
+  return date.toLocaleDateString("vi-VN", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -229,6 +262,45 @@ function getOrderDateValue(order) {
     order?.date ||
     null
   );
+}
+
+function getExpectedDeliveryDateValue(order) {
+  return (
+    order?.ngay_giao_du_kien ||
+    order?.ngayGiaoDuKien ||
+    order?.ngay_giao_du_kien_text ||
+    order?.expected_delivery_date ||
+    order?.expectedDeliveryDate ||
+    order?.delivery_date ||
+    order?.deliveryDate ||
+    null
+  );
+}
+
+function getActualDeliveryDateValue(order) {
+  return (
+    order?.ngay_giao_thuc ||
+    order?.ngayGiaoThuc ||
+    order?.ngay_giao_thuc_te ||
+    order?.actual_delivery_date ||
+    order?.actualDeliveryDate ||
+    null
+  );
+}
+
+function getDeliveryDateDisplay(order) {
+  const actualDate = getActualDeliveryDateValue(order);
+  const expectedDate = getExpectedDeliveryDateValue(order);
+
+  if (actualDate) {
+    return `Đã giao: ${formatDateOnly(actualDate)}`;
+  }
+
+  if (expectedDate) {
+    return `Dự kiến: ${formatDateOnly(expectedDate)}`;
+  }
+
+  return "-";
 }
 
 function getOrderTimestamp(order) {
@@ -353,6 +425,14 @@ function getOrderTotal(order) {
 
   if (order?.tongThanhToan !== undefined && order?.tongThanhToan !== null) {
     return parseMoney(order.tongThanhToan);
+  }
+
+  if (order?.thanh_tien !== undefined && order?.thanh_tien !== null) {
+    return parseMoney(order.thanh_tien);
+  }
+
+  if (order?.thanhTien !== undefined && order?.thanhTien !== null) {
+    return parseMoney(order.thanhTien);
   }
 
   if (order?.tong_tien !== undefined && order?.tong_tien !== null) {
@@ -708,26 +788,27 @@ function Orders() {
             <table style={tableStyle}>
               <thead>
                 <tr>
-                  <th style={{ ...thStyle, width: "13%" }}>Mã đơn</th>
-                  <th style={{ ...thStyle, width: "16%" }}>Khách hàng</th>
-                  <th style={{ ...thStyle, width: "18%" }}>Địa chỉ</th>
-                  <th style={{ ...thStyle, width: "13%" }}>Ngày đặt</th>
-                  <th style={{ ...thStyle, width: "13%" }}>Tổng tiền</th>
-                  <th style={{ ...thStyle, width: "13%" }}>Trạng thái</th>
-                  <th style={{ ...thStyle, width: "14%" }}>Hành động</th>
+                  <th style={{ ...thStyle, width: "12%" }}>Mã đơn</th>
+                  <th style={{ ...thStyle, width: "15%" }}>Khách hàng</th>
+                  <th style={{ ...thStyle, width: "16%" }}>Địa chỉ</th>
+                  <th style={{ ...thStyle, width: "12%" }}>Ngày đặt</th>
+                  <th style={{ ...thStyle, width: "13%" }}>Ngày giao</th>
+                  <th style={{ ...thStyle, width: "12%" }}>Tổng tiền</th>
+                  <th style={{ ...thStyle, width: "11%" }}>Trạng thái</th>
+                  <th style={{ ...thStyle, width: "9%" }}>Hành động</th>
                 </tr>
               </thead>
 
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="7" style={emptyStyle}>
+                    <td colSpan="8" style={emptyStyle}>
                       Đang tải đơn hàng...
                     </td>
                   </tr>
                 ) : displayOrders.length === 0 ? (
                   <tr>
-                    <td colSpan="7" style={emptyStyle}>
+                    <td colSpan="8" style={emptyStyle}>
                       Không có đơn hàng nào.
                     </td>
                   </tr>
@@ -769,6 +850,12 @@ function Orders() {
 
                         <td style={tdStyle}>
                           {formatDateTime(getOrderDateValue(order))}
+                        </td>
+
+                        <td style={tdStyle}>
+                          <span style={deliveryDateStyle}>
+                            {getDeliveryDateDisplay(order)}
+                          </span>
                         </td>
 
                         <td style={tdStyle}>
@@ -870,6 +957,20 @@ function Orders() {
                   <InfoBox
                     label="Ngày đặt"
                     value={formatDateTime(getOrderDateValue(selectedOrder))}
+                  />
+
+                  <InfoBox
+                    label="Ngày giao dự kiến"
+                    value={formatDateOnly(
+                      getExpectedDeliveryDateValue(selectedOrder),
+                    )}
+                  />
+
+                  <InfoBox
+                    label="Ngày giao thực tế"
+                    value={formatDateOnly(
+                      getActualDeliveryDateValue(selectedOrder),
+                    )}
                   />
 
                   <InfoBox
@@ -1187,6 +1288,13 @@ const ellipsisStyle = {
   textOverflow: "ellipsis",
   whiteSpace: "nowrap",
   color: "#667085",
+};
+
+const deliveryDateStyle = {
+  display: "inline-block",
+  color: "#475467",
+  fontSize: "13px",
+  lineHeight: 1.35,
 };
 
 const moneyStyle = {
