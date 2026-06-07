@@ -20,6 +20,44 @@ const taoMaDonHang = () => `DH-${Date.now()}`;
 const taoSoHoaDon = () => `HD-${Date.now()}`;
 const taoMaGiaoDich = () => `GD-${Date.now()}`;
 
+const tinhNgayGiaoDuKien = (ngayBatDau = new Date(), soNgay = 3) => {
+  const ngay = new Date(ngayBatDau);
+  ngay.setDate(ngay.getDate() + soNgay);
+  ngay.setHours(0, 0, 0, 0);
+
+  return ngay;
+};
+
+const parseNgayGiaoDuKien = (value) => {
+  if (!value) return tinhNgayGiaoDuKien();
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return tinhNgayGiaoDuKien();
+  }
+
+  date.setHours(0, 0, 0, 0);
+
+  return date;
+};
+
+const buildOrderIncludes = () => [
+  {
+    model: DonHangChiTiet,
+    as: "chi_tiet",
+    include: [{ model: Tranh, as: "tranh" }],
+  },
+  { model: KhachHang, as: "khach_hang" },
+  { model: NhanVien, as: "nhan_vien" },
+  { model: DonViVanChuyen, as: "don_vi_van_chuyen" },
+  {
+    model: HoaDon,
+    as: "hoa_don",
+    include: [{ model: ThanhToan, as: "thanh_toan" }],
+  },
+];
+
 const mapPhuongThucThanhToan = (value) => {
   if (value === "bank") return "chuyen_khoan";
   if (value === "card") return "the";
@@ -83,26 +121,30 @@ const kiemTraKhuyenMaiHopLe = async (
 // ================= KHÁCH HÀNG: TẠO ĐƠN HÀNG =================
 const taoDonHang = async (req, res) => {
   const {
-    ten_nguoi_nhan, // 🌟 ĐÃ THÊM: Bốc trường tên nhập từ giỏ hàng Frontend sang
-    sdt_nguoi_nhan, // 🌟 ĐÃ THÊM: Bốc trường SĐT nhập từ giỏ hàng Frontend sang
+    ten_nguoi_nhan,
+    sdt_nguoi_nhan,
     dia_chi_giao,
     don_vi_van_chuyen_id,
     khuyen_mai_id,
     ghi_chu,
     phuong_thuc_thanh_toan = "cod",
+    ngay_giao_du_kien,
   } = req.body;
 
   const khachHangId = req.user.khach_hang_id;
+
   if (!khachHangId) {
     return res.status(401).json({
       success: false,
       error: "Token không hợp lệ hoặc không phải khách hàng",
     });
   }
+
   if (!dia_chi_giao) {
-    return res
-      .status(400)
-      .json({ success: false, error: "Địa chỉ giao hàng là bắt buộc" });
+    return res.status(400).json({
+      success: false,
+      error: "Địa chỉ giao hàng là bắt buộc",
+    });
   }
 
   try {
@@ -120,10 +162,12 @@ const taoDonHang = async (req, res) => {
         transaction: t,
       });
 
-      if (!chiTietGioHang || chiTietGioHang.length === 0)
+      if (!chiTietGioHang || chiTietGioHang.length === 0) {
         throw new Error("Giỏ hàng đang trống");
+      }
 
       let tongTienHang = 0;
+
       for (const item of chiTietGioHang) {
         const tranh = item.tranh;
         const soLuongMua = Number(item.so_luong || 0);
@@ -151,9 +195,15 @@ const taoDonHang = async (req, res) => {
           don_vi_van_chuyen_id,
           { transaction: t },
         );
-        if (!donViVanChuyen) throw new Error("Đơn vị vận chuyển không tồn tại");
-        if (!donViVanChuyen.hoat_dong)
+
+        if (!donViVanChuyen) {
+          throw new Error("Đơn vị vận chuyển không tồn tại");
+        }
+
+        if (!donViVanChuyen.hoat_dong) {
           throw new Error("Đơn vị vận chuyển hiện không hoạt động");
+        }
+
         phiVanChuyen = Number(donViVanChuyen.phi_co_ban || 0);
         donViVanChuyenId = donViVanChuyen.id;
       } else {
@@ -167,12 +217,14 @@ const taoDonHang = async (req, res) => {
         const khuyenMai = await KhuyenMai.findByPk(khuyen_mai_id, {
           transaction: t,
         });
+
         const loiKhuyenMai = await kiemTraKhuyenMaiHopLe(
           khuyenMai,
           khachHangId,
           tongTienHang,
           t,
         );
+
         if (loiKhuyenMai) throw new Error(loiKhuyenMai);
 
         giamGia = tinhSoTienGiam(khuyenMai, tongTienHang);
@@ -181,6 +233,9 @@ const taoDonHang = async (req, res) => {
 
       const tongThanhToan = Math.max(tongTienHang + phiVanChuyen - giamGia, 0);
 
+      const ngayDat = new Date();
+      const ngayGiaoDuKien = parseNgayGiaoDuKien(ngay_giao_du_kien);
+
       const donHang = await DonHang.create(
         {
           khach_hang_id: khachHangId,
@@ -188,15 +243,21 @@ const taoDonHang = async (req, res) => {
           don_vi_van_chuyen_id: donViVanChuyenId,
           khuyen_mai_id: khuyenMaiHopLeId,
           ma_don_hang: taoMaDonHang(),
-          ten_nguoi_nhan: ten_nguoi_nhan || "Khách hàng", // 🌟 ĐÃ SỬA: Lưu trực tiếp tên người nhận thật vào SQL
-          sdt_nguoi_nhan: sdt_nguoi_nhan || "", // 🌟 ĐÃ SỬA: Lưu trực tiếp số điện thoại nhận thật vào SQL
+
+          ten_nguoi_nhan: ten_nguoi_nhan || "Khách hàng",
+          sdt_nguoi_nhan: sdt_nguoi_nhan || "",
+
           dia_chi_giao,
           tong_tien_hang: tongTienHang,
           phi_van_chuyen: phiVanChuyen,
           giam_gia: giamGia,
+
           trang_thai: "cho_xac_nhan",
           ghi_chu,
-          ngay_dat: new Date(),
+
+          ngay_dat: ngayDat,
+          ngay_giao_du_kien: ngayGiaoDuKien,
+          ngay_giao_thuc: null,
         },
         { transaction: t },
       );
@@ -209,7 +270,9 @@ const taoDonHang = async (req, res) => {
         co_lap_khung: false,
       }));
 
-      await DonHangChiTiet.bulkCreate(duLieuChiTietDonHang, { transaction: t });
+      await DonHangChiTiet.bulkCreate(duLieuChiTietDonHang, {
+        transaction: t,
+      });
 
       if (khuyenMaiHopLeId) {
         await LichSuSuDungKhuyenMai.create(
@@ -231,8 +294,10 @@ const taoDonHang = async (req, res) => {
 
       for (const item of chiTietGioHang) {
         const tranh = item.tranh;
+
         const soLuongConLai =
           Number(tranh.so_luong_ton || 0) - Number(item.so_luong || 0);
+
         await tranh.update(
           {
             so_luong_ton: soLuongConLai,
@@ -262,7 +327,8 @@ const taoDonHang = async (req, res) => {
           hoa_don_id: hoaDon.id,
           so_tien: tongThanhToan,
           phuong_thuc: mapPhuongThucThanhToan(phuong_thuc_thanh_toan),
-          trang_thai: "cho_thanh_toan",
+          trang_thai:
+            phuong_thuc_thanh_toan === "cod" ? "cho_thanh_toan" : "cho_thanh_toan",
           ma_giao_dich: taoMaGiaoDich(),
         },
         { transaction: t },
@@ -274,19 +340,7 @@ const taoDonHang = async (req, res) => {
       });
 
       return await DonHang.findByPk(donHang.id, {
-        include: [
-          {
-            model: DonHangChiTiet,
-            as: "chi_tiet",
-            include: [{ model: Tranh, as: "tranh" }],
-          },
-          { model: DonViVanChuyen, as: "don_vi_van_chuyen" },
-          {
-            model: HoaDon,
-            as: "hoa_don",
-            include: [{ model: ThanhToan, as: "thanh_toan" }],
-          },
-        ],
+        include: buildOrderIncludes(),
         transaction: t,
       });
     });

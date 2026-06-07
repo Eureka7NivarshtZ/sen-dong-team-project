@@ -10,13 +10,15 @@ function parseOrderDate(value) {
   if (typeof value === "number") {
     const timestamp = value < 10000000000 ? value * 1000 : value;
     const date = new Date(timestamp);
+
     return Number.isNaN(date.getTime()) ? null : date;
   }
 
   const text = String(value).trim();
+
   if (!text) return null;
 
-  // Dạng MySQL: 2026-06-06 15:30:20
+  // Dạng MySQL DATETIME: 2026-06-06 15:30:20
   const mysqlDateTimeMatch = text.match(
     /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?/,
   );
@@ -37,7 +39,7 @@ function parseOrderDate(value) {
     return Number.isNaN(date.getTime()) ? null : date;
   }
 
-  // Dạng chỉ có ngày: 2026-06-06
+  // Dạng MySQL DATE: 2026-06-06
   const mysqlDateMatch = text.match(/^(\d{4})-(\d{2})-(\d{2})$/);
 
   if (mysqlDateMatch) {
@@ -55,7 +57,7 @@ function parseOrderDate(value) {
     return Number.isNaN(date.getTime()) ? null : date;
   }
 
-  // Dạng Việt Nam: 06/06/2026 15:30:20
+  // Dạng Việt Nam: 06/06/2026 hoặc 06/06/2026 15:30:20
   const vietnameseDateMatch = text.match(
     /^(\d{1,2})[/-](\d{1,2})[/-](\d{4})(?:\s+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?/,
   );
@@ -89,8 +91,66 @@ function getOrderDateValue(order) {
     order?.NgayDat ||
     order?.created_at ||
     order?.createdAt ||
+    order?.ngay_tao ||
+    order?.ngayTao ||
+    order?.thoi_gian_dat ||
+    order?.thoiGianDat ||
+    order?.order_date ||
+    order?.date ||
     null
   );
+}
+
+function getExpectedDeliveryDateValue(order) {
+  return (
+    order?.ngay_giao_du_kien ||
+    order?.ngayGiaoDuKien ||
+    order?.ngay_giao_du_kien_text ||
+    order?.expected_delivery_date ||
+    order?.expectedDeliveryDate ||
+    order?.delivery_date ||
+    order?.deliveryDate ||
+    null
+  );
+}
+
+function getActualDeliveryDateValue(order) {
+  return (
+    order?.ngay_giao_thuc ||
+    order?.ngayGiaoThuc ||
+    order?.ngay_giao_thuc_te ||
+    order?.actual_delivery_date ||
+    order?.actualDeliveryDate ||
+    null
+  );
+}
+
+function normalizeOrderDeliveryFields(order) {
+  if (!order || typeof order !== "object") return order;
+
+  const ngayDat = getOrderDateValue(order);
+  const ngayGiaoDuKien = getExpectedDeliveryDateValue(order);
+  const ngayGiaoThuc = getActualDeliveryDateValue(order);
+
+  return {
+    ...order,
+
+    // Giữ cả snake_case và camelCase để component nào cũng đọc được.
+    ngay_dat: order.ngay_dat || ngayDat,
+    ngayDat: order.ngayDat || ngayDat,
+
+    ngay_giao_du_kien: order.ngay_giao_du_kien || ngayGiaoDuKien,
+    ngayGiaoDuKien: order.ngayGiaoDuKien || ngayGiaoDuKien,
+
+    ngay_giao_thuc: order.ngay_giao_thuc || ngayGiaoThuc,
+    ngayGiaoThuc: order.ngayGiaoThuc || ngayGiaoThuc,
+  };
+}
+
+function normalizeOrderArray(list) {
+  if (!Array.isArray(list)) return list;
+
+  return list.map(normalizeOrderDeliveryFields);
 }
 
 function getOrderTimestamp(order) {
@@ -101,14 +161,20 @@ function getOrderTimestamp(order) {
 }
 
 function getOrderId(order) {
-  const id = Number(order?.id);
-  return Number.isNaN(id) ? 0 : id;
+  const directId = Number(order?.id);
+
+  if (!Number.isNaN(directId) && directId > 0) return directId;
+
+  const maDonHang = String(order?.ma_don_hang || order?.maDonHang || "");
+  const idFromCode = Number(maDonHang.replace(/[^\d]/g, ""));
+
+  return Number.isNaN(idFromCode) ? 0 : idFromCode;
 }
 
 function sortOrdersNewestFirst(list) {
   if (!Array.isArray(list)) return list;
 
-  return [...list].sort((a, b) => {
+  return normalizeOrderArray(list).sort((a, b) => {
     const timeDiff = getOrderTimestamp(b) - getOrderTimestamp(a);
 
     if (timeDiff !== 0) return timeDiff;
@@ -194,6 +260,7 @@ function buildNewestOrderParams(params = {}) {
 
 const donHangService = {
   // ================= KHÁCH HÀNG =================
+
   capNhatThongTinGiaoHangCuaToi: async (id, data) => {
     try {
       const response = await apiClient.put(
@@ -201,7 +268,10 @@ const donHangService = {
         data,
       );
 
-      return response.data;
+      return {
+        ...response.data,
+        data: normalizeOrderDeliveryFields(response.data?.data),
+      };
     } catch (error) {
       return {
         success: false,
@@ -216,7 +286,10 @@ const donHangService = {
     try {
       const response = await apiClient.post("/don-hang/them", donHangData);
 
-      return response.data;
+      return {
+        ...response.data,
+        data: normalizeOrderDeliveryFields(response.data?.data),
+      };
     } catch (error) {
       return {
         success: false,
@@ -244,7 +317,10 @@ const donHangService = {
     try {
       const response = await apiClient.get(`/don-hang/chi-tiet/${id}`);
 
-      return response.data;
+      return {
+        ...response.data,
+        data: normalizeOrderDeliveryFields(response.data?.data),
+      };
     } catch (error) {
       return {
         success: false,
@@ -257,7 +333,10 @@ const donHangService = {
     try {
       const response = await apiClient.put(`/don-hang/huy/${id}`, {});
 
-      return response.data;
+      return {
+        ...response.data,
+        data: normalizeOrderDeliveryFields(response.data?.data),
+      };
     } catch (error) {
       return {
         success: false,
@@ -267,6 +346,7 @@ const donHangService = {
   },
 
   // ================= NHÂN VIÊN / QUẢN LÝ =================
+
   xemTatCaDonHang: async (params = {}) => {
     try {
       const response = await apiClient.get("/don-hang", {
@@ -286,7 +366,10 @@ const donHangService = {
     try {
       const response = await apiClient.get(`/don-hang/${id}`);
 
-      return response.data;
+      return {
+        ...response.data,
+        data: normalizeOrderDeliveryFields(response.data?.data),
+      };
     } catch (error) {
       return {
         success: false,
@@ -301,7 +384,10 @@ const donHangService = {
         trang_thai,
       });
 
-      return response.data;
+      return {
+        ...response.data,
+        data: normalizeOrderDeliveryFields(response.data?.data),
+      };
     } catch (error) {
       return {
         success: false,
@@ -314,7 +400,10 @@ const donHangService = {
     try {
       const response = await apiClient.put(`/don-hang/${id}/huy`, {});
 
-      return response.data;
+      return {
+        ...response.data,
+        data: normalizeOrderDeliveryFields(response.data?.data),
+      };
     } catch (error) {
       return {
         success: false,

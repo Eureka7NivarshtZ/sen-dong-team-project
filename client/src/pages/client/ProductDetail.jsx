@@ -238,7 +238,7 @@ function ProductDetail() {
               fontWeight: "500",
             }}
           >
-            🚚 Miễn phí vận chuyển
+            
           </div>
         </div>
 

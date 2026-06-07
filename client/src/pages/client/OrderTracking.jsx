@@ -1178,6 +1178,9 @@ function OrderCard({
           <p style={{ margin: 0, color: "#667085", fontSize: "14px" }}>
             Ngày đặt: {formatDateTime(order.ngay_dat || order.createdAt)}
           </p>
+          <p style={{ margin: 0, color: "#667085", fontSize: "14px" }}>
+            Ngày giao dự kiến: 3 ngày sau khi đặt đơn
+          </p>
         </div>
 
         <StatusBadge status={order.trang_thai} />
